@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "d2665e11f8f647e6e75035395420965f",
-    "content-hash": "c4121a0f48d71381d2c1abacc8be7496",
+    "hash": "23d2fb80bbd10509186ee3a034ed2a07",
+    "content-hash": "9bf6cd678f5cbc2d8ce9ae62329f158e",
     "packages": [
         {
             "name": "picqer/bol-plaza-php-client",
