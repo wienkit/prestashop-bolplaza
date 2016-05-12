@@ -142,7 +142,7 @@ class AdminBolPlazaOrdersController extends AdminController
                     Context::getContext()->cart = $cart;
                     Context::getContext()->currency = new Currency((int)$cart->id_currency);
                     Context::getContext()->customer = new Customer((int)$cart->id_customer);
-                    
+
                     $id_order_state = Configuration::get('BOL_PLAZA_ORDERS_INITIALSTATE'); // TODO CONFIG
                     $amount_paid = self::getBolPaymentTotal($openOrder);
                     $verified = $payment_module->validateOrder(
@@ -219,7 +219,7 @@ class AdminBolPlazaOrdersController extends AdminController
         $customer->firstname = $order->Buyer->BillingDetails->FirstName;
         $customer->email = $order->Buyer->BillingDetails->Email;
         $customer->passwd = Tools::passwdGen(8, 'RANDOM');
-        $customer->id_default_group = Configuration::get('BOL_PLAZA_ORDERS_CUSTOMER_GROUP');
+        $customer->id_default_group = Configuration::get('PS_CUSTOMER_GROUP');
         $customer->add();
         return $customer;
     }
@@ -282,10 +282,11 @@ class AdminBolPlazaOrdersController extends AdminController
                 }
             }
         }
-        
+
         if (Configuration::get('BOL_PLAZA_ORDERS_FREE_SHIPPING')) {
             $this->addFreeShippingCartRule($cart);
         }
+
         $cart->update();
         if (!$hasProducts) {
             return false;

@@ -89,7 +89,7 @@ class BolPlaza extends Module
         foreach (Language::getLanguages(true) as $lang) {
             $order_state->name[$lang['id_lang']] = 'Bol.com order imported';
         }
-        
+
         $order_state->send_email = false;
         $order_state->module_name = $this->name;
         $order_state->invoice = false;
@@ -152,7 +152,6 @@ class BolPlaza extends Module
             $pubkey = (string) Tools::getValue('bolplaza_orders_pubkey');
             $carrier = (int) Tools::getValue('bolplaza_orders_carrier');
             $carrierCode = (string) Tools::getValue('bolplaza_orders_carrier_code');
-            $customerGroup = (int) Tools::getValue('bolplaza_orders_customer_group');
             $freeShipping = (bool) Tools::getValue('bolplaza_orders_free_shipping');
 
             if (!$privkey
@@ -169,7 +168,6 @@ class BolPlaza extends Module
                 Configuration::updateValue('BOL_PLAZA_ORDERS_PUBKEY', $pubkey);
                 Configuration::updateValue('BOL_PLAZA_ORDERS_CARRIER', $carrier);
                 Configuration::updateValue('BOL_PLAZA_ORDERS_CARRIER_CODE', $carrierCode);
-                Configuration::updateValue('BOL_PLAZA_ORDERS_CUSTOMER_GROUP', $customerGroup);
                 Configuration::updateValue('BOL_PLAZA_ORDERS_FREE_SHIPPING', $freeShipping);
                 $output .= $this->displayConfirmation($this->l('Settings updated'));
             }
@@ -183,7 +181,6 @@ class BolPlaza extends Module
         $default_lang = (int)Configuration::get('PS_LANG_DEFAULT');
 
         $carriers = Carrier::getCarriers(Context::getContext()->language->id);
-        $customerGroups = Group::getGroups(Context::getContext()->language->id, Context::getContext()->shop->id);
 
         // Init Fields form array
         $fields_form = array();
@@ -260,17 +257,6 @@ class BolPlaza extends Module
                     'name' => 'bolplaza_orders_carrier_code'
                 ),
                 array(
-                    'type' => 'select',
-                    'label' => $this->l('Default customer group'),
-                    'desc' => $this->l('Choose a customer group for the Bol.com customers, keep in mind that the group should have access to the carrier.'),
-                    'name' => 'bolplaza_orders_customer_group',
-                    'options' => array(
-                        'query' => $customerGroups,
-                        'id' => 'id_group',
-                        'name' => 'name'
-                    )
-                ),
-                array(
                     'type' => 'switch',
                     'label' => $this->l('Use free shipping'),
                     'name' => 'bolplaza_orders_free_shipping',
@@ -333,7 +319,6 @@ class BolPlaza extends Module
         $helper->fields_value['bolplaza_orders_pubkey'] = Configuration::get('BOL_PLAZA_ORDERS_PUBKEY');
         $helper->fields_value['bolplaza_orders_carrier'] = Configuration::get('BOL_PLAZA_ORDERS_CARRIER');
         $helper->fields_value['bolplaza_orders_carrier_code'] = Configuration::get('BOL_PLAZA_ORDERS_CARRIER_CODE');
-        $helper->fields_value['bolplaza_orders_customer_group'] = Configuration::get('BOL_PLAZA_ORDERS_CUSTOMER_GROUP');
         $helper->fields_value['bolplaza_orders_free_shipping'] = Configuration::get('BOL_PLAZA_ORDERS_FREE_SHIPPING');
 
         return $helper->generateForm($fields_form);
