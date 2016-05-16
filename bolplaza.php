@@ -15,6 +15,7 @@
 
 require_once _PS_MODULE_DIR_.'bolplaza/vendor/autoload.php';
 require_once _PS_MODULE_DIR_.'bolplaza/classes/BolPlazaOrderItem.php';
+require_once _PS_MODULE_DIR_.'bolplaza/classes/BolPlazaProduct.php';
 
 class BolPlaza extends Module
 {
@@ -46,6 +47,9 @@ class BolPlaza extends Module
             return $this->installDb()
                 && $this->installOrderState()
                 && $this->installTab()
+                && $this->registerHook('actionProductUpdate')
+                && $this->registerHook('actionUpdateQuantity')
+                && $this->registerHook('displayAdminProductsExtra')
                 && $this->registerHook('ActionObjectOrderCarrierUpdateAfter');
         }
         return false;
@@ -56,6 +60,9 @@ class BolPlaza extends Module
         return $this->uninstallTab()
           && $this->uninstallOrderState()
           && $this->uninstallDb()
+          && $this->unregisterHook('actionProductUpdate')
+          && $this->unregisterHook('actionUpdateQuantity')
+          && $this->unregisterHook('displayAdminProductsExtra')
           && $this->unregisterHook('ActionObjectOrderCarrierUpdateAfter')
           && parent::uninstall();
     }
@@ -84,10 +91,21 @@ class BolPlaza extends Module
 
     public function installOrderState()
     {
+        $orderStateName = 'Bol.com order imported';
+        foreach (Language::getLanguages(true) as $lang) {
+            $order_states = OrderState::getOrderStates($lang['id_lang']);
+            foreach ($order_states as $state) {
+                if($state['name'] == $orderStateName) {
+                    Configuration::updateValue('BOL_PLAZA_ORDERS_INITIALSTATE', $state['id_order_state']);
+                    return true;
+                }
+            }
+        }
+
         $order_state = new OrderState();
         $order_state->name = array();
         foreach (Language::getLanguages(true) as $lang) {
-            $order_state->name[$lang['id_lang']] = 'Bol.com order imported';
+            $order_state->name[$lang['id_lang']] = $orderStateName;
         }
 
         $order_state->send_email = false;
@@ -348,26 +366,128 @@ class BolPlaza extends Module
                 $itemsShipped = array();
                 $orderPayments = OrderPayment::getByOrderReference($order->reference);
                 foreach ($orderPayments as $orderPayment) {
-                    $shipment = new Picqer\BolPlazaClient\Entities\BolPlazaShipment();
-                    $shipment->OrderId = $orderPayment->transaction_id;
-                    $shipment->DateTime = date('Y-m-d\TH:i:s');
-                    $transporter = new Picqer\BolPlazaClient\Entities\BolPlazaTransporter();
-                    $transporter->Code = Configuration::get('BOL_PLAZA_ORDERS_CARRIER_CODE');
-                    $transporter->TrackAndTraceCode = $orderCarrier->tracking_number;
-                    $shipment->Transporter = $transporter;
                     $items = BolPlazaOrderItem::getByOrderId($order->id);
-                    $shipment->OrderItems = array();
                     foreach ($items as $item) {
-                        $shipment->OrderItems[] = $item->id_bol_order_item;
+                        $shipment = new Picqer\BolPlazaClient\Entities\BolPlazaShipmentRequest();
+                        $shipment->OrderItemId = $item->id_bol_order_item;
+                        $shipment->ShipmentReference = 'bolplazatest123'; // TODO REFERENCE?
+                        $shipment->DateTime = date('Y-m-d\TH:i:s');
+                        $shipment->ExpectedDeliveryDate = date('Y-m-d\TH:i:s');  // TODO IMPLEMENT?
+                        $transport = new Picqer\BolPlazaClient\Entities\BolPlazaTransport();
+                        $transport->TransporterCode = Configuration::get('BOL_PLAZA_ORDERS_CARRIER_CODE');
+                        $transport->TrackAndTrace = $orderCarrier->tracking_number;
+                        $shipment->Transport = $transport;
                         $itemsShipped[] = $item;
+                        $Plaza->processShipment($shipment);
                     }
-                    $shipments[] = $shipment;
                 }
-                $Plaza->processShipments($shipments);
                 foreach ($itemsShipped as $item) {
                     $item->setShipped();
                 }
             }
         }
+    }
+
+    public function hookDisplayAdminProductsExtra($params)
+    {
+        if ($id_product = (int)Tools::getValue('id_product'))
+        $product = new Product($id_product, true, $this->context->language->id, $this->context->shop->id);
+        if (!Validate:: isLoadedObject($product))
+          return;
+
+        $attributes = $product->getAttributesResume($this->context->language->id);
+
+        if (empty($attributes)) {
+            $attributes[] = array(
+                'id_product' => $product->id,
+                'id_product_attribute' => 0,
+                'attribute_designation' => ''
+            );
+        }
+
+        $product_designation = array();
+
+        foreach ($attributes as $attribute) {
+            $product_designation[$attribute['id_product_attribute']] = rtrim(
+                $product->name .' - ' . $attribute['attribute_designation'],
+                ' - '
+            );
+        }
+
+        $bolProducts = BolPlazaProduct::getByProductId($id_product);
+        $indexedBolProducts = array();
+        foreach ($bolProducts as $bolProduct) {
+            $indexedBolProducts[$bolProduct['id_product_attribute']] = $bolProduct;
+        }
+
+        $this->context->smarty->assign(array(
+            'attributes' => $attributes,
+            'product_designation' => $product_designation,
+            'product' => $product,
+            'bol_products' => $indexedBolProducts
+        ));
+
+        return $this->display(__FILE__, 'views/templates/admin/bolproduct.tpl');
+    }
+
+    public function hookActionProductUpdate($params)
+    {
+        if ((int)Tools::getValue('bolplaza_loaded') === 1 && Validate::isLoadedObject($product = new Product((int)$id_product = Tools::getValue('id_product')))) {
+            $this->processBolProductEntities($params);
+        }
+    }
+
+    private function processBolProductEntities($params)
+    {
+        // Get all id_product_attribute
+        $attributes = $product->getAttributesResume($this->context->language->id);
+        if (empty($attributes)) {
+            $attributes[] = array(
+                'id_product_attribute' => 0,
+                'attribute_designation' => ''
+            );
+        }
+
+        $bolProducts = BolPlazaProduct::getByProductId($id_product);
+        $indexedBolProducts = array();
+        foreach ($bolProducts as $bolProduct) {
+            $indexedBolProducts[$bolProduct['id_product_attribute']] = $bolProduct;
+        }
+
+        // get form inforamtion
+        foreach ($attributes as $attribute) {
+            $key = $product->id.'_'.$attribute['id_product_attribute'];
+
+            // get elements to manage
+            $published = Tools::getValue('bolplaza_published_'.$key);
+            $price = Tools::getValue('bolplaza_price_'.$key, '');
+
+            if($indexedBolProducts[$attribute['id_product_attribute']]) {
+                $bolProduct = new BolPlazaProduct($indexedBolProducts[$attribute['id_product_attribute']]['id_bolplaza_product']);
+            } else {
+                $bolProduct = new BolPlazaProduct();
+            }
+
+            if(!$published && $price == 0) {
+                $bolProduct->delete();
+            } else {
+                $bolProduct->id_product = $product->id;
+                $bolProduct->id_product_attribute = $attribute['id_product_attribute'];
+                $bolProduct->price = $price;
+                $bolProduct->published = $published;
+                $bolProduct->save();
+            }
+        }
+    }
+
+    private function hookActionUpdateQuantity($param)
+    {
+        // array(
+        //     'id_product' => $id_product,
+        //     'id_product_attribute' => $id_product_attribute,
+        //     'quantity' => $quantity,
+        //     'id_shop' => $id_shop
+        // )
+        ddd($param);
     }
 }

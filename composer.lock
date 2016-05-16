@@ -4,16 +4,16 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "23d2fb80bbd10509186ee3a034ed2a07",
-    "content-hash": "9bf6cd678f5cbc2d8ce9ae62329f158e",
+    "hash": "18e46bda7fba830227f2c7f99950db26",
+    "content-hash": "cbff80f6e3db31fa3ebda400f9b4d5cd",
     "packages": [
         {
             "name": "picqer/bol-plaza-php-client",
-            "version": "1.0.0",
+            "version": "2.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wienkit/bol-plaza-php-client.git",
-                "reference": "7e78ab2"
+                "reference": "552a9dd"
             },
             "type": "library"
         }

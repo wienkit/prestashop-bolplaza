@@ -130,12 +130,13 @@ class AdminBolPlazaOrdersController extends AdminController
                 $payment_module = new BolPlazaTestPayment();
             }
 
-            foreach ($Plaza->getOpenOrders() as $openOrder) {
-                if (!self::getTransactionExists($openOrder->OrderId)) {
-                    $cart = $this->parse($openOrder);
+            foreach ($Plaza->getOrders() as $order) {
+                if (!self::getTransactionExists($order->OrderId)) {
+
+                    $cart = $this->parse($order);
 
                     if (!$cart) {
-                        $this->errors[] = $this->l("Couldn't create a cart for order ") .$openOrder->OrderId;
+                        $this->errors[] = $this->l("Couldn't create a cart for order ") .$order->OrderId;
                         continue;
                     }
 
@@ -144,22 +145,22 @@ class AdminBolPlazaOrdersController extends AdminController
                     Context::getContext()->customer = new Customer((int)$cart->id_customer);
 
                     $id_order_state = Configuration::get('BOL_PLAZA_ORDERS_INITIALSTATE'); // TODO CONFIG
-                    $amount_paid = self::getBolPaymentTotal($openOrder);
+                    $amount_paid = self::getBolPaymentTotal($order);
                     $verified = $payment_module->validateOrder(
                         (int)$cart->id,
                         (int)$id_order_state,
                         $amount_paid,
                         $payment_module->displayName,
-                        $this->l('Bol.com order'),
+                        null,
                         array(
-                            'transaction_id' => $openOrder->OrderId
+                            'transaction_id' => $order->OrderId
                         ),
                         null,
                         false,
                         $cart->secure_key
                     );
                     if ($verified) {
-                        $this->persistBolItems($payment_module->currentOrder, $openOrder);
+                        $this->persistBolItems($payment_module->currentOrder, $order);
                     }
 
                 }
@@ -182,6 +183,7 @@ class AdminBolPlazaOrdersController extends AdminController
                 }
                 $order->deleteAssociations();
                 Db::getInstance()->execute('DELETE FROM `'._DB_PREFIX_.'bolplaza_item` WHERE `id_order` = '.(int)pSQL($order->id));
+                Db::getInstance()->execute('DELETE FROM `'._DB_PREFIX_.'order_history` WHERE `id_order` = '.(int)pSQL($order->id));
                 $order->delete();
                 $customer->delete();
             }
@@ -202,22 +204,22 @@ class AdminBolPlazaOrdersController extends AdminController
         return (bool)Db::getInstance()->executeS($sql);
     }
 
-    public function parse(Picqer\BolPlazaClient\Entities\BolPlazaOpenOrder $openOrder)
+    public function parse(Picqer\BolPlazaClient\Entities\BolPlazaOrder $order)
     {
-        $customer = $this->parseCustomer($openOrder);
+        $customer = $this->parseCustomer($order);
         Context::getContext()->customer = $customer;
-        $shipping = $this->parseAddress($openOrder->Buyer->ShipmentDetails, $customer, "Shipping");
-        $billing  = $this->parseAddress($openOrder->Buyer->BillingDetails, $customer, "Billing");
-        $cart     = $this->parseCart($openOrder, $customer, $billing, $shipping);
+        $shipping = $this->parseAddress($order->CustomerDetails->ShipmentDetails, $customer, "Shipping");
+        $billing  = $this->parseAddress($order->CustomerDetails->BillingDetails, $customer, "Billing");
+        $cart     = $this->parseCart($order, $customer, $billing, $shipping);
         return $cart;
     }
 
-    public function parseCustomer(Picqer\BolPlazaClient\Entities\BolPlazaOpenOrder $order)
+    public function parseCustomer(Picqer\BolPlazaClient\Entities\BolPlazaOrder $order)
     {
         $customer = new Customer();
-        $customer->lastname = $order->Buyer->BillingDetails->Surname;
-        $customer->firstname = $order->Buyer->BillingDetails->FirstName;
-        $customer->email = $order->Buyer->BillingDetails->Email;
+        $customer->lastname = $order->CustomerDetails->BillingDetails->Surname;
+        $customer->firstname = $order->CustomerDetails->BillingDetails->Firstname;
+        $customer->email = $order->CustomerDetails->BillingDetails->Email;
         $customer->passwd = Tools::passwdGen(8, 'RANDOM');
         $customer->id_default_group = Configuration::get('PS_CUSTOMER_GROUP');
         $customer->add();
@@ -228,7 +230,7 @@ class AdminBolPlazaOrdersController extends AdminController
     {
         $address = new Address();
         $address->id_customer = $customer->id;
-        $address->firstname = $details->FirstName;
+        $address->firstname = $details->Firstname;
         $address->lastname = $details->Surname;
         $address->address1 = $details->Streetname;
         $address->address1.= " " . $details->Housenumber;
@@ -236,6 +238,9 @@ class AdminBolPlazaOrdersController extends AdminController
             $address->address1.= " " . $details->HousenumberExtended;
         }
         $address->address2.= $details->AddressSupplement;
+        if (!empty($details->ExtraAddressInformation)) {
+            $address->address2.= " (" . $details->ExtraAddressInformation . ")";
+        }
         $address->postcode = $details->ZipCode;
         $address->city = $details->City;
         $address->id_country = Country::getByIso($details->CountryCode);
@@ -244,7 +249,7 @@ class AdminBolPlazaOrdersController extends AdminController
         return $address;
     }
 
-    public function parseCart(Picqer\BolPlazaClient\Entities\BolPlazaOpenOrder $openOrder, Customer $customer, Address $billing, Address $shipping)
+    public function parseCart(Picqer\BolPlazaClient\Entities\BolPlazaOrder $order, Customer $customer, Address $billing, Address $shipping)
     {
         $cart = new Cart();
         $cart->id_customer = $customer->id;
@@ -259,7 +264,7 @@ class AdminBolPlazaOrdersController extends AdminController
         $cart->gift = 0;
         $cart->secure_key = md5(uniqid(rand(), true));
         $cart->add();
-        $items = $openOrder->OpenOrderItems;
+        $items = $order->OrderItems;
         $hasProducts = false;
         if (!empty($items)) {
             foreach ($items as $item) {
@@ -274,7 +279,7 @@ class AdminBolPlazaOrdersController extends AdminController
                     continue;
                 }
                 $hasProducts = true;
-                $this->addSpecificPrice($cart, $customer, $product, $productIds['id_product_attribute'], round(self::getTaxExclusive($product, $item->Price), 6));
+                $this->addSpecificPrice($cart, $customer, $product, $productIds['id_product_attribute'], round(self::getTaxExclusive($product, $item->OfferPrice), 6));
                 $cartResult = $cart->updateQty($item->Quantity, $product->id, $productIds['id_product_attribute']);
                 if (!$cartResult) {
                     $this->errors[] = Tools::displayError('Couldn\'t add product to cart. The product cannot be sold because it\'s unavailable or out of stock');
@@ -294,9 +299,9 @@ class AdminBolPlazaOrdersController extends AdminController
         return $cart;
     }
 
-    public function persistBolItems($orderId, Picqer\BolPlazaClient\Entities\BolPlazaOpenOrder $openOrder)
+    public function persistBolItems($orderId, Picqer\BolPlazaClient\Entities\BolPlazaOrder $order)
     {
-        $items = $openOrder->OpenOrderItems;
+        $items = $order->OrderItems;
         $hasProducts = false;
         if (!empty($items)) {
             foreach ($items as $orderItem) {
@@ -392,14 +397,14 @@ class AdminBolPlazaOrdersController extends AdminController
         return Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query);
     }
 
-    private static function getBolPaymentTotal(Picqer\BolPlazaClient\Entities\BolPlazaOpenOrder $openOrder)
+    private static function getBolPaymentTotal(Picqer\BolPlazaClient\Entities\BolPlazaOrder $order)
     {
-        $items = $openOrder->OpenOrderItems;
+        $items = $order->OrderItems;
         $total = 0;
         if (!empty($items)) {
             foreach ($items as $orderItem) {
                 $quantity = $orderItem->Quantity;
-                $price = $orderItem->Price;
+                $price = $orderItem->OfferPrice;
                 $total += $quantity * $price;
             }
         }
