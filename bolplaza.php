@@ -432,12 +432,12 @@ class BolPlaza extends Module
 
     public function hookActionProductUpdate($params)
     {
-        if ((int)Tools::getValue('bolplaza_loaded') === 1 && Validate::isLoadedObject($product = new Product((int)$id_product = Tools::getValue('id_product')))) {
-            $this->processBolProductEntities($params);
+        if ((int)Tools::getValue('bolplaza_loaded') === 1 && Validate::isLoadedObject($product = new Product((int)$params['id_product']))) {
+            $this->processBolProductEntities($product);
         }
     }
 
-    private function processBolProductEntities($params)
+    private function processBolProductEntities($product)
     {
         // Get all id_product_attribute
         $attributes = $product->getAttributesResume($this->context->language->id);
@@ -448,7 +448,7 @@ class BolPlaza extends Module
             );
         }
 
-        $bolProducts = BolPlazaProduct::getByProductId($id_product);
+        $bolProducts = BolPlazaProduct::getByProductId($product->id);
         $indexedBolProducts = array();
         foreach ($bolProducts as $bolProduct) {
             $indexedBolProducts[$bolProduct['id_product_attribute']] = $bolProduct;
@@ -475,19 +475,74 @@ class BolPlaza extends Module
                 $bolProduct->id_product_attribute = $attribute['id_product_attribute'];
                 $bolProduct->price = $price;
                 $bolProduct->published = $published;
+                $bolProduct->info_update = true;
                 $bolProduct->save();
+                $this->processBolProductUpdate($bolProduct);
             }
         }
     }
 
-    private function hookActionUpdateQuantity($param)
+    private function processBolProductCreate($bolProduct)
     {
-        // array(
-        //     'id_product' => $id_product,
-        //     'id_product_attribute' => $id_product_attribute,
-        //     'quantity' => $quantity,
-        //     'id_shop' => $id_shop
-        // )
-        ddd($param);
+        $Plaza = self::getClient();
+        $offerCreate = new Picqer\BolPlazaClient\Entities\BolPlazaOfferCreate();
+        $offerCreate->EAN = '12354'; // TODO use product ean
+        $offerCreate->Condition = 'NEW'; // TODO get from product
+        $offerCreate->Price = $bolProduct->price;
+        $offerCreate->DeliveryCode = '24uurs-16'; // TODO as default config and bolProduct field
+        $offerCreate->QuantityInStock = 12; // TODO get from stock
+        $offerCreate->Publish = $bolProduct->published;
+        $offerCreate->ReferenceCode = $bolProduct->id; // TODO use product sku
+        $offerCreate->Description = 'Test product';  // TODO get from product description
+        try {
+            $Plaza->createOffer($bolProduct->id, $offerCreate);
+            $bolProduct->info_update = false;
+            $bolProduct->save();
+        } catch (Exception $e) {
+            $this->context->controller->errors[] = "[bolplaza] " . $this->l("Couldn't send update to Bol.com, error: ") . "<br />" . $e->getMessage();
+        }
+    }
+
+    private function processBolProductUpdate($bolProduct)
+    {
+        $Plaza = self::getClient();
+        $offerUpdate = new Picqer\BolPlazaClient\Entities\BolPlazaOfferUpdate();
+        $offerUpdate->Price = $bolProduct->price;
+        $offerUpdate->DeliveryCode = '24uurs-16'; // TODO as default config and bolProduct field
+        $offerUpdate->Publish = $bolProduct->published;
+        $offerUpdate->ReferenceCode = $bolProduct->id; // TODO use product sku
+        $offerUpdate->Description = 'Test product';  // TODO get from product description
+        try {
+            $Plaza->updateOffer($bolProduct->id, $offerUpdate);
+            $bolProduct->info_update = false;
+            $bolProduct->save();
+        } catch (Exception $e) {
+            $this->context->controller->errors[] = "[bolplaza] " . $this->l("Couldn't send update to Bol.com, error: ") . "<br />" . $e->getMessage();
+        }
+    }
+
+    public function hookActionUpdateQuantity($param)
+    {
+        $bolProductId = BolPlazaProduct::getIdByProductAndAttributeId($param['id_product'], $param['id_product_attribute']);
+        if(!empty($bolProductId)) {
+            $bolProduct = new BolPlazaProduct($bolProductId);
+            $bolProduct->stock_update = true;
+            $bolProduct->save();
+            $this->processBolStockUpdate($bolProduct, $param['quantity']);
+        }
+    }
+
+    private function processBolStockUpdate($bolProduct, $quantity)
+    {
+        $Plaza = self::getClient();
+        $stockUpdate = new Picqer\BolPlazaClient\Entities\BolPlazaStockUpdate();
+        $stockUpdate->QuantityInStock = $quantity;
+        try {
+            $result = $Plaza->updateOfferStock($bolProduct->id, $stockUpdate);
+            $bolProduct->stock_update = false;
+            $bolProduct->save();
+        } catch (Exception $e) {
+            $this->context->controller->errors[] = "[bolplaza] " . $this->l("Couldn't send update to Bol.com, error: ") . "<br />" . $e->getMessage();
+        }
     }
 }

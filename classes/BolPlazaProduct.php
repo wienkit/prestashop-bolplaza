@@ -30,6 +30,12 @@ class BolPlazaProduct extends ObjectModel
     /** @var float */
     public $price;
 
+    /** @var bool */
+    public $stock_update;
+
+    /** @var bool */
+    public $info_update;
+
     /**
      * @see ObjectModel::$definition
      */
@@ -41,7 +47,9 @@ class BolPlazaProduct extends ObjectModel
             'id_product' =>              array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId', 'required' => true),
             'id_product_attribute' =>    array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId', 'required' => true),
             'published' =>               array('type' => self::TYPE_BOOL, 'shop' => true, 'validate' => 'isBool'),
-            'price' =>                   array('type' => self::TYPE_FLOAT, 'shop' => true, 'validate' => 'isPrice')
+            'price' =>                   array('type' => self::TYPE_FLOAT, 'shop' => true, 'validate' => 'isPrice'),
+            'stock_update' =>            array('type' => self::TYPE_BOOL, 'shop' => true, 'validate' => 'isBool'),
+            'info_update' =>             array('type' => self::TYPE_BOOL, 'shop' => true, 'validate' => 'isBool')
         )
     );
 
@@ -51,5 +59,14 @@ class BolPlazaProduct extends ObjectModel
 			SELECT *
 			FROM `'._DB_PREFIX_.'bolplaza_product`
 			WHERE `id_product` = '.(int)$id_product);
+    }
+
+    public static function getIdByProductAndAttributeId($id_product, $id_product_attribute)
+    {
+        return Db::getInstance(_PS_USE_SQL_SLAVE_)->getValue('
+			SELECT `id_bolplaza_product`
+			FROM `'._DB_PREFIX_.'bolplaza_product`
+			WHERE `id_product` = '.(int)$id_product.'
+      AND `id_product_attribute` = '.(int)$id_product_attribute);
     }
 }

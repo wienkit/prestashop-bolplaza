@@ -23,7 +23,7 @@
         {foreach $attributes AS $index => $attribute}
           {assign var=price value=''}
           {assign var=selected value=''}
-          {if $bol_products[$attribute['id_product_attribute']]}
+          {if array_key_exists($attribute['id_product_attribute'], $bol_products)}
             {assign var=price value=$bol_products[$attribute['id_product_attribute']]['price']}
             {assign var=selected value=$bol_products[$attribute['id_product_attribute']]['published']}
           {/if}

@@ -34,6 +34,8 @@ $sql[_DB_PREFIX_.'bolplaza_product'] = 'CREATE TABLE IF NOT EXISTS `'._DB_PREFIX
               `id_shop` INT(11) UNSIGNED NOT NULL DEFAULT \'1\',
               `published` tinyint(1) NOT NULL DEFAULT \'0\',
               `price` DECIMAL(20, 6) NOT NULL DEFAULT \'0.000000\',
+              `stock_update` tinyint(1) NOT NULL DEFAULT \'1\',
+              `info_update` tinyint(1) NOT NULL DEFAULT \'1\',
               PRIMARY KEY (`id_bolplaza_product`),
               UNIQUE KEY(`id_product`, `id_product_attribute`, `id_shop`)
             ) ENGINE='._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8;';
