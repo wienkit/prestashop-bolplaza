@@ -136,7 +136,7 @@ class AdminBolPlazaOrdersController extends AdminController
                     $cart = $this->parse($order);
 
                     if (!$cart) {
-                        $this->errors[] = $this->l("Couldn't create a cart for order ") .$order->OrderId;
+                        $this->errors[] = $this->l('Couldn\'t create a cart for order ') .$order->OrderId;
                         continue;
                     }
 
@@ -208,8 +208,8 @@ class AdminBolPlazaOrdersController extends AdminController
     {
         $customer = $this->parseCustomer($order);
         Context::getContext()->customer = $customer;
-        $shipping = $this->parseAddress($order->CustomerDetails->ShipmentDetails, $customer, "Shipping");
-        $billing  = $this->parseAddress($order->CustomerDetails->BillingDetails, $customer, "Billing");
+        $shipping = $this->parseAddress($order->CustomerDetails->ShipmentDetails, $customer, 'Shipping');
+        $billing  = $this->parseAddress($order->CustomerDetails->BillingDetails, $customer, 'Billing');
         $cart     = $this->parseCart($order, $customer, $billing, $shipping);
         return $cart;
     }
@@ -233,13 +233,13 @@ class AdminBolPlazaOrdersController extends AdminController
         $address->firstname = $details->Firstname;
         $address->lastname = $details->Surname;
         $address->address1 = $details->Streetname;
-        $address->address1.= " " . $details->Housenumber;
+        $address->address1.= ' ' . $details->Housenumber;
         if (!empty($details->HousenumberExtended)) {
-            $address->address1.= " " . $details->HousenumberExtended;
+            $address->address1.= ' ' . $details->HousenumberExtended;
         }
         $address->address2.= $details->AddressSupplement;
         if (!empty($details->ExtraAddressInformation)) {
-            $address->address2.= " (" . $details->ExtraAddressInformation . ")";
+            $address->address2.= ' (' . $details->ExtraAddressInformation . ')';
         }
         $address->postcode = $details->ZipCode;
         $address->city = $details->City;
@@ -269,13 +269,13 @@ class AdminBolPlazaOrdersController extends AdminController
         if (!empty($items)) {
             foreach ($items as $item) {
                 $productIds = self::getProductIdByEan($item->EAN);
-                if (empty($productIds) || !array_key_exists("id_product", $productIds)) {
-                    $this->errors[] = $this->l("Couldn't find product for EAN: ") . $item->EAN;
+                if (empty($productIds) || !array_key_exists('id_product', $productIds)) {
+                    $this->errors[] = $this->l('Couldn\'t find product for EAN: ') . $item->EAN;
                     continue;
                 }
                 $product = new Product($productIds['id_product']);
                 if (!Validate::isLoadedObject($product)) {
-                    $this->errors[] = $this->l("Couldn't load product for EAN: ") . $item->EAN;
+                    $this->errors[] = $this->l('Couldn\'t load product for EAN: ') . $item->EAN;
                     continue;
                 }
                 $hasProducts = true;

@@ -16,6 +16,7 @@
 require_once _PS_MODULE_DIR_.'bolplaza/vendor/autoload.php';
 require_once _PS_MODULE_DIR_.'bolplaza/classes/BolPlazaOrderItem.php';
 require_once _PS_MODULE_DIR_.'bolplaza/classes/BolPlazaProduct.php';
+require_once _PS_MODULE_DIR_.'bolplaza/controllers/admin/AdminBolPlazaProductsController.php';
 
 class BolPlaza extends Module
 {
@@ -50,7 +51,10 @@ class BolPlaza extends Module
                 && $this->registerHook('actionProductUpdate')
                 && $this->registerHook('actionUpdateQuantity')
                 && $this->registerHook('displayAdminProductsExtra')
-                && $this->registerHook('ActionObjectOrderCarrierUpdateAfter');
+                && $this->registerHook('actionObjectOrderCarrierUpdateAfter')
+                && $this->registerHook('actionObjectBolPlazaProductAddAfter')
+                && $this->registerHook('actionObjectBolPlazaProductDeleteAfter')
+                && $this->registerHook('actionObjectBolPlazaProductUpdateAfter');
         }
         return false;
     }
@@ -63,7 +67,10 @@ class BolPlaza extends Module
           && $this->unregisterHook('actionProductUpdate')
           && $this->unregisterHook('actionUpdateQuantity')
           && $this->unregisterHook('displayAdminProductsExtra')
-          && $this->unregisterHook('ActionObjectOrderCarrierUpdateAfter')
+          && $this->unregisterHook('actionObjectOrderCarrierUpdateAfter')
+          && $this->unregisterHook('actionObjectBolPlazaProductAddAfter')
+          && $this->unregisterHook('actionObjectBolPlazaProductDeleteAfter')
+          && $this->unregisterHook('actionObjectBolPlazaProductUpdateAfter')
           && parent::uninstall();
     }
 
@@ -134,24 +141,41 @@ class BolPlaza extends Module
 
     public function installTab()
     {
-        $tab = new Tab();
-        $tab->active = 1;
-        $tab->name = array();
-        $tab->class_name = 'AdminBolPlazaOrders';
+        $ordersTab = new Tab();
+        $ordersTab->active = 1;
+        $ordersTab->name = array();
+        $ordersTab->class_name = 'AdminBolPlazaOrders';
 
         foreach (Language::getLanguages(true) as $lang) {
-            $tab->name[$lang['id_lang']] = 'Bol.com orders';
+            $ordersTab->name[$lang['id_lang']] = 'Bol.com orders';
         }
 
-        $tab->id_parent = 10;
-        $tab->module = $this->name;
+        $ordersTab->id_parent = 10;
+        $ordersTab->module = $this->name;
 
-        return $tab->add();
+        $productsTab = new Tab();
+        $productsTab->active = 1;
+        $productsTab->name = array();
+        $productsTab->class_name = 'AdminBolPlazaProducts';
+
+        foreach (Language::getLanguages(true) as $lang) {
+            $productsTab->name[$lang['id_lang']] = 'Bol.com products';
+        }
+
+        $productsTab->id_parent = 9;
+        $productsTab->module = $this->name;
+
+        return $ordersTab->add() && $productsTab->add();
     }
 
     public function uninstallTab()
     {
         $id_tab = (int)Tab::getIdFromClassName('AdminBolPlazaOrders');
+        if ($id_tab) {
+            $tab = new Tab($id_tab);
+            return $tab->delete();
+        }
+        $id_tab = (int)Tab::getIdFromClassName('AdminBolPlazaProducts');
         if ($id_tab) {
             $tab = new Tab($id_tab);
             return $tab->delete();
@@ -170,6 +194,7 @@ class BolPlaza extends Module
             $pubkey = (string) Tools::getValue('bolplaza_orders_pubkey');
             $carrier = (int) Tools::getValue('bolplaza_orders_carrier');
             $carrierCode = (string) Tools::getValue('bolplaza_orders_carrier_code');
+            $deliveryCode = (string) Tools::getValue('bolplaza_orders_delivery_code');
             $freeShipping = (bool) Tools::getValue('bolplaza_orders_free_shipping');
 
             if (!$privkey
@@ -177,6 +202,7 @@ class BolPlaza extends Module
                 || empty($privkey)
                 || empty($pubkey)
                 || empty($carrier)
+                || empty($deliveryCode)
                 || empty($carrierCode)) {
                 $output .= $this->displayError($this->l('Invalid Configuration value'));
             } else {
@@ -186,6 +212,7 @@ class BolPlaza extends Module
                 Configuration::updateValue('BOL_PLAZA_ORDERS_PUBKEY', $pubkey);
                 Configuration::updateValue('BOL_PLAZA_ORDERS_CARRIER', $carrier);
                 Configuration::updateValue('BOL_PLAZA_ORDERS_CARRIER_CODE', $carrierCode);
+                Configuration::updateValue('BOL_PLAZA_ORDERS_DELIVERY_CODE', $deliveryCode);
                 Configuration::updateValue('BOL_PLAZA_ORDERS_FREE_SHIPPING', $freeShipping);
                 $output .= $this->displayConfirmation($this->l('Settings updated'));
             }
@@ -199,6 +226,7 @@ class BolPlaza extends Module
         $default_lang = (int)Configuration::get('PS_LANG_DEFAULT');
 
         $carriers = Carrier::getCarriers(Context::getContext()->language->id);
+        $delivery_codes = BolPlazaProduct::DELIVERY_CODES;
 
         // Init Fields form array
         $fields_form = array();
@@ -209,7 +237,7 @@ class BolPlaza extends Module
             'input' => array(
                 array(
                     'type' => 'switch',
-                    'label' => $this->l('Enable Bol.com orders connector'),
+                    'label' => $this->l('Enable Bol.com connector'),
                     'name' => 'bolplaza_orders_enabled',
                     'is_bool' => true,
                     'values' => array(
@@ -275,6 +303,17 @@ class BolPlaza extends Module
                     'name' => 'bolplaza_orders_carrier_code'
                 ),
                 array(
+                    'type' => 'select',
+                    'label' => $this->l('Delivery code'),
+                    'desc' => $this->l('Choose a delivery code for your Bol.com products'),
+                    'name' => 'bolplaza_orders_delivery_code',
+                    'options' => array(
+                        'query' => $delivery_codes,
+                        'id' => 'deliverycode',
+                        'name' => 'description'
+                    )
+                ),
+                array(
                     'type' => 'switch',
                     'label' => $this->l('Use free shipping'),
                     'name' => 'bolplaza_orders_free_shipping',
@@ -291,7 +330,7 @@ class BolPlaza extends Module
                             'label' => $this->l('No')
                         )
                     ),
-                    'hint' => $this->l("Don't calculate shipping costs.")
+                    'hint' => $this->l('Don\'t calculate shipping costs.')
                 ),
             ),
             'submit' => array(
@@ -337,6 +376,7 @@ class BolPlaza extends Module
         $helper->fields_value['bolplaza_orders_pubkey'] = Configuration::get('BOL_PLAZA_ORDERS_PUBKEY');
         $helper->fields_value['bolplaza_orders_carrier'] = Configuration::get('BOL_PLAZA_ORDERS_CARRIER');
         $helper->fields_value['bolplaza_orders_carrier_code'] = Configuration::get('BOL_PLAZA_ORDERS_CARRIER_CODE');
+        $helper->fields_value['bolplaza_orders_delivery_code'] = Configuration::get('BOL_PLAZA_ORDERS_DELIVERY_CODE');
         $helper->fields_value['bolplaza_orders_free_shipping'] = Configuration::get('BOL_PLAZA_ORDERS_FREE_SHIPPING');
 
         return $helper->generateForm($fields_form);
@@ -354,11 +394,26 @@ class BolPlaza extends Module
         return $client;
     }
 
+    private function getDeliveryDate()
+    {
+        $codes = BolPlazaProduct::DELIVERY_CODES;
+        $deliverycode = end($codes);
+        foreach ($codes as $code) {
+            if($code['deliverycode'] == Configuration::get('BOL_PLAZA_ORDERS_DELIVERY_CODE')) {
+                $deliverycode = $code;
+            }
+        }
+        $addedWeekdays = $deliverycode['addtime'];
+        if(date('H') >= $deliverycode['shipsuntil']) {
+            $addedWeekdays++;
+        }
+        return date('Y-m-d\T18:00:00', strtotime('+ ' . $addedWeekdays . ' Weekdays'));
+    }
+
     public function hookActionObjectOrderCarrierUpdateAfter($params)
     {
         $orderCarrier = $params['object'];
         if ($orderCarrier->tracking_number) {
-
             $order = new Order($orderCarrier->id_order);
             if ($order->module == 'bolplaza' || $order->module == 'bolplazatest') {
                 $shipments = array();
@@ -370,9 +425,9 @@ class BolPlaza extends Module
                     foreach ($items as $item) {
                         $shipment = new Picqer\BolPlazaClient\Entities\BolPlazaShipmentRequest();
                         $shipment->OrderItemId = $item->id_bol_order_item;
-                        $shipment->ShipmentReference = 'bolplazatest123'; // TODO REFERENCE?
+                        $shipment->ShipmentReference = $order->reference . '-' . $orderCarrier->id;
                         $shipment->DateTime = date('Y-m-d\TH:i:s');
-                        $shipment->ExpectedDeliveryDate = date('Y-m-d\TH:i:s');  // TODO IMPLEMENT?
+                        $shipment->ExpectedDeliveryDate = $this->getDeliveryDate();
                         $transport = new Picqer\BolPlazaClient\Entities\BolPlazaTransport();
                         $transport->TransporterCode = Configuration::get('BOL_PLAZA_ORDERS_CARRIER_CODE');
                         $transport->TrackAndTrace = $orderCarrier->tracking_number;
@@ -390,6 +445,9 @@ class BolPlaza extends Module
 
     public function hookDisplayAdminProductsExtra($params)
     {
+        if (!Configuration::get('BOL_PLAZA_ORDERS_ENABLED')) {
+            return $this->display(__FILE__, 'views/templates/admin/disabled.tpl');
+        }
         if ($id_product = (int)Tools::getValue('id_product'))
         $product = new Product($id_product, true, $this->context->language->id, $this->context->shop->id);
         if (!Validate:: isLoadedObject($product))
@@ -460,64 +518,45 @@ class BolPlaza extends Module
 
             // get elements to manage
             $published = Tools::getValue('bolplaza_published_'.$key);
-            $price = Tools::getValue('bolplaza_price_'.$key, '');
+            $price = Tools::getValue('bolplaza_price_'.$key, 0);
 
-            if($indexedBolProducts[$attribute['id_product_attribute']]) {
+            if(array_key_exists($attribute['id_product_attribute'], $indexedBolProducts)) {
                 $bolProduct = new BolPlazaProduct($indexedBolProducts[$attribute['id_product_attribute']]['id_bolplaza_product']);
+                if($bolProduct->price == $price && $bolProduct->published == $published) {
+                    continue;
+                }
+                $bolProduct->status = BolPlazaProduct::STATUS_INFO_UPDATE;
+            } elseif(!$published && $price == 0) {
+                continue;
             } else {
                 $bolProduct = new BolPlazaProduct();
             }
 
-            if(!$published && $price == 0) {
+            $bolProduct->id_product = $product->id;
+            $bolProduct->id_product_attribute = $attribute['id_product_attribute'];
+            $bolProduct->price = $price;
+            $bolProduct->published = $published;
+
+            if(!$bolProduct->published && $price == 0) {
                 $bolProduct->delete();
             } else {
-                $bolProduct->id_product = $product->id;
-                $bolProduct->id_product_attribute = $attribute['id_product_attribute'];
-                $bolProduct->price = $price;
-                $bolProduct->published = $published;
-                $bolProduct->info_update = true;
                 $bolProduct->save();
-                $this->processBolProductUpdate($bolProduct);
             }
         }
     }
 
-    private function processBolProductCreate($bolProduct)
+    public function hookActionObjectBolPlazaProductAddAfter($param)
     {
-        $Plaza = self::getClient();
-        $offerCreate = new Picqer\BolPlazaClient\Entities\BolPlazaOfferCreate();
-        $offerCreate->EAN = '12354'; // TODO use product ean
-        $offerCreate->Condition = 'NEW'; // TODO get from product
-        $offerCreate->Price = $bolProduct->price;
-        $offerCreate->DeliveryCode = '24uurs-16'; // TODO as default config and bolProduct field
-        $offerCreate->QuantityInStock = 12; // TODO get from stock
-        $offerCreate->Publish = $bolProduct->published;
-        $offerCreate->ReferenceCode = $bolProduct->id; // TODO use product sku
-        $offerCreate->Description = 'Test product';  // TODO get from product description
-        try {
-            $Plaza->createOffer($bolProduct->id, $offerCreate);
-            $bolProduct->info_update = false;
-            $bolProduct->save();
-        } catch (Exception $e) {
-            $this->context->controller->errors[] = "[bolplaza] " . $this->l("Couldn't send update to Bol.com, error: ") . "<br />" . $e->getMessage();
+        if(!empty($param['object'])) {
+            AdminBolPlazaProductsController::processBolProductCreate($param['object'], $this->context);
         }
     }
 
-    private function processBolProductUpdate($bolProduct)
+    public function hookActionObjectBolPlazaProductUpdateAfter($param)
     {
-        $Plaza = self::getClient();
-        $offerUpdate = new Picqer\BolPlazaClient\Entities\BolPlazaOfferUpdate();
-        $offerUpdate->Price = $bolProduct->price;
-        $offerUpdate->DeliveryCode = '24uurs-16'; // TODO as default config and bolProduct field
-        $offerUpdate->Publish = $bolProduct->published;
-        $offerUpdate->ReferenceCode = $bolProduct->id; // TODO use product sku
-        $offerUpdate->Description = 'Test product';  // TODO get from product description
-        try {
-            $Plaza->updateOffer($bolProduct->id, $offerUpdate);
-            $bolProduct->info_update = false;
-            $bolProduct->save();
-        } catch (Exception $e) {
-            $this->context->controller->errors[] = "[bolplaza] " . $this->l("Couldn't send update to Bol.com, error: ") . "<br />" . $e->getMessage();
+        if(!empty($param['object'])) {
+            AdminBolPlazaProductsController::setProductStatus($bolProduct, (int)BolPlazaProduct::STATUS_INFO_UPDATE);
+            AdminBolPlazaProductsController::processBolProductUpdate($param['object'], $this->context);
         }
     }
 
@@ -526,23 +565,15 @@ class BolPlaza extends Module
         $bolProductId = BolPlazaProduct::getIdByProductAndAttributeId($param['id_product'], $param['id_product_attribute']);
         if(!empty($bolProductId)) {
             $bolProduct = new BolPlazaProduct($bolProductId);
-            $bolProduct->stock_update = true;
-            $bolProduct->save();
-            $this->processBolStockUpdate($bolProduct, $param['quantity']);
+            AdminBolPlazaProductsController::setProductStatus($bolProduct, (int)BolPlazaProduct::STATUS_STOCK_UPDATE);
+            AdminBolPlazaProductsController::processBolQuantityUpdate($bolProduct, $param['quantity'], $this->context);
         }
     }
 
-    private function processBolStockUpdate($bolProduct, $quantity)
+    public function hookActionObjectBolPlazaProductDeleteAfter($param)
     {
-        $Plaza = self::getClient();
-        $stockUpdate = new Picqer\BolPlazaClient\Entities\BolPlazaStockUpdate();
-        $stockUpdate->QuantityInStock = $quantity;
-        try {
-            $result = $Plaza->updateOfferStock($bolProduct->id, $stockUpdate);
-            $bolProduct->stock_update = false;
-            $bolProduct->save();
-        } catch (Exception $e) {
-            $this->context->controller->errors[] = "[bolplaza] " . $this->l("Couldn't send update to Bol.com, error: ") . "<br />" . $e->getMessage();
+        if(!empty($param['object'])) {
+            AdminBolPlazaProductsController::processBolProductDelete($param['object'], $this->context);
         }
     }
 }
