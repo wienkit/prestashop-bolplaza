@@ -264,7 +264,7 @@ class BolPlaza extends Module
         $default_lang = (int)Configuration::get('PS_LANG_DEFAULT');
 
         $carriers = Carrier::getCarriers(Context::getContext()->language->id);
-        $delivery_codes = BolPlazaProduct::DELIVERY_CODES;
+        $delivery_codes = BolPlazaProduct::getDeliveryCodes();
 
         // Init Fields form array
         $fields_form = array();
@@ -442,7 +442,7 @@ class BolPlaza extends Module
      */
     private function getDeliveryDate()
     {
-        $codes = BolPlazaProduct::DELIVERY_CODES;
+        $codes = BolPlazaProduct::getDeliveryCodes();
         $deliverycode = end($codes);
         foreach ($codes as $code) {
             if($code['deliverycode'] == Configuration::get('BOL_PLAZA_ORDERS_DELIVERY_CODE')) {
