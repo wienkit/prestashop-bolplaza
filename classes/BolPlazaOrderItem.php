@@ -62,12 +62,20 @@ class BolPlazaOrderItem extends ObjectModel
         ),
     );
 
+    /**
+     * Set the shipped status
+     */
     public function setShipped()
     {
         $this->status = 'shipped';
         $this->save();
     }
 
+    /**
+     * Returns the BolPlazaOrderItem data for an order ID
+     * @param string $id_order
+     * @return array
+     */
     public static function getByOrderId($id_order)
     {
         return ObjectModel::hydrateCollection(

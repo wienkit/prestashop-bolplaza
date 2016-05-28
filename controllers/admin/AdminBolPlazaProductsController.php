@@ -79,6 +79,11 @@ class AdminBolPlazaProductsController extends AdminController
         parent::__construct();
     }
 
+    /**
+     * Callback for the static column in the list
+     * @param int $status the status
+     * @return string the status
+     */
     public function getSychronizedState($status)
     {
         switch($status) {
@@ -95,6 +100,9 @@ class AdminBolPlazaProductsController extends AdminController
         }
     }
 
+    /**
+     * Overrides parent::displayViewLink
+     */
     public function displayViewLink($token = null, $id = 0, $name = null)
     {
         if ($this->tabAccess['view'] == 1) {
@@ -115,6 +123,9 @@ class AdminBolPlazaProductsController extends AdminController
         }
     }
 
+    /**
+     * Overrides parent::initPageHeaderToolbar
+     */
     public function initPageHeaderToolbar()
     {
         parent::initPageHeaderToolbar();
@@ -128,6 +139,9 @@ class AdminBolPlazaProductsController extends AdminController
         );
     }
 
+    /**
+     * Processes the request
+     */
     public function postProcess()
     {
         if ((bool)Tools::getValue('sync_products')) {
@@ -140,6 +154,9 @@ class AdminBolPlazaProductsController extends AdminController
         }
     }
 
+    /**
+     * Synchronize changed products
+     */
     public static function synchronize($context)
     {
         $bolProducts = BolPlazaProduct::getUpdatedProducts();
@@ -158,6 +175,11 @@ class AdminBolPlazaProductsController extends AdminController
         }
     }
 
+    /**
+     * Set the plaza synchronization status of a product
+     * @param BolPlazaProduct $bolProduct
+     * @param int $status
+     */
     public static function setProductStatus($bolProduct, $status)
     {
         DB::getInstance()->update('bolplaza_product', array(
@@ -165,6 +187,11 @@ class AdminBolPlazaProductsController extends AdminController
         ), 'id_bolplaza_product = ' . (int)$bolProduct->id);
     }
 
+    /**
+     * Delete a product from Bol.combination
+     * @param BolPlazaProduct $bolProduct
+     * @param Context $context
+     */
     public static function processBolProductDelete($bolProduct, $context)
     {
         $Plaza = BolPlaza::getClient();
@@ -175,6 +202,11 @@ class AdminBolPlazaProductsController extends AdminController
         }
     }
 
+    /**
+     * Update the stock on Bol.com
+     * @param BolPlazaProduct $bolProduct
+     * @param Context $context
+     */
     public static function processBolStockUpdate($bolProduct, $context)
     {
         $product = new Product($bolProduct->id_product, false, $context->language->id, $context->shop->id);
@@ -182,6 +214,12 @@ class AdminBolPlazaProductsController extends AdminController
         self::processBolQuantityUpdate($bolProduct, $quantity, $context);
     }
 
+    /**
+     * Update the stock on Bol.com
+     * @param BolPlazaProduct $bolProduct
+     * @param int $quantity
+     * @param Context $context
+     */
     public static function processBolQuantityUpdate($bolProduct, $quantity, $context)
     {
         $Plaza = BolPlaza::getClient();
@@ -195,6 +233,11 @@ class AdminBolPlazaProductsController extends AdminController
         }
     }
 
+    /**
+     * Update a product on Bol.com
+     * @param BolPlazaProduct $bolProduct
+     * @param Context $context
+     */
     public static function processBolProductUpdate($bolProduct, $context)
     {
         $price_calculator    = Adapter_ServiceLocator::get('Adapter_ProductPriceCalculator');
@@ -226,6 +269,11 @@ class AdminBolPlazaProductsController extends AdminController
         }
     }
 
+    /**
+     * Add a product from Bol.com
+     * @param BolPlazaProduct $bolProduct
+     * @param Context $context
+     */
     public static function processBolProductCreate($bolProduct, $context)
     {
         $price_calculator    = Adapter_ServiceLocator::get('Adapter_ProductPriceCalculator');

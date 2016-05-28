@@ -20,111 +20,6 @@ class BolPlazaProduct extends ObjectModel
     const STATUS_STOCK_UPDATE = 2;
     const STATUS_INFO_UPDATE = 3;
 
-    const DELIVERY_CODES = array(
-        array(
-            'deliverycode' => '24uurs-23',
-            'description' => 'Ordered before 23:00 on working days, delivered the next working day.',
-            'shipsuntil' => 23,
-            'addtime' => 1
-        ),
-        array(
-            'deliverycode' => '24uurs-22',
-            'description' => 'Ordered before 22:00 on working days, delivered the next working day.',
-            'shipsuntil' => 22,
-            'addtime' => 1
-        ),
-        array(
-            'deliverycode' => '24uurs-21',
-            'description' => 'Ordered before 21:00 on working days, delivered the next working day.',
-            'shipsuntil' => 21,
-            'addtime' => 1
-        ),
-        array(
-            'deliverycode' => '24uurs-20',
-            'description' => 'Ordered before 20:00 on working days, delivered the next working day.',
-            'shipsuntil' => 20,
-            'addtime' => 1
-        ),
-        array(
-            'deliverycode' => '24uurs-19',
-            'description' => 'Ordered before 19:00 on working days, delivered the next working day.',
-            'shipsuntil' => 19,
-            'addtime' => 1
-        ),
-        array(
-            'deliverycode' => '24uurs-18',
-            'description' => 'Ordered before 18:00 on working days, delivered the next working day.',
-            'shipsuntil' => 18,
-            'addtime' => 1
-        ),
-        array(
-            'deliverycode' => '24uurs-17',
-            'description' => 'Ordered before 17:00 on working days, delivered the next working day.',
-            'shipsuntil' => 17,
-            'addtime' => 1
-        ),
-        array(
-            'deliverycode' => '24uurs-16',
-            'description' => 'Ordered before 16:00 on working days, delivered the next working day.',
-            'shipsuntil' => 16,
-            'addtime' => 1
-        ),
-        array(
-            'deliverycode' => '24uurs-15',
-            'description' => 'Ordered before 15:00 on working days, delivered the next working day.',
-            'shipsuntil' => 15,
-            'addtime' => 1
-        ),
-        array(
-            'deliverycode' => '24uurs-14',
-            'description' => 'Ordered before 14:00 on working days, delivered the next working day.',
-            'shipsuntil' => 14,
-            'addtime' => 1
-        ),
-        array(
-            'deliverycode' => '24uurs-13',
-            'description' => 'Ordered before 13:00 on working days, delivered the next working day.',
-            'shipsuntil' => 13,
-            'addtime' => 1
-        ),
-        array(
-            'deliverycode' => '24uurs-12',
-            'description' => 'Ordered before 12:00 on working days, delivered the next working day.',
-            'shipsuntil' => 12,
-            'addtime' => 1
-        ),
-        array(
-            'deliverycode' => '1-2d',
-            'description' => '1-2 working days.',
-            'shipsuntil' => 12,
-            'addtime' => 2
-        ),
-        array(
-            'deliverycode' => '2-3d',
-            'description' => '2-3 working days.',
-            'shipsuntil' => 12,
-            'addtime' => 3
-        ),
-        array(
-            'deliverycode' => '3-5d',
-            'description' => '3-5 working days.',
-            'shipsuntil' => 12,
-            'addtime' => 5
-        ),
-        array(
-            'deliverycode' => '4-8d',
-            'description' => '4-8 working days.',
-            'shipsuntil' => 12,
-            'addtime' => 8
-        ),
-        array(
-            'deliverycode' => '1-8d',
-            'description' => '1-8 working days.',
-            'shipsuntil' => 12,
-            'addtime' => 8
-        )
-    );
-
     /** @var int */
     public $id_bolplaza_product;
 
@@ -159,6 +54,11 @@ class BolPlazaProduct extends ObjectModel
         )
     );
 
+    /**
+     * Returns the BolProduct data for a product ID
+     * @param string $id_product
+     * @return array the BolPlazaProduct data
+     */
     public static function getByProductId($id_product)
     {
         return Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS('
@@ -167,6 +67,12 @@ class BolPlazaProduct extends ObjectModel
 			WHERE `id_product` = '.(int)$id_product);
     }
 
+    /**
+     * Returns the BolProduct data for a product ID and attribute ID
+     * @param string $id_product
+     * @param string $id_product_attribute
+     * @return array the BolPlazaProduct data
+     */
     public static function getIdByProductAndAttributeId($id_product, $id_product_attribute)
     {
         return Db::getInstance(_PS_USE_SQL_SLAVE_)->getValue('
@@ -176,6 +82,10 @@ class BolPlazaProduct extends ObjectModel
       AND `id_product_attribute` = '.(int)$id_product_attribute);
     }
 
+    /**
+     * Returns a list of BolProduct objects that need an update
+     * @return array
+     */
     public static function getUpdatedProducts()
     {
         return ObjectModel::hydrateCollection(
@@ -184,6 +94,117 @@ class BolPlazaProduct extends ObjectModel
                 SELECT *
                 FROM `'._DB_PREFIX_.'bolplaza_product`
                 WHERE `status` > 0')
+        );
+    }
+
+    /**
+     * Returns a list of delivery codes
+     * @return array
+     */
+    public static function getDeliveryCodes() {
+          return array(
+            array(
+                'deliverycode' => '24uurs-23',
+                'description' => 'Ordered before 23:00 on working days, delivered the next working day.',
+                'shipsuntil' => 23,
+                'addtime' => 1
+            ),
+            array(
+                'deliverycode' => '24uurs-22',
+                'description' => 'Ordered before 22:00 on working days, delivered the next working day.',
+                'shipsuntil' => 22,
+                'addtime' => 1
+            ),
+            array(
+                'deliverycode' => '24uurs-21',
+                'description' => 'Ordered before 21:00 on working days, delivered the next working day.',
+                'shipsuntil' => 21,
+                'addtime' => 1
+            ),
+            array(
+                'deliverycode' => '24uurs-20',
+                'description' => 'Ordered before 20:00 on working days, delivered the next working day.',
+                'shipsuntil' => 20,
+                'addtime' => 1
+            ),
+            array(
+                'deliverycode' => '24uurs-19',
+                'description' => 'Ordered before 19:00 on working days, delivered the next working day.',
+                'shipsuntil' => 19,
+                'addtime' => 1
+            ),
+            array(
+                'deliverycode' => '24uurs-18',
+                'description' => 'Ordered before 18:00 on working days, delivered the next working day.',
+                'shipsuntil' => 18,
+                'addtime' => 1
+            ),
+            array(
+                'deliverycode' => '24uurs-17',
+                'description' => 'Ordered before 17:00 on working days, delivered the next working day.',
+                'shipsuntil' => 17,
+                'addtime' => 1
+            ),
+            array(
+                'deliverycode' => '24uurs-16',
+                'description' => 'Ordered before 16:00 on working days, delivered the next working day.',
+                'shipsuntil' => 16,
+                'addtime' => 1
+            ),
+            array(
+                'deliverycode' => '24uurs-15',
+                'description' => 'Ordered before 15:00 on working days, delivered the next working day.',
+                'shipsuntil' => 15,
+                'addtime' => 1
+            ),
+            array(
+                'deliverycode' => '24uurs-14',
+                'description' => 'Ordered before 14:00 on working days, delivered the next working day.',
+                'shipsuntil' => 14,
+                'addtime' => 1
+            ),
+            array(
+                'deliverycode' => '24uurs-13',
+                'description' => 'Ordered before 13:00 on working days, delivered the next working day.',
+                'shipsuntil' => 13,
+                'addtime' => 1
+            ),
+            array(
+                'deliverycode' => '24uurs-12',
+                'description' => 'Ordered before 12:00 on working days, delivered the next working day.',
+                'shipsuntil' => 12,
+                'addtime' => 1
+            ),
+            array(
+                'deliverycode' => '1-2d',
+                'description' => '1-2 working days.',
+                'shipsuntil' => 12,
+                'addtime' => 2
+            ),
+            array(
+                'deliverycode' => '2-3d',
+                'description' => '2-3 working days.',
+                'shipsuntil' => 12,
+                'addtime' => 3
+            ),
+            array(
+                'deliverycode' => '3-5d',
+                'description' => '3-5 working days.',
+                'shipsuntil' => 12,
+                'addtime' => 5
+            ),
+            array(
+                'deliverycode' => '4-8d',
+                'description' => '4-8 working days.',
+                'shipsuntil' => 12,
+                'addtime' => 8
+            ),
+            array(
+                'deliverycode' => '1-8d',
+                'description' => '1-8 working days.',
+                'shipsuntil' => 12,
+                'addtime' => 8
+            )
         );
     }
 }

@@ -72,6 +72,9 @@ class AdminBolPlazaOrdersController extends AdminController
         parent::__construct();
     }
 
+    /**
+     * Overrides parent::displayViewLink
+     */
     public function displayViewLink($token = null, $id = 0, $name = null)
     {
         if ($this->tabAccess['view'] == 1) {
@@ -92,6 +95,9 @@ class AdminBolPlazaOrdersController extends AdminController
         }
     }
 
+    /**
+     * Overrides parent::initPageHeaderToolbar
+     */
     public function initPageHeaderToolbar()
     {
         parent::initPageHeaderToolbar();
@@ -111,6 +117,9 @@ class AdminBolPlazaOrdersController extends AdminController
         }
     }
 
+    /**
+     * Processes the request
+     */
     public function postProcess()
     {
         /* PrestaShop demo mode */
@@ -204,6 +213,11 @@ class AdminBolPlazaOrdersController extends AdminController
         return (bool)Db::getInstance()->executeS($sql);
     }
 
+    /**
+     * Parse a Bol.com order to a fully prepared Cart object
+     * @param Picqer\BolPlazaClient\Entities\BolPlazaOrder $order
+     * @return Cart
+     */
     public function parse(Picqer\BolPlazaClient\Entities\BolPlazaOrder $order)
     {
         $customer = $this->parseCustomer($order);
@@ -214,6 +228,11 @@ class AdminBolPlazaOrdersController extends AdminController
         return $cart;
     }
 
+    /**
+     * Parse a customer for the order
+     * @param Picqer\BolPlazaClient\Entities\BolPlazaOrder $order
+     * @return Customer
+     */
     public function parseCustomer(Picqer\BolPlazaClient\Entities\BolPlazaOrder $order)
     {
         $customer = new Customer();
@@ -226,6 +245,13 @@ class AdminBolPlazaOrdersController extends AdminController
         return $customer;
     }
 
+    /**
+     * Parse an address for the order
+     * @param Picqer\BolPlazaClient\Entities\BolPlazaShipmentDetails $details
+     * @param Customer $customer
+     * @param string $alias a name for the address
+     * @return Address
+     */
     public function parseAddress(Picqer\BolPlazaClient\Entities\BolPlazaShipmentDetails $details, Customer $customer, $alias)
     {
         $address = new Address();
@@ -249,6 +275,14 @@ class AdminBolPlazaOrdersController extends AdminController
         return $address;
     }
 
+    /**
+     * Parse the cart for the order
+     * @param Picqer\BolPlazaClient\Entities\BolPlazaOrder $order
+     * @param Customer $customer
+     * @param Address $billing
+     * @param Address $shipping
+     * @return Cart
+     */
     public function parseCart(Picqer\BolPlazaClient\Entities\BolPlazaOrder $order, Customer $customer, Address $billing, Address $shipping)
     {
         $cart = new Cart();
@@ -299,6 +333,11 @@ class AdminBolPlazaOrdersController extends AdminController
         return $cart;
     }
 
+    /**
+     * Persist the BolItems to the database
+     * @param string $orderId
+     * @param Picqer\BolPlazaClient\Entities\BolPlazaOrder $order
+     */
     public function persistBolItems($orderId, Picqer\BolPlazaClient\Entities\BolPlazaOrder $order)
     {
         $items = $order->OrderItems;
@@ -318,6 +357,14 @@ class AdminBolPlazaOrdersController extends AdminController
         }
     }
 
+    /**
+     * Adds a specific price for a product
+     * @param Cart $cart
+     * @param Customer $customer
+     * @param Product $product
+     * @param string $id_product_attribute
+     * @param decimal $price
+     */
     private function addSpecificPrice(Cart $cart, Customer $customer, Product $product, $id_product_attribute, $price)
     {
         $specific_price = new SpecificPrice();
@@ -339,6 +386,10 @@ class AdminBolPlazaOrdersController extends AdminController
         $specific_price->add();
     }
 
+    /**
+     * Adds a cart rule for free shipping
+     * @param Cart $cart
+     */
     private function addFreeShippingCartRule(Cart $cart)
     {
         $cart_rule = new CartRule();
@@ -357,6 +408,11 @@ class AdminBolPlazaOrdersController extends AdminController
         $cart->addCartRule((int)$cart_rule->id);
     }
 
+    /**
+     * Return the tax exclusive price
+     * @param Product $product
+     * @param decimal $price
+     */
     public static function getTaxExclusive(Product $product, $price)
     {
         $address = Address::initialize();
@@ -366,6 +422,11 @@ class AdminBolPlazaOrdersController extends AdminController
 
     }
 
+    /**
+     * Return the product ID for an EAN number
+     * @param string $ean
+     * @return array the product (and attribute)
+     */
     public static function getProductIdByEan($ean)
     {
         $id = Product::getIdByEan13($ean);
@@ -380,6 +441,11 @@ class AdminBolPlazaOrdersController extends AdminController
         }
     }
 
+    /**
+     * Return the attribute for an ean
+     * @param string $ean
+     * @return array the product/attribute combination
+     */
     private static function getAttributeByEan($ean)
     {
         if (empty($ean)) {
@@ -397,6 +463,11 @@ class AdminBolPlazaOrdersController extends AdminController
         return Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query);
     }
 
+    /**
+     * Get the Payment total of the Bol.com order
+     * @param Picqer\BolPlazaClient\Entities\BolPlazaOrder $order
+     * @return decimal the total
+     */
     private static function getBolPaymentTotal(Picqer\BolPlazaClient\Entities\BolPlazaOrder $order)
     {
         $items = $order->OrderItems;

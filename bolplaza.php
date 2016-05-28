@@ -42,6 +42,9 @@ class BolPlaza extends Module
 
     }
 
+    /**
+     * Overrides parent::install()
+     */
     public function install()
     {
         if (parent::install()) {
@@ -59,6 +62,9 @@ class BolPlaza extends Module
         return false;
     }
 
+    /**
+     * Overrides parent::uninstall()
+     */
     public function uninstall()
     {
         return $this->uninstallTab()
@@ -74,6 +80,10 @@ class BolPlaza extends Module
           && parent::uninstall();
     }
 
+    /**
+     * Install the database tables
+     * @return bool success
+     */
     public function installDb()
     {
         $sql = array();
@@ -86,6 +96,10 @@ class BolPlaza extends Module
 
     }
 
+    /**
+     * Remove the database tables
+     * @return bool success
+     */
     public function uninstallDb()
     {
         $sql = array();
@@ -96,6 +110,10 @@ class BolPlaza extends Module
         return true;
     }
 
+    /**
+     * Install a new order state for bol.com orders
+     * @return bool success
+     */
     public function installOrderState()
     {
         $orderStateName = 'Bol.com order imported';
@@ -133,12 +151,20 @@ class BolPlaza extends Module
         return true;
     }
 
+    /**
+     * Remove the Bol.com order state
+     * @return bool success
+     */
     public function uninstallOrderState()
     {
         Configuration::deleteByName('BOL_PLAZA_ORDERS_INITIALSTATE');
         return true;
     }
 
+    /**
+     * Install menu items
+     * @return bool success
+     */
     public function installTab()
     {
         $ordersTab = new Tab();
@@ -168,6 +194,10 @@ class BolPlaza extends Module
         return $ordersTab->add() && $productsTab->add();
     }
 
+    /**
+     * Remove menu items
+     * @return bool success
+     */
     public function uninstallTab()
     {
         $id_tab = (int)Tab::getIdFromClassName('AdminBolPlazaOrders');
@@ -183,6 +213,10 @@ class BolPlaza extends Module
         return true;
     }
 
+    /**
+     * Render the module configuration page
+     * @return $output the rendered page
+     */
     public function getContent()
     {
         $output = null;
@@ -220,6 +254,10 @@ class BolPlaza extends Module
         return $output.$this->displayForm();
     }
 
+    /**
+     * Render a form on the module configuration page
+     * @return the form
+     */
     public function displayForm()
     {
         // Get default language
@@ -382,6 +420,10 @@ class BolPlaza extends Module
         return $helper->generateForm($fields_form);
     }
 
+    /**
+     * Retrieve the BolPlaza client
+     * @return Picqer\BolPlazaClient\BolPlazaClient
+     */
     public static function getClient()
     {
         $publickey = Configuration::get('BOL_PLAZA_ORDERS_PUBKEY');
@@ -394,6 +436,10 @@ class BolPlaza extends Module
         return $client;
     }
 
+    /**
+     * Calculate the delivery date of a shipment
+     * @return Date
+     */
     private function getDeliveryDate()
     {
         $codes = BolPlazaProduct::DELIVERY_CODES;
@@ -410,6 +456,11 @@ class BolPlaza extends Module
         return date('Y-m-d\T18:00:00', strtotime('+ ' . $addedWeekdays . ' Weekdays'));
     }
 
+    /**
+     * Update a shipment to Bol.com
+     * Executes hook: actionObjectOrderCarrierUpdateAfter
+     * @param array $param
+     */
     public function hookActionObjectOrderCarrierUpdateAfter($params)
     {
         $orderCarrier = $params['object'];
@@ -443,6 +494,11 @@ class BolPlaza extends Module
         }
     }
 
+    /**
+     * Add a new tab to the product page
+     * Executes hook: displayAdminProductsExtra
+     * @param array $param
+     */
     public function hookDisplayAdminProductsExtra($params)
     {
         if (!Configuration::get('BOL_PLAZA_ORDERS_ENABLED')) {
@@ -488,6 +544,11 @@ class BolPlaza extends Module
         return $this->display(__FILE__, 'views/templates/admin/bolproduct.tpl');
     }
 
+    /**
+     * Process BolProduct entities added on the product page
+     * Executes hook: actionProductUpdate
+     * @param array $param
+     */
     public function hookActionProductUpdate($params)
     {
         if ((int)Tools::getValue('bolplaza_loaded') === 1 && Validate::isLoadedObject($product = new Product((int)$params['id_product']))) {
@@ -495,6 +556,10 @@ class BolPlaza extends Module
         }
     }
 
+    /**
+     * Process the Bol.com products for a product
+     * @param Product $product
+     */
     private function processBolProductEntities($product)
     {
         // Get all id_product_attribute
@@ -545,6 +610,11 @@ class BolPlaza extends Module
         }
     }
 
+    /**
+     * Send a creation request to Bol.com
+     * Executes hook: actionObjectBolPlazaProductAddAfter
+     * @param array $param
+     */
     public function hookActionObjectBolPlazaProductAddAfter($param)
     {
         if(!empty($param['object'])) {
@@ -552,6 +622,11 @@ class BolPlaza extends Module
         }
     }
 
+    /**
+     * Send an update request to Bol.com
+     * Executes hook: actionObjectBolPlazaProductUpdateAfter
+     * @param array $param
+     */
     public function hookActionObjectBolPlazaProductUpdateAfter($param)
     {
         if(!empty($param['object'])) {
@@ -560,6 +635,11 @@ class BolPlaza extends Module
         }
     }
 
+    /**
+     * Send stock updates to Bol.com
+     * Executes hook: actionUpdateQuantity
+     * @param array $param
+     */
     public function hookActionUpdateQuantity($param)
     {
         $bolProductId = BolPlazaProduct::getIdByProductAndAttributeId($param['id_product'], $param['id_product_attribute']);
@@ -570,6 +650,11 @@ class BolPlaza extends Module
         }
     }
 
+    /**
+     * Send a product deletion request to Bol.com
+     * Executes hook: actionObjectBolPlazaProductDeleteAfter
+     * @param array $param
+     */
     public function hookActionObjectBolPlazaProductDeleteAfter($param)
     {
         if(!empty($param['object'])) {
