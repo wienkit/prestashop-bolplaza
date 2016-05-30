@@ -23,7 +23,11 @@ class AdminBolPlazaProductsController extends AdminController
     {
 
         if ($id_product = Tools::getValue('id_product')) {
-            Tools::redirectAdmin(Context::getContext()->link->getAdminLink('AdminProducts').'&updateproduct&id_product='.(int)$id_product);
+            Tools::redirectAdmin(
+                Context::getContext()
+                    ->link
+                    ->getAdminLink('AdminProducts').'&updateproduct&id_product='.(int)$id_product
+            );
         }
 
         $this->bootstrap = true;
@@ -34,8 +38,11 @@ class AdminBolPlazaProductsController extends AdminController
 
         $this->identifier = 'id_product';
 
-        $this->_join .= ' INNER JOIN `'._DB_PREFIX_.'product_lang` pl ON (pl.`id_product` = a.`id_product` AND pl.`id_shop` = a.`id_shop`) ';
-        $this->_select .= ' pl.`name` as `product_name`, IF(status = 0, 1, 0) as badge_success, IF(status > 0, 1, 0) as badge_danger ';
+        $this->_join .= ' INNER JOIN `'._DB_PREFIX_.'product_lang` pl
+                            ON (pl.`id_product` = a.`id_product` AND pl.`id_shop` = a.`id_shop`) ';
+        $this->_select .= ' pl.`name` as `product_name`,
+                            IF(status = 0, 1, 0) as badge_success,
+                            IF(status > 0, 1, 0) as badge_danger ';
 
         $this->fields_list = array(
             'id_bolplaza_product' => array(
@@ -198,7 +205,9 @@ class AdminBolPlazaProductsController extends AdminController
         try {
             $Plaza->deleteOffer($bolProduct->id);
         } catch (Exception $e) {
-            $context->controller->errors[] = Tools::displayError('Couldn\'t send update to Bol.com, error: ' . $e->getMessage() . 'You have to correct this manually.');
+            $context->controller->errors[] = Tools::displayError(
+                'Couldn\'t send update to Bol.com, error: ' . $e->getMessage() . 'You have to correct this manually.'
+            );
         }
     }
 
@@ -210,7 +219,10 @@ class AdminBolPlazaProductsController extends AdminController
     public static function processBolStockUpdate($bolProduct, $context)
     {
         $product = new Product($bolProduct->id_product, false, $context->language->id, $context->shop->id);
-        $quantity = StockAvailable::getQuantityAvailableByProduct($product->id_product, $bolProduct->id_product_attribute);
+        $quantity = StockAvailable::getQuantityAvailableByProduct(
+            $product->id_product,
+            $bolProduct->id_product_attribute
+        );
         self::processBolQuantityUpdate($bolProduct, $quantity, $context);
     }
 
@@ -229,7 +241,9 @@ class AdminBolPlazaProductsController extends AdminController
             $Plaza->updateOfferStock($bolProduct->id, $stockUpdate);
             self::setProductStatus($bolProduct, (int)BolPlazaProduct::STATUS_OK);
         } catch (Exception $e) {
-            $context->controller->errors[] = Tools::displayError('[bolplaza] Couldn\'t send update to Bol.com, error: ' . $e->getMessage());
+            $context->controller->errors[] = Tools::displayError(
+              '[bolplaza] Couldn\'t send update to Bol.com, error: ' . $e->getMessage()
+            );
         }
     }
 
@@ -247,7 +261,7 @@ class AdminBolPlazaProductsController extends AdminController
         $offerUpdate->Publish = $bolProduct->published == 1 ? 'true' : 'false';
 
         $product = new Product($bolProduct->id_product, false, $context->language->id, $context->shop->id);
-        if($bolProduct->id_product_attribute) {
+        if ($bolProduct->id_product_attribute) {
             $combination = new Combination($bolProduct->id_product_attribute);
             $offerUpdate->ReferenceCode = $combination->reference;
         } else {
@@ -255,8 +269,12 @@ class AdminBolPlazaProductsController extends AdminController
         }
         $offerUpdate->Description = !empty($product->description) ? $product->description : $product->name;
         $price = $bolProduct->price;
-        if($price == 0) {
-            $price = $price_calculator->getProductPrice((int)$bolProduct->id_product, true, (int)$bolProduct->id_product_attribute);
+        if ($price == 0) {
+            $price = $price_calculator->getProductPrice(
+              (int)$bolProduct->id_product,
+              true,
+              (int)$bolProduct->id_product_attribute
+            );
         }
         $offerUpdate->Price = $price;
 
@@ -265,7 +283,9 @@ class AdminBolPlazaProductsController extends AdminController
             $Plaza->updateOffer($bolProduct->id, $offerUpdate);
             self::setProductStatus($bolProduct, (int)BolPlazaProduct::STATUS_OK);
         } catch (Exception $e) {
-            $context->controller->errors[] = Tools::displayError('[bolplaza] Couldn\'t send update to Bol.com, error: ' . $e->getMessage());
+            $context->controller->errors[] = Tools::displayError(
+              '[bolplaza] Couldn\'t send update to Bol.com, error: ' . $e->getMessage()
+            );
         }
     }
 
@@ -283,10 +303,13 @@ class AdminBolPlazaProductsController extends AdminController
         $offerCreate->Publish = $bolProduct->published == 1 ? 'true' : 'false';
 
         $product = new Product($bolProduct->id_product, false, $context->language->id, $context->shop->id);
-        if($bolProduct->id_product_attribute) {
+        if ($bolProduct->id_product_attribute) {
             $combination = new Combination($bolProduct->id_product_attribute);
             $offerCreate->EAN = $combination->ean13;
-            $offerCreate->QuantityInStock = StockAvailable::getQuantityAvailableByProduct($product->id_product, $bolProduct->id_product_attribute);
+            $offerCreate->QuantityInStock = StockAvailable::getQuantityAvailableByProduct(
+                $product->id_product,
+                $bolProduct->id_product_attribute
+            );
             $offerCreate->ReferenceCode = $combination->reference;
         } else {
             $offerCreate->EAN = $product->ean13;
@@ -307,8 +330,12 @@ class AdminBolPlazaProductsController extends AdminController
 
         $offerCreate->Description = !empty($product->description) ? $product->description : $product->name;
         $price = $bolProduct->price;
-        if($price == 0) {
-            $price = $price_calculator->getProductPrice((int)$bolProduct->id_product, true, (int)$bolProduct->id_product_attribute);
+        if ($price == 0) {
+            $price = $price_calculator->getProductPrice(
+                (int)$bolProduct->id_product,
+                true,
+                (int)$bolProduct->id_product_attribute
+            );
         }
         $offerCreate->Price = $price;
 
@@ -317,7 +344,9 @@ class AdminBolPlazaProductsController extends AdminController
             $Plaza->createOffer($bolProduct->id, $offerCreate);
             self::setProductStatus($bolProduct, (int)BolPlazaProduct::STATUS_OK);
         } catch (Exception $e) {
-            $context->controller->errors[] = Tools::displayError('[bolplaza] Couldn\'t send update to Bol.com, error: ' . $e->getMessage());
+            $context->controller->errors[] = Tools::displayError(
+                '[bolplaza] Couldn\'t send update to Bol.com, error: ' . $e->getMessage()
+            );
         }
     }
 }

@@ -46,11 +46,31 @@ class BolPlazaProduct extends ObjectModel
         'primary' => 'id_bolplaza_product',
         'multishop' => true,
         'fields' => array(
-            'id_product' =>              array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId', 'required' => true),
-            'id_product_attribute' =>    array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId', 'required' => true),
-            'published' =>               array('type' => self::TYPE_BOOL, 'shop' => true, 'validate' => 'isBool'),
-            'price' =>                   array('type' => self::TYPE_FLOAT, 'shop' => true, 'validate' => 'isPrice'),
-            'status' =>             array('type' => self::TYPE_INT, 'shop' => true, 'validate' => 'isInt')
+            'id_product' => array(
+                'type' => self::TYPE_INT,
+                'validate' => 'isUnsignedId',
+                'required' => true
+            ),
+            'id_product_attribute' => array(
+                'type' => self::TYPE_INT,
+                'validate' => 'isUnsignedId',
+                'required' => true
+            ),
+            'published' => array(
+                'type' => self::TYPE_BOOL,
+                'shop' => true,
+                'validate' => 'isBool'
+            ),
+            'price' => array(
+                'type' => self::TYPE_FLOAT,
+                'shop' => true,
+                'validate' => 'isPrice'
+            ),
+            'status' => array(
+                'type' => self::TYPE_INT,
+                'shop' => true,
+                'validate' => 'isInt'
+            )
         )
     );
 
@@ -101,7 +121,8 @@ class BolPlazaProduct extends ObjectModel
      * Returns a list of delivery codes
      * @return array
      */
-    public static function getDeliveryCodes() {
+    public static function getDeliveryCodes()
+    {
           return array(
             array(
                 'deliverycode' => '24uurs-23',

@@ -27,15 +27,17 @@ function upgrade_module_1_1_0($object)
         && $object->registerHook('actionObjectBolPlazaProductUpdateAfter')
         && $object->installProductsTab()
         && Db::getInstance()->execute(
-                    'CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'bolplaza_product` (
-                      `id_bolplaza_product` int(11) NOT NULL AUTO_INCREMENT,
-                      `id_product` int(10) unsigned NOT NULL,
-                      `id_product_attribute` int(10) unsigned NOT NULL,
-                      `id_shop` INT(11) UNSIGNED NOT NULL DEFAULT \'1\',
-                      `published` tinyint(1) NOT NULL DEFAULT \'0\',
-                      `price` DECIMAL(20, 6) NOT NULL DEFAULT \'0.000000\',
-                      `status` tinyint(1) NOT NULL DEFAULT \'1\',
-                      PRIMARY KEY (`id_bolplaza_product`),
-                      UNIQUE KEY(`id_product`, `id_product_attribute`, `id_shop`)
-                    ) ENGINE='._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8;'));
-  }
+            'CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'bolplaza_product` (
+                `id_bolplaza_product` int(11) NOT NULL AUTO_INCREMENT,
+                `id_product` int(10) unsigned NOT NULL,
+                `id_product_attribute` int(10) unsigned NOT NULL,
+                `id_shop` INT(11) UNSIGNED NOT NULL DEFAULT \'1\',
+                `published` tinyint(1) NOT NULL DEFAULT \'0\',
+                `price` DECIMAL(20, 6) NOT NULL DEFAULT \'0.000000\',
+                `status` tinyint(1) NOT NULL DEFAULT \'1\',
+                PRIMARY KEY (`id_bolplaza_product`),
+                UNIQUE KEY(`id_product`, `id_product_attribute`, `id_shop`)
+            ) ENGINE='._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8;'
+        )
+    );
+}

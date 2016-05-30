@@ -25,7 +25,9 @@ class AdminBolPlazaOrdersController extends AdminController
     {
 
         if ($id_order = Tools::getValue('id_order')) {
-            Tools::redirectAdmin(Context::getContext()->link->getAdminLink('AdminOrders').'&vieworder&id_order='.(int)$id_order);
+            Tools::redirectAdmin(
+                Context::getContext()->link->getAdminLink('AdminOrders').'&vieworder&id_order='.(int)$id_order
+            );
         }
 
         $this->bootstrap = true;
@@ -36,7 +38,8 @@ class AdminBolPlazaOrdersController extends AdminController
 
         $this->identifier = 'id_order';
 
-        $this->_select = 'IF(STRCMP(status,\'shipped\'), 1, 0) as badge_danger, IF (STRCMP(status,\'shipped\'), 0, 1) as badge_success';
+        $this->_select = 'IF(STRCMP(status,\'shipped\'), 1, 0) as badge_danger,
+                          IF (STRCMP(status,\'shipped\'), 0, 1) as badge_success';
 
         $this->fields_list = array(
             'id_order' => array(
@@ -175,7 +178,7 @@ class AdminBolPlazaOrdersController extends AdminController
                 }
             }
             $this->confirmations[] = $this->l('Bol.com order sync completed.');
-        } else if ((bool)Tools::getValue('delete_testdata')) {
+        } elseif ((bool)Tools::getValue('delete_testdata')) {
             $orders = new PrestaShopCollection('Order');
             $orders->where('module', '=', 'bolplazatest');
             foreach ($orders->getResults() as $order) {
@@ -191,8 +194,10 @@ class AdminBolPlazaOrdersController extends AdminController
                     $payment->delete();
                 }
                 $order->deleteAssociations();
-                Db::getInstance()->execute('DELETE FROM `'._DB_PREFIX_.'bolplaza_item` WHERE `id_order` = '.(int)pSQL($order->id));
-                Db::getInstance()->execute('DELETE FROM `'._DB_PREFIX_.'order_history` WHERE `id_order` = '.(int)pSQL($order->id));
+                Db::getInstance()->execute('DELETE FROM `'._DB_PREFIX_.'bolplaza_item`
+                                              WHERE `id_order` = '.(int)pSQL($order->id));
+                Db::getInstance()->execute('DELETE FROM `'._DB_PREFIX_.'order_history`
+                                              WHERE `id_order` = '.(int)pSQL($order->id));
                 $order->delete();
                 $customer->delete();
             }
@@ -252,7 +257,10 @@ class AdminBolPlazaOrdersController extends AdminController
      * @param string $alias a name for the address
      * @return Address
      */
-    public function parseAddress(Picqer\BolPlazaClient\Entities\BolPlazaShipmentDetails $details, Customer $customer, $alias)
+    public function parseAddress(
+      Picqer\BolPlazaClient\Entities\BolPlazaShipmentDetails $details,
+      Customer $customer,
+      $alias)
     {
         $address = new Address();
         $address->id_customer = $customer->id;
@@ -283,7 +291,12 @@ class AdminBolPlazaOrdersController extends AdminController
      * @param Address $shipping
      * @return Cart
      */
-    public function parseCart(Picqer\BolPlazaClient\Entities\BolPlazaOrder $order, Customer $customer, Address $billing, Address $shipping)
+    public function parseCart(
+      Picqer\BolPlazaClient\Entities\BolPlazaOrder $order,
+      Customer $customer,
+      Address $billing,
+      Address $shipping
+    )
     {
         $cart = new Cart();
         $cart->id_customer = $customer->id;
@@ -313,10 +326,18 @@ class AdminBolPlazaOrdersController extends AdminController
                     continue;
                 }
                 $hasProducts = true;
-                $this->addSpecificPrice($cart, $customer, $product, $productIds['id_product_attribute'], round(self::getTaxExclusive($product, $item->OfferPrice), 6));
+                $this->addSpecificPrice(
+                  $cart,
+                  $customer,
+                  $product,
+                  $productIds['id_product_attribute'],
+                  round(self::getTaxExclusive($product, $item->OfferPrice), 6)
+                );
                 $cartResult = $cart->updateQty($item->Quantity, $product->id, $productIds['id_product_attribute']);
                 if (!$cartResult) {
-                    $this->errors[] = Tools::displayError('Couldn\'t add product to cart. The product cannot be sold because it\'s unavailable or out of stock');
+                    $this->errors[] = Tools::displayError(
+                        'Couldn\'t add product to cart. The product cannot
+                         be sold because it\'s unavailable or out of stock');
                     return false;
                 }
             }
@@ -394,7 +415,9 @@ class AdminBolPlazaOrdersController extends AdminController
     {
         $cart_rule = new CartRule();
         $cart_rule->code = BolPlazaPayment::CARTRULE_CODE_PREFIX.(int)$cart->id;
-        $cart_rule->name = array(Configuration::get('PS_LANG_DEFAULT') => $this->l('Free Shipping', 'AdminTab', false, false));
+        $cart_rule->name = array(
+            Configuration::get('PS_LANG_DEFAULT') => $this->l('Free Shipping', 'AdminTab', false, false)
+        );
         $cart_rule->id_customer = (int)$cart->id_customer;
         $cart_rule->free_shipping = true;
         $cart_rule->quantity = 1;
@@ -419,7 +442,6 @@ class AdminBolPlazaOrdersController extends AdminController
         $tax_manager = TaxManagerFactory::getManager($address, $product->id_tax_rules_group);
         $tax_calculator = $tax_manager->getTaxCalculator();
         return $tax_calculator->removeTaxes($price);
-
     }
 
     /**

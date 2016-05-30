@@ -43,7 +43,6 @@ class BolPlazaOrderItem extends ObjectModel
     /** @var int */
     public $quantity;
 
-
     /**
      * @see ObjectModel::$definition
      */
@@ -51,14 +50,46 @@ class BolPlazaOrderItem extends ObjectModel
         'table' => 'bolplaza_item',
         'primary' => 'id_bolplaza_item',
         'fields' => array(
-            'id_shop' =>                 array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId'),
-            'id_shop_group' =>           array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId'),
-            'id_order' =>                array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId', 'required' => true),
-            'id_bol_order_item' =>       array('type' => self::TYPE_STRING, 'validate' => 'isGenericName', 'required' => true),
-            'status' =>                  array('type' => self::TYPE_STRING, 'validate' => 'isGenericName', 'size' => 12),
-            'ean' =>                     array('type' => self::TYPE_STRING, 'validate' => 'isGenericName', 'size' => 13),
-            'title' =>                   array('type' => self::TYPE_STRING, 'validate' => 'isGenericName', 'size' => 255),
-            'quantity' =>                array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId')
+            'id_shop' => array(
+                'type' => self::TYPE_INT,
+                'validate' => 'isUnsignedId'
+            ),
+            'id_shop_group' => array(
+                'type' => self::TYPE_INT,
+                'validate' =>
+                'isUnsignedId'
+            ),
+            'id_order' => array(
+                'type' => self::TYPE_INT,
+                'validate' =>
+                'isUnsignedId',
+                'required' => true
+            ),
+            'id_bol_order_item' => array(
+                'type' => self::TYPE_STRING,
+                'validate' =>
+                'isGenericName',
+                'required' => true
+            ),
+            'status' => array(
+                'type' => self::TYPE_STRING,
+                'validate' => 'isGenericName',
+                'size' => 12
+            ),
+            'ean' => array(
+                'type' => self::TYPE_STRING,
+                'validate' => 'isGenericName',
+                'size' => 13
+            ),
+            'title' => array(
+                'type' => self::TYPE_STRING,
+                'validate' => 'isGenericName',
+                'size' => 255
+            ),
+            'quantity' => array(
+                'type' => self::TYPE_INT,
+                'validate' => 'isUnsignedId'
+            )
         ),
     );
 
