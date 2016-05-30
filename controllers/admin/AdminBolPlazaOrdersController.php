@@ -258,10 +258,10 @@ class AdminBolPlazaOrdersController extends AdminController
      * @return Address
      */
     public function parseAddress(
-      Picqer\BolPlazaClient\Entities\BolPlazaShipmentDetails $details,
-      Customer $customer,
-      $alias)
-    {
+        Picqer\BolPlazaClient\Entities\BolPlazaShipmentDetails $details,
+        Customer $customer,
+        $alias
+    ) {
         $address = new Address();
         $address->id_customer = $customer->id;
         $address->firstname = $details->Firstname;
@@ -292,12 +292,11 @@ class AdminBolPlazaOrdersController extends AdminController
      * @return Cart
      */
     public function parseCart(
-      Picqer\BolPlazaClient\Entities\BolPlazaOrder $order,
-      Customer $customer,
-      Address $billing,
-      Address $shipping
-    )
-    {
+        Picqer\BolPlazaClient\Entities\BolPlazaOrder $order,
+        Customer $customer,
+        Address $billing,
+        Address $shipping
+    ) {
         $cart = new Cart();
         $cart->id_customer = $customer->id;
         $cart->id_address_delivery = $shipping->id;
@@ -327,17 +326,18 @@ class AdminBolPlazaOrdersController extends AdminController
                 }
                 $hasProducts = true;
                 $this->addSpecificPrice(
-                  $cart,
-                  $customer,
-                  $product,
-                  $productIds['id_product_attribute'],
-                  round(self::getTaxExclusive($product, $item->OfferPrice), 6)
+                    $cart,
+                    $customer,
+                    $product,
+                    $productIds['id_product_attribute'],
+                    round(self::getTaxExclusive($product, $item->OfferPrice), 6)
                 );
                 $cartResult = $cart->updateQty($item->Quantity, $product->id, $productIds['id_product_attribute']);
                 if (!$cartResult) {
                     $this->errors[] = Tools::displayError(
                         'Couldn\'t add product to cart. The product cannot
-                         be sold because it\'s unavailable or out of stock');
+                         be sold because it\'s unavailable or out of stock'
+                    );
                     return false;
                 }
             }

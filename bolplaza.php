@@ -36,7 +36,8 @@ class BolPlaza extends Module
         parent::__construct();
 
         $this->displayName = $this->l('Bol.com Plaza API connector');
-        $this->description = $this->l('Connect to Bol.com Plaza to synchronize your Bol.com orders and products with your Prestashop website.');
+        $this->description = $this->l('Connect to Bol.com Plaza to synchronize your Bol.com
+                                       orders and products with your Prestashop website.');
 
         $this->confirmUninstall = $this->l('Are you sure you want to uninstall?');
 
@@ -121,7 +122,7 @@ class BolPlaza extends Module
         foreach (Language::getLanguages(true) as $lang) {
             $order_states = OrderState::getOrderStates($lang['id_lang']);
             foreach ($order_states as $state) {
-                if($state['name'] == $orderStateName) {
+                if ($state['name'] == $orderStateName) {
                     Configuration::updateValue('BOL_PLAZA_ORDERS_INITIALSTATE', $state['id_order_state']);
                     return true;
                 }
@@ -451,12 +452,12 @@ class BolPlaza extends Module
         $codes = BolPlazaProduct::getDeliveryCodes();
         $deliverycode = end($codes);
         foreach ($codes as $code) {
-            if($code['deliverycode'] == Configuration::get('BOL_PLAZA_ORDERS_DELIVERY_CODE')) {
+            if ($code['deliverycode'] == Configuration::get('BOL_PLAZA_ORDERS_DELIVERY_CODE')) {
                 $deliverycode = $code;
             }
         }
         $addedWeekdays = $deliverycode['addtime'];
-        if(date('H') >= $deliverycode['shipsuntil']) {
+        if (date('H') >= $deliverycode['shipsuntil']) {
             $addedWeekdays++;
         }
         return date('Y-m-d\T18:00:00', strtotime('+ ' . $addedWeekdays . ' Weekdays'));
@@ -506,10 +507,12 @@ class BolPlaza extends Module
         if (!Configuration::get('BOL_PLAZA_ORDERS_ENABLED')) {
             return $this->display(__FILE__, 'views/templates/admin/disabled.tpl');
         }
-        if ($id_product = (int)Tools::getValue('id_product'))
-        $product = new Product($id_product, true, $this->context->language->id, $this->context->shop->id);
-        if (!Validate:: isLoadedObject($product))
-          return;
+        if ($id_product = (int)Tools::getValue('id_product')) {
+            $product = new Product($id_product, true, $this->context->language->id, $this->context->shop->id);
+        }
+        if (!Validate:: isLoadedObject($product)) {
+            return;
+        }
 
         $attributes = $product->getAttributesResume($this->context->language->id);
 
@@ -553,7 +556,8 @@ class BolPlaza extends Module
      */
     public function hookActionProductUpdate($params)
     {
-        if ((int)Tools::getValue('bolplaza_loaded') === 1 && Validate::isLoadedObject($product = new Product((int)$params['id_product']))) {
+        if ((int)Tools::getValue('bolplaza_loaded') === 1
+             && Validate::isLoadedObject($product = new Product((int)$params['id_product']))) {
             $this->processBolProductEntities($product);
         }
     }
@@ -587,13 +591,15 @@ class BolPlaza extends Module
             $published = Tools::getValue('bolplaza_published_'.$key);
             $price = Tools::getValue('bolplaza_price_'.$key, 0);
 
-            if(array_key_exists($attribute['id_product_attribute'], $indexedBolProducts)) {
-                $bolProduct = new BolPlazaProduct($indexedBolProducts[$attribute['id_product_attribute']]['id_bolplaza_product']);
-                if($bolProduct->price == $price && $bolProduct->published == $published) {
+            if (array_key_exists($attribute['id_product_attribute'], $indexedBolProducts)) {
+                $bolProduct = new BolPlazaProduct(
+                    $indexedBolProducts[$attribute['id_product_attribute']]['id_bolplaza_product']
+                );
+                if ($bolProduct->price == $price && $bolProduct->published == $published) {
                     continue;
                 }
                 $bolProduct->status = BolPlazaProduct::STATUS_INFO_UPDATE;
-            } elseif(!$published && $price == 0) {
+            } elseif (!$published && $price == 0) {
                 continue;
             } else {
                 $bolProduct = new BolPlazaProduct();
@@ -604,7 +610,7 @@ class BolPlaza extends Module
             $bolProduct->price = $price;
             $bolProduct->published = $published;
 
-            if(!$bolProduct->published && $price == 0) {
+            if (!$bolProduct->published && $price == 0) {
                 $bolProduct->delete();
             } else {
                 $bolProduct->save();
@@ -619,7 +625,7 @@ class BolPlaza extends Module
      */
     public function hookActionObjectBolPlazaProductAddAfter($param)
     {
-        if(!empty($param['object'])) {
+        if (!empty($param['object'])) {
             AdminBolPlazaProductsController::processBolProductCreate($param['object'], $this->context);
         }
     }
@@ -631,8 +637,11 @@ class BolPlaza extends Module
      */
     public function hookActionObjectBolPlazaProductUpdateAfter($param)
     {
-        if(!empty($param['object'])) {
-            AdminBolPlazaProductsController::setProductStatus($param['object'], (int)BolPlazaProduct::STATUS_INFO_UPDATE);
+        if (!empty($param['object'])) {
+            AdminBolPlazaProductsController::setProductStatus(
+                $param['object'],
+                (int)BolPlazaProduct::STATUS_INFO_UPDATE
+            );
             AdminBolPlazaProductsController::processBolProductUpdate($param['object'], $this->context);
         }
     }
@@ -644,8 +653,11 @@ class BolPlaza extends Module
      */
     public function hookActionUpdateQuantity($param)
     {
-        $bolProductId = BolPlazaProduct::getIdByProductAndAttributeId($param['id_product'], $param['id_product_attribute']);
-        if(!empty($bolProductId)) {
+        $bolProductId = BolPlazaProduct::getIdByProductAndAttributeId(
+            $param['id_product'],
+            $param['id_product_attribute']
+        );
+        if (!empty($bolProductId)) {
             $bolProduct = new BolPlazaProduct($bolProductId);
             AdminBolPlazaProductsController::setProductStatus($bolProduct, (int)BolPlazaProduct::STATUS_STOCK_UPDATE);
             AdminBolPlazaProductsController::processBolQuantityUpdate($bolProduct, $param['quantity'], $this->context);
@@ -659,7 +671,7 @@ class BolPlaza extends Module
      */
     public function hookActionObjectBolPlazaProductDeleteAfter($param)
     {
-        if(!empty($param['object'])) {
+        if (!empty($param['object'])) {
             AdminBolPlazaProductsController::processBolProductDelete($param['object'], $this->context);
         }
     }

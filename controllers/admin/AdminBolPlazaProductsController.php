@@ -242,7 +242,7 @@ class AdminBolPlazaProductsController extends AdminController
             self::setProductStatus($bolProduct, (int)BolPlazaProduct::STATUS_OK);
         } catch (Exception $e) {
             $context->controller->errors[] = Tools::displayError(
-              '[bolplaza] Couldn\'t send update to Bol.com, error: ' . $e->getMessage()
+                '[bolplaza] Couldn\'t send update to Bol.com, error: ' . $e->getMessage()
             );
         }
     }
@@ -271,9 +271,9 @@ class AdminBolPlazaProductsController extends AdminController
         $price = $bolProduct->price;
         if ($price == 0) {
             $price = $price_calculator->getProductPrice(
-              (int)$bolProduct->id_product,
-              true,
-              (int)$bolProduct->id_product_attribute
+                (int)$bolProduct->id_product,
+                true,
+                (int)$bolProduct->id_product_attribute
             );
         }
         $offerUpdate->Price = $price;
@@ -284,7 +284,7 @@ class AdminBolPlazaProductsController extends AdminController
             self::setProductStatus($bolProduct, (int)BolPlazaProduct::STATUS_OK);
         } catch (Exception $e) {
             $context->controller->errors[] = Tools::displayError(
-              '[bolplaza] Couldn\'t send update to Bol.com, error: ' . $e->getMessage()
+                '[bolplaza] Couldn\'t send update to Bol.com, error: ' . $e->getMessage()
             );
         }
     }
