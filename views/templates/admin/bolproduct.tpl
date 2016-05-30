@@ -1,3 +1,17 @@
+{*
+* NOTICE OF LICENSE
+*
+* This file is licenced under the Software License Agreement.
+* With the purchase or the installation of the software in your application
+* you accept the licence agreement.
+*
+* You must not modify, adapt or create derivative works of this source code
+*
+*  @author    Mark Wienk
+*  @copyright 2013-2016 Wienk IT
+*  @license   LICENSE.txt
+*
+*}
 <input type="hidden" name="bolplaza_loaded" value="1">
 {if isset($product->id)}
 <div class="panel product-tab" id="product-ModuleBolplaza">
@@ -29,15 +43,15 @@
           {/if}
           <tr {if $index is odd}class="alt_row"{/if}>
             <td class="fixed-width-xs" align="center"><input type="checkbox"
-              name="bolplaza_published_{$attribute['id_product']}_{$attribute['id_product_attribute']}"
+              name="bolplaza_published_{$attribute['id_product']|escape:'htmlall':'UTF-8'}_{$attribute['id_product_attribute']|escape:'htmlall':'UTF-8'}"
               {if $selected == true}checked="checked"{/if}
               value="1" />
             </td>
-            <td>{$product_designation[$attribute['id_product_attribute']]}</td>
+            <td>{$product_designation[$attribute['id_product_attribute']]|escape:'htmlall':'UTF-8'}</td>
             <td>
               <div class="input-group">
           			<span class="input-group-addon"> &euro;</span>
-          			<input name="bolplaza_price_{$attribute['id_product']}_{$attribute['id_product_attribute']}" id="bolplaza_price_{$attribute['id_product']}_{$attribute['id_product_attribute']}" type="text" value="{$price|escape:'html':'UTF-8'}" onchange="noComma('bolplaza_price_{$attribute['id_product']}_{$attribute['id_product_attribute']}');" maxlength="27">
+          			<input name="bolplaza_price_{$attribute['id_product']|escape:'htmlall':'UTF-8'}_{$attribute['id_product_attribute']|escape:'htmlall':'UTF-8'}" id="bolplaza_price_{$attribute['id_product']}_{$attribute['id_product_attribute']}" type="text" value="{$price|escape:'html':'UTF-8'}" onchange="noComma('bolplaza_price_{$attribute['id_product']|escape:'htmlall':'UTF-8'}_{$attribute['id_product_attribute']|escape:'htmlall':'UTF-8'}');" maxlength="27">
           		</div>
             </td>
           </tr>
@@ -47,7 +61,7 @@
     </div>
   </div>
   <div class="panel-footer">
-    <a href="{$link->getAdminLink('AdminProducts')}" class="btn btn-default"><i class="process-icon-cancel"></i> {l s='Cancel' mod='bolplaza'}</a>
+    <a href="{$link->getAdminLink('AdminProducts')|escape:'htmlall':'UTF-8'}" class="btn btn-default"><i class="process-icon-cancel"></i> {l s='Cancel' mod='bolplaza'}</a>
     <button type="submit" name="submitAddproduct" class="btn btn-default pull-right"><i class="process-icon-save"></i> {l s='Save' mod='bolplaza'}</button>
     <button type="submit" name="submitAddproductAndStay" class="btn btn-default pull-right"><i class="process-icon-save"></i> {l s='Save and stay' mod='bolplaza'}</button>
   </div>
