@@ -2,11 +2,11 @@
 {if isset($product->id)}
 <div class="panel product-tab" id="product-ModuleBolplaza">
   <input type="hidden" name="submitted_tabs[]" value="Bolplaza" />
-  <h3 class="tab">{l s='Bol.com settings'}</h3>
+  <h3 class="tab">{l s='Bol.com settings' mod='bolplaza'}</h3>
   <div class="row">
 		<div class="alert alert-info" style="display:block; position:'auto';">
-			<p>{l s='This interface allows you to edit the Bol.com data.'}</p>
-			<p>{l s='You can also specify product/product combinations. '}</p>
+			<p>{l s='This interface allows you to edit the Bol.com data.' mod='bolplaza'}</p>
+			<p>{l s='You can also specify product/product combinations.' mod='bolplaza'}</p>
 		</div>
 	</div>
   <div class="row">
@@ -14,9 +14,9 @@
       <table class="table">
         <thead>
           <tr>
-            <th class="width: 10%; min-width: 50px;" align="center"><span class="title_box">{l s='Published'}</span></th>
-            <th style="width: 50%"><span class="title_box">{l s='Product'}</span></th>
-            <th style="width: 40%"><span class="title_box">{l s='Custom price (optional)'}</span></th>
+            <th class="width: 10%; min-width: 50px;" align="center"><span class="title_box">{l s='Published' mod='bolplaza'}</span></th>
+            <th style="width: 50%"><span class="title_box">{l s='Product' mod='bolplaza'}</span></th>
+            <th style="width: 40%"><span class="title_box">{l s='Custom price (optional)' mod='bolplaza'}</span></th>
           </tr>
         </thead>
         <tbody>
@@ -47,9 +47,9 @@
     </div>
   </div>
   <div class="panel-footer">
-    <a href="{$link->getAdminLink('AdminProducts')}" class="btn btn-default"><i class="process-icon-cancel"></i> {l s='Cancel'}</a>
-    <button type="submit" name="submitAddproduct" class="btn btn-default pull-right"><i class="process-icon-save"></i> {l s='Save'}</button>
-    <button type="submit" name="submitAddproductAndStay" class="btn btn-default pull-right"><i class="process-icon-save"></i> {l s='Save and stay'}</button>
+    <a href="{$link->getAdminLink('AdminProducts')}" class="btn btn-default"><i class="process-icon-cancel"></i> {l s='Cancel' mod='bolplaza'}</a>
+    <button type="submit" name="submitAddproduct" class="btn btn-default pull-right"><i class="process-icon-save"></i> {l s='Save' mod='bolplaza'}</button>
+    <button type="submit" name="submitAddproductAndStay" class="btn btn-default pull-right"><i class="process-icon-save"></i> {l s='Save and stay' mod='bolplaza'}</button>
   </div>
 </div>
 {/if}
