@@ -24,7 +24,7 @@ class BolPlaza extends Module
     {
         $this->name = 'bolplaza';
         $this->tab = 'market_place';
-        $this->version = '1.0.0';
+        $this->version = '1.1.0';
         $this->author = 'Wienk IT';
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
@@ -50,7 +50,8 @@ class BolPlaza extends Module
         if (parent::install()) {
             return $this->installDb()
                 && $this->installOrderState()
-                && $this->installTab()
+                && $this->installOrdersTab()
+                && $this->installProductsTab()
                 && $this->registerHook('actionProductUpdate')
                 && $this->registerHook('actionUpdateQuantity')
                 && $this->registerHook('displayAdminProductsExtra')
@@ -67,7 +68,7 @@ class BolPlaza extends Module
      */
     public function uninstall()
     {
-        return $this->uninstallTab()
+        return $this->uninstallTabs()
           && $this->uninstallOrderState()
           && $this->uninstallDb()
           && $this->unregisterHook('actionProductUpdate')
@@ -165,7 +166,7 @@ class BolPlaza extends Module
      * Install menu items
      * @return bool success
      */
-    public function installTab()
+    public function installOrdersTab()
     {
         $ordersTab = new Tab();
         $ordersTab->active = 1;
@@ -176,9 +177,14 @@ class BolPlaza extends Module
             $ordersTab->name[$lang['id_lang']] = 'Bol.com orders';
         }
 
-        $ordersTab->id_parent = 10;
+        $ordersTab->id_parent = (int)Tab::getIdFromClassName('AdminParentOrders');
         $ordersTab->module = $this->name;
 
+        return $ordersTab->add();
+    }
+
+    public function installProductsTab()
+    {
         $productsTab = new Tab();
         $productsTab->active = 1;
         $productsTab->name = array();
@@ -188,17 +194,17 @@ class BolPlaza extends Module
             $productsTab->name[$lang['id_lang']] = 'Bol.com products';
         }
 
-        $productsTab->id_parent = 9;
+        $productsTab->id_parent = (int)Tab::getIdFromClassName('AdminCatalog');
         $productsTab->module = $this->name;
 
-        return $ordersTab->add() && $productsTab->add();
+        return $productsTab->add();
     }
 
     /**
      * Remove menu items
      * @return bool success
      */
-    public function uninstallTab()
+    public function uninstallTabs()
     {
         $id_tab = (int)Tab::getIdFromClassName('AdminBolPlazaOrders');
         if ($id_tab) {

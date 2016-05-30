@@ -14,6 +14,9 @@ De Bol.com Plaza API connector laat je jouw Bol.com orders afhandelen in jouw ba
 
 3. Gebruik
 ==========
+
+3.1 Orders
+----------
 Ga naar Orders -> Bol.com orders. Je kunt daar klikken op 'Sync orders', waarna de orders worden geïmporteerd.
 Wanneer je nu je order afhandeld (via de normale Orders pagina), kun je zien welke data er gebruikt is.
 Het Bol.com Order ID wordt geïmporteerd als het transactie ID van de betaling.
@@ -22,13 +25,30 @@ Wanneer je een track & trace nummer aan je order toevoegt, wordt deze naar Bol.c
 
 Als je in de test modus zit, kun je de 'Delete test data' knop gebruiken om de testorders te verwijderen.
 
+3.2 Producten
+-------------
+Vanaf versie 1.1.0 is het ook mogelijk om je producten te synchroniseren met je Bol.com verkoopaccount.
+Je kunt de data zoals deze op Bol.com wordt getoond beheren op de productpagina (via de Bol.com tab).
+Daar kun je per product of combinatie aangeven hoe deze op Bol.com getoond moet worden.
+Je kunt instellen of het artikel gepubliceerd moet worden, en je kunt optioneel een specifieke prijs voor Bol.com aangeven.
+
+Wanneer je je product aanpast, wordt er een bericht naar Bol.com gestuurd met de nieuwe informatie.
+Als je je EAN code of je product conditie (nieuw, gebruikt etc) aanpast, moet het product eerst verwijderd worden.
+Dit kun je doen door voor het product publiceren uit te zetten, en de prijs op 0 te zetten.
+
+Er is ook een nieuw menuitem toegevoegd aan het Catalogus menu. Daarin zie je een overzicht van alle producten die naar Bol.com zijn gemeld.
+Wanneer er een foutieve melding is gedaan, staat dat in de statusbalk aangegeven.
+Je kunt dan handmatig de melding opnieuw doen door op de knop 'Synchronize' te drukken.
+
+Voordat je de Bol.com producten kunt gebruiken, dien je in de instellingen van de module je levertijd in te stellen.
+
 4. Veelgestelde vragen
 =============================
 1. Kan ik een order annuleren via de connector?
 - Helaas is dit momenteel nog niet mogelijk, je moet dit op je Bol.com account zelf doen.
 
 2. Hoe kan ik mijn producten synchroniseren naar Bol.com?
-- Dit moet je momenteel nog met de Excel file doen. Ook kun je een andere addon hiervoor gebruiken.
+- Dit kun je doen vanaf de productpagina in de backoffice
 
 3. Kunnen de orders ook automatisch worden geïmporteerd?
 - Ja, maar daar moet je een crontaak voor opzetten.

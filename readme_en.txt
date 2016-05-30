@@ -3,7 +3,9 @@ Bol.com Plaza API connector
 
 1. Introduction
 ===============
-The Bol.com Plaza API connector allows you to import your orders from the Bol.com Plaza account. That means that you can handle all logic you would normally follow, from your own backoffice.
+The Bol.com Plaza API connector allows you to import your orders from the Bol.com Plaza account and synchronize your products to it.
+That means that you can handle all logic you would normally follow, from your own backoffice.
+
 
 2. Installation
 ===============
@@ -14,6 +16,9 @@ The Bol.com Plaza API connector allows you to import your orders from the Bol.co
 
 3. Usage
 ========
+
+3.1 Orders
+----------
 Go to your Orders -> Bol.com orders page. You can now click on 'Sync orders' to retrieve the orders from Bol.com.
 If you now handle your order (via the Order details page), you can see the data that was used.
 The Bol.com Order ID is imported as the transaction ID of the payment.
@@ -22,6 +27,21 @@ When you add a track & trace code to your order, the API connector notify Bol.co
 
 If you are in testing mode, a button to clean the test data will appear on the Bol.com orders page.
 
+3.2 Products
+------------
+From version 1.1.0 it is also possible to synchronize your products with your Bol.com seller account.
+You can manage your product data on the product page, a new tab will be visible for the Bol.com settings.
+In there you can publish the product (and optionally set a specific price for the Bol.com publication).
+
+When you edit your product, the Bol.com connector will send a message to Bol.com, notifying it of stock, title and price.
+If you edit your EAN code or your product condition, you need to disable it on Bol.com, and add a new version of it.
+You can delete a product from Bol.com by unpublishing it, and setting the price to 0.
+
+A new tab is also added to the Catalog menu, showing you an overview of the currently available Bol.com products.
+It also shows a status, in case of an erroneous transfer.
+You can click the 'Synchronize' button in the page's header to synchronize all products that have an erroneous status.
+
+The product delivery code is managed on the module's page. Note that you have to set this before you can synchronize produts to Bol.com.
 
 4. Frequently asked questions
 =============================
@@ -29,7 +49,7 @@ If you are in testing mode, a button to clean the test data will appear on the B
 - No this is currently not possible, you need to login to your Bol.com account.
 
 2. How can I synchronize my products to Bol.com?
-- You need to upload an MS Excel file to Bol.com via the seller interface, or use another addon for this functionality.
+- You need to edit the Bol.com settings in your product detail page
 
 3. Can the order be imported automatically?
 - Yes, however, you need to setup a cron task for this.
