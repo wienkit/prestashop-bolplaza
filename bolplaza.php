@@ -473,25 +473,21 @@ class BolPlaza extends Module
         if ($orderCarrier->tracking_number) {
             $order = new Order($orderCarrier->id_order);
             if ($order->module == 'bolplaza' || $order->module == 'bolplazatest') {
-                $shipments = array();
                 $Plaza = self::getClient();
                 $itemsShipped = array();
-                $orderPayments = OrderPayment::getByOrderReference($order->reference);
-                foreach ($orderPayments as $orderPayment) {
-                    $items = BolPlazaOrderItem::getByOrderId($order->id);
-                    foreach ($items as $item) {
-                        $shipment = new Picqer\BolPlazaClient\Entities\BolPlazaShipmentRequest();
-                        $shipment->OrderItemId = $item->id_bol_order_item;
-                        $shipment->ShipmentReference = $order->reference . '-' . $orderCarrier->id;
-                        $shipment->DateTime = date('Y-m-d\TH:i:s');
-                        $shipment->ExpectedDeliveryDate = $this->getDeliveryDate();
-                        $transport = new Picqer\BolPlazaClient\Entities\BolPlazaTransport();
-                        $transport->TransporterCode = Configuration::get('BOL_PLAZA_ORDERS_CARRIER_CODE');
-                        $transport->TrackAndTrace = $orderCarrier->tracking_number;
-                        $shipment->Transport = $transport;
-                        $itemsShipped[] = $item;
-                        $Plaza->processShipment($shipment);
-                    }
+                $items = BolPlazaOrderItem::getByOrderId($order->id);
+                foreach ($items as $item) {
+                    $shipment = new Picqer\BolPlazaClient\Entities\BolPlazaShipmentRequest();
+                    $shipment->OrderItemId = $item->id_bol_order_item;
+                    $shipment->ShipmentReference = $order->reference . '-' . $orderCarrier->id;
+                    $shipment->DateTime = date('Y-m-d\TH:i:s');
+                    $shipment->ExpectedDeliveryDate = $this->getDeliveryDate();
+                    $transport = new Picqer\BolPlazaClient\Entities\BolPlazaTransport();
+                    $transport->TransporterCode = Configuration::get('BOL_PLAZA_ORDERS_CARRIER_CODE');
+                    $transport->TrackAndTrace = $orderCarrier->tracking_number;
+                    $shipment->Transport = $transport;
+                    $itemsShipped[] = $item;
+                    $Plaza->processShipment($shipment);
                 }
                 foreach ($itemsShipped as $item) {
                     $item->setShipped();
@@ -636,7 +632,7 @@ class BolPlaza extends Module
     public function hookActionObjectBolPlazaProductUpdateAfter($param)
     {
         if(!empty($param['object'])) {
-            AdminBolPlazaProductsController::setProductStatus($bolProduct, (int)BolPlazaProduct::STATUS_INFO_UPDATE);
+            AdminBolPlazaProductsController::setProductStatus($param['object'], (int)BolPlazaProduct::STATUS_INFO_UPDATE);
             AdminBolPlazaProductsController::processBolProductUpdate($param['object'], $this->context);
         }
     }

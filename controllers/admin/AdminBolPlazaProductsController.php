@@ -226,7 +226,7 @@ class AdminBolPlazaProductsController extends AdminController
         $stockUpdate = new Picqer\BolPlazaClient\Entities\BolPlazaStockUpdate();
         $stockUpdate->QuantityInStock = $quantity;
         try {
-            $result = $Plaza->updateOfferStock($bolProduct->id, $stockUpdate);
+            $Plaza->updateOfferStock($bolProduct->id, $stockUpdate);
             self::setProductStatus($bolProduct, (int)BolPlazaProduct::STATUS_OK);
         } catch (Exception $e) {
             $context->controller->errors[] = Tools::displayError('[bolplaza] Couldn\'t send update to Bol.com, error: ' . $e->getMessage());
