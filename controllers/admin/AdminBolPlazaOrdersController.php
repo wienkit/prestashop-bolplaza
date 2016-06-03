@@ -13,7 +13,7 @@
  *  @license   LICENSE.txt
  */
 
-require_once _PS_MODULE_DIR_.'bolplaza/vendor/autoload.php';
+require_once _PS_MODULE_DIR_.'bolplaza/libraries/autoload.php';
 require_once _PS_MODULE_DIR_.'bolplaza/bolplaza.php';
 require_once _PS_MODULE_DIR_.'bolplaza/classes/BolPlazaPayment.php';
 require_once _PS_MODULE_DIR_.'bolplaza/classes/BolPlazaTestPayment.php';

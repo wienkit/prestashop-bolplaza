@@ -1,34 +1,37 @@
 {
-    "name": "wienkit/bolplaza",
-    "description": "PrestaShop module for Bol.com Plaza integration",
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Mark Wienk",
-            "email": "mark@wienkit.nl"
-        }
-    ],
-    "minimum-stability": "dev",
-    "repositories":{
-      "picqer": {
-        "type": "package",
-        "package": {
-          "name": "picqer/bol-plaza-php-client",
-          "version": "2.0.0",
-          "source": {
-            "url": "https://github.com/wienkit/bol-plaza-php-client.git",
-            "type": "git",
-            "reference": "39dc589"
-          }
-        }
+  "name": "wienkit/bolplaza",
+  "description": "PrestaShop module for Bol.com Plaza integration",
+  "license": "MIT",
+  "authors": [
+      {
+          "name": "Mark Wienk",
+          "email": "mark@wienkit.nl"
       }
-    },
-    "require": {
-      "picqer/bol-plaza-php-client": "2.0.0"
-    },
-    "autoload": {
-      "psr-4": {
-        "Picqer\\BolPlazaClient\\": "vendor/picqer/bol-plaza-php-client/src/"
+  ],
+  "minimum-stability": "dev",
+  "repositories":{
+    "picqer": {
+      "type": "package",
+      "package": {
+        "name": "picqer/bol-plaza-php-client",
+        "version": "2.0.0",
+        "source": {
+          "url": "https://github.com/wienkit/bol-plaza-php-client.git",
+          "type": "git",
+          "reference": "39dc589"
+        }
       }
     }
+  },
+  "require": {
+    "picqer/bol-plaza-php-client": "2.0.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Picqer\\BolPlazaClient\\": "vendor/picqer/bol-plaza-php-client/src/"
+    }
+  },
+  "config": {
+    "vendor-dir": "libraries"
+  }
 }
