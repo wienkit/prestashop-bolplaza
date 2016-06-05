@@ -2,11 +2,12 @@
 <module>
 	<name>bolplaza</name>
 	<displayName><![CDATA[Bol.com Plaza API connector]]></displayName>
-	<version><![CDATA[1.0.0]]></version>
-	<description><![CDATA[Connect to Bol.com Plaza to synchronize your Bol.com orders and products with your Prestashop website.]]></description>
+	<version><![CDATA[1.1.0]]></version>
+	<description><![CDATA[Connect to Bol.com Plaza to synchronize your Bol.com
+                                       orders and products with your Prestashop website.]]></description>
 	<author><![CDATA[Wienk IT]]></author>
 	<tab><![CDATA[market_place]]></tab>
-	<confirmUninstall><![CDATA[Are you sure you want to uninstall?]]></confirmUninstall>
+	<confirmUninstall><![CDATA[Weet je het zeker?]]></confirmUninstall>
 	<is_configurable>1</is_configurable>
 	<need_instance>0</need_instance>
 	<limited_countries></limited_countries>

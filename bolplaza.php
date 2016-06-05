@@ -210,12 +210,16 @@ class BolPlaza extends Module
         $id_tab = (int)Tab::getIdFromClassName('AdminBolPlazaOrders');
         if ($id_tab) {
             $tab = new Tab($id_tab);
-            return $tab->delete();
+            if(!$tab->delete()) {
+                return false;
+            }
         }
         $id_tab = (int)Tab::getIdFromClassName('AdminBolPlazaProducts');
         if ($id_tab) {
             $tab = new Tab($id_tab);
-            return $tab->delete();
+            if(!$tab->delete()) {
+                return false;
+            }
         }
         return true;
     }
