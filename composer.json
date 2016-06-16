@@ -28,7 +28,7 @@
   },
   "autoload": {
     "psr-4": {
-      "Picqer\\BolPlazaClient\\": "vendor/picqer/bol-plaza-php-client/src/"
+      "Picqer\\BolPlazaClient\\": "libraries/picqer/bol-plaza-php-client/src/"
     }
   },
   "config": {
