@@ -246,6 +246,7 @@ class AdminBolPlazaOrdersController extends AdminController
         $customer->email = $order->CustomerDetails->BillingDetails->Email;
         $customer->passwd = Tools::passwdGen(8, 'RANDOM');
         $customer->id_default_group = Configuration::get('PS_CUSTOMER_GROUP');
+        $customer->newsletter = false;
         $customer->add();
         return $customer;
     }
