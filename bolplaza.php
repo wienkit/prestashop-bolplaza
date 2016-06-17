@@ -24,7 +24,7 @@ class BolPlaza extends Module
     {
         $this->name = 'bolplaza';
         $this->tab = 'market_place';
-        $this->version = '1.1.0';
+        $this->version = '1.1.1';
         $this->author = 'Wienk IT';
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
@@ -210,14 +210,14 @@ class BolPlaza extends Module
         $id_tab = (int)Tab::getIdFromClassName('AdminBolPlazaOrders');
         if ($id_tab) {
             $tab = new Tab($id_tab);
-            if(!$tab->delete()) {
+            if (!$tab->delete()) {
                 return false;
             }
         }
         $id_tab = (int)Tab::getIdFromClassName('AdminBolPlazaProducts');
         if ($id_tab) {
             $tab = new Tab($id_tab);
-            if(!$tab->delete()) {
+            if (!$tab->delete()) {
                 return false;
             }
         }
