@@ -1,5 +1,6 @@
 Bol.com Plaza API connector
 ===========================
+Uitgebreide documentatie kun je ook vinden op: http://www.werkaandewebshop.com/bolplaza-docs
 
 1. Introductie
 ==============
