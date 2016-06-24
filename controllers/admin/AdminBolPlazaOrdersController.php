@@ -306,7 +306,7 @@ class AdminBolPlazaOrdersController extends AdminController
         $cart->id_shop_group = (int)Context::getContext()->shop->id_shop_group;
         $cart->id_lang = $this->context->language->id;
         $cart->id_currency = Context::getContext()->currency->id;
-        $cart->id_carrier = Configuration::get('BOL_PLAZA_ORDERS_CARRIER');
+        $cart->id_carrier = (int)Configuration::get('BOL_PLAZA_ORDERS_CARRIER');
         $cart->recyclable = 0;
         $cart->gift = 0;
         $cart->secure_key = md5(uniqid(rand(), true));
@@ -426,7 +426,7 @@ class AdminBolPlazaOrdersController extends AdminController
         $cart_rule->minimum_amount_currency = (int)$cart->id_currency;
         $cart_rule->reduction_currency = (int)$cart->id_currency;
         $cart_rule->date_from = date('Y-m-d H:i:s', time());
-        $cart_rule->date_to = date('Y-m-d H:i:s', time() + 24 * 36000);
+        $cart_rule->date_to = date('Y-m-d H:i:s', time() + 60);
         $cart_rule->active = 1;
         $cart_rule->add();
         $cart->addCartRule((int)$cart_rule->id);
