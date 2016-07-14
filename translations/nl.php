@@ -3,7 +3,6 @@
 global $_MODULE;
 $_MODULE = array();
 $_MODULE['<{bolplaza}prestashop>bolplaza_5770439bc8bf8dfbf5f3f17c9134756e'] = 'Bol.com Plaza API connector';
-$_MODULE['<{bolplaza}prestashop>bolplaza_0c00493a89b449a01a76804618458679'] = 'Verbind met Bol.com Plaza om je Bol.com orders en producten te synchroniseren met je Prestashop website.';
 $_MODULE['<{bolplaza}prestashop>bolplaza_876f23178c29dc2552c0b48bf23cd9bd'] = 'Weet je het zeker?';
 $_MODULE['<{bolplaza}prestashop>bolplaza_fe5d926454b6a8144efce13a44d019ba'] = 'Er is een onjuiste configuratiewaarde ingevuld';
 $_MODULE['<{bolplaza}prestashop>bolplaza_c888438d14855d7d96a2724ee9c306bd'] = 'Instellingen opgeslagen';
