@@ -185,7 +185,8 @@ class AdminBolPlazaOrdersController extends AdminController
     public static function synchronize()
     {
         $context = Context::getContext();
-        if (!Configuration::get('BOL_PLAZA_ORDERS_ENABLED')) {
+        $module = Module::getInstanceByName('bolplaza');
+        if (!Configuration::get('BOL_PLAZA_ORDERS_ENABLED') || !$module->isEnabledForShopContext()) {
             $context->controller->errors[] = Tools::displayError('Bol Plaza API isn\'t enabled for the current store.');
             return;
         }
