@@ -159,6 +159,7 @@ class AdminBolPlazaProductsController extends AdminController
             self::synchronize($this->context);
             $this->confirmations[] = $this->l('Bol products fully synchronized.');
         }
+        return parent::postProcess();
     }
 
     /**

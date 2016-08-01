@@ -33,19 +33,35 @@ class AdminBolPlazaOrdersController extends AdminController
         $this->bootstrap = true;
         $this->table = 'bolplaza_item';
         $this->className = 'BolPlazaOrderItem';
+        $this->context = Context::getContext();
+        $this->explicitSelect = true;
+        $this->allow_export = true;
+        $this->deleted = false;
 
         $this->addRowAction('view');
 
         $this->identifier = 'id_order';
 
-        $this->_select = 'IF(STRCMP(status,\'shipped\'), 1, 0) as badge_danger,
+        $this->_join .= ' INNER JOIN `'._DB_PREFIX_.'orders` ord
+                            ON (ord.`id_order` = a.`id_order`)
+                          INNER JOIN `'._DB_PREFIX_.'order_payment` op
+                            ON (op.`order_reference` = ord.`reference`) ';
+        $this->_select = 'op.transaction_id,
+                          IF(STRCMP(status,\'shipped\'), 1, 0) as badge_danger,
                           IF (STRCMP(status,\'shipped\'), 0, 1) as badge_success';
 
         $this->fields_list = array(
             'id_order' => array(
                 'title' => $this->l('Order ID'),
                 'align' => 'text-center',
-                'class' => 'fixed-width-xs'
+                'class' => 'fixed-width-xs',
+                'filter_key' => 'a!id_order'
+            ),
+            'transaction_id' => array(
+                'title' => $this->l('Transactie ID'),
+                'align' => 'text-center',
+                'class' => 'fixed-width-xs',
+                'filter_key' => 'op!transaction_id'
             ),
             'quantity' => array(
                 'title' => $this->l('Quantity'),
@@ -202,6 +218,8 @@ class AdminBolPlazaOrdersController extends AdminController
                 $customer->delete();
             }
         }
+
+        return parent::postProcess();
     }
 
     /**
