@@ -58,7 +58,7 @@ class AdminBolPlazaOrdersController extends AdminController
                 'filter_key' => 'a!id_order'
             ),
             'transaction_id' => array(
-                'title' => $this->l('Transactie ID'),
+                'title' => $this->l('Transaction ID'),
                 'align' => 'text-center',
                 'class' => 'fixed-width-xs',
                 'filter_key' => 'op!transaction_id'
@@ -138,61 +138,18 @@ class AdminBolPlazaOrdersController extends AdminController
 
     /**
      * Processes the request
+     * @return bool
      */
     public function postProcess()
     {
         /* PrestaShop demo mode */
         if (_PS_MODE_DEMO_) {
             $this->errors[] = Tools::displayError('This functionality has been disabled.');
-            return;
+            return false;
         }
 
         if ((bool)Tools::getValue('sync_orders')) {
-            if (!Configuration::get('BOL_PLAZA_ORDERS_ENABLED')) {
-                $this->errors[] = Tools::displayError('Bol Plaza API isn\'t enabled for the current store.');
-                return;
-            }
-            $Plaza = BolPlaza::getClient();
-            $payment_module = new BolPlazaPayment();
-            if ((bool)Configuration::get('BOL_PLAZA_ORDERS_TESTMODE')) {
-                $payment_module = new BolPlazaTestPayment();
-            }
-
-            foreach ($Plaza->getOrders() as $order) {
-                if (!self::getTransactionExists($order->OrderId)) {
-
-                    $cart = $this->parse($order);
-
-                    if (!$cart) {
-                        $this->errors[] = $this->l('Couldn\'t create a cart for order ') .$order->OrderId;
-                        continue;
-                    }
-
-                    Context::getContext()->cart = $cart;
-                    Context::getContext()->currency = new Currency((int)$cart->id_currency);
-                    Context::getContext()->customer = new Customer((int)$cart->id_customer);
-
-                    $id_order_state = Configuration::get('BOL_PLAZA_ORDERS_INITIALSTATE'); // TODO CONFIG
-                    $amount_paid = self::getBolPaymentTotal($order);
-                    $verified = $payment_module->validateOrder(
-                        (int)$cart->id,
-                        (int)$id_order_state,
-                        $amount_paid,
-                        $payment_module->displayName,
-                        null,
-                        array(
-                            'transaction_id' => $order->OrderId
-                        ),
-                        null,
-                        false,
-                        $cart->secure_key
-                    );
-                    if ($verified) {
-                        $this->persistBolItems($payment_module->currentOrder, $order);
-                    }
-
-                }
-            }
+            self::synchronize();
             $this->confirmations[] = $this->l('Bol.com order sync completed.');
         } elseif ((bool)Tools::getValue('delete_testdata')) {
             $orders = new PrestaShopCollection('Order');
@@ -223,9 +180,65 @@ class AdminBolPlazaOrdersController extends AdminController
     }
 
     /**
+     * Synchronize the orders from Bol.com to the PrestaShop shop
+     */
+    public static function synchronize()
+    {
+        $context = Context::getContext();
+        if (!Configuration::get('BOL_PLAZA_ORDERS_ENABLED')) {
+            $context->controller->errors[] = Tools::displayError('Bol Plaza API isn\'t enabled for the current store.');
+            return;
+        }
+        $Plaza = BolPlaza::getClient();
+        $payment_module = new BolPlazaPayment();
+        if ((bool)Configuration::get('BOL_PLAZA_ORDERS_TESTMODE')) {
+            $payment_module = new BolPlazaTestPayment();
+        }
+
+        foreach ($Plaza->getOrders() as $order) {
+            if (!self::getTransactionExists($order->OrderId)) {
+
+                $cart = self::parse($order);
+
+                if (!$cart) {
+                    $context->controller->errors[] = Translate::getAdminTranslation('Couldn\'t create a cart for order ', 'AdminBolPlazaOrders') .$order->OrderId;
+                    continue;
+                }
+
+                Context::getContext()->cart = $cart;
+                Context::getContext()->currency = new Currency((int)$cart->id_currency);
+                Context::getContext()->customer = new Customer((int)$cart->id_customer);
+
+//                var_dump($cart);
+//                var_dump($order);
+//                ddd($cart);
+
+                $id_order_state = Configuration::get('BOL_PLAZA_ORDERS_INITIALSTATE');
+                $amount_paid = self::getBolPaymentTotal($order);
+                $verified = $payment_module->validateOrder(
+                    (int)$cart->id,
+                    (int)$id_order_state,
+                    $amount_paid,
+                    $payment_module->displayName,
+                    null,
+                    array(
+                        'transaction_id' => $order->OrderId
+                    ),
+                    null,
+                    false,
+                    $cart->secure_key
+                );
+                if ($verified) {
+                    self::persistBolItems($payment_module->currentOrder, $order);
+                }
+            }
+        }
+    }
+
+    /**
      * Get OrderID for a Transaction ID
-     * @param string $transaction id
-     * @return array
+     * @param $transaction_id
+     * @return bool
      */
     public static function getTransactionExists($transaction_id)
     {
@@ -241,13 +254,13 @@ class AdminBolPlazaOrdersController extends AdminController
      * @param Picqer\BolPlazaClient\Entities\BolPlazaOrder $order
      * @return Cart
      */
-    public function parse(Picqer\BolPlazaClient\Entities\BolPlazaOrder $order)
+    public static function parse(Picqer\BolPlazaClient\Entities\BolPlazaOrder $order)
     {
-        $customer = $this->parseCustomer($order);
+        $customer = self::parseCustomer($order);
         Context::getContext()->customer = $customer;
-        $shipping = $this->parseAddress($order->CustomerDetails->ShipmentDetails, $customer, 'Shipping');
-        $billing  = $this->parseAddress($order->CustomerDetails->BillingDetails, $customer, 'Billing');
-        $cart     = $this->parseCart($order, $customer, $billing, $shipping);
+        $shipping = self::parseAddress($order->CustomerDetails->ShipmentDetails, $customer, 'Shipping');
+        $billing  = self::parseAddress($order->CustomerDetails->BillingDetails, $customer, 'Billing');
+        $cart     = self::parseCart($order, $customer, $billing, $shipping);
         return $cart;
     }
 
@@ -256,7 +269,7 @@ class AdminBolPlazaOrdersController extends AdminController
      * @param Picqer\BolPlazaClient\Entities\BolPlazaOrder $order
      * @return Customer
      */
-    public function parseCustomer(Picqer\BolPlazaClient\Entities\BolPlazaOrder $order)
+    public static function parseCustomer(Picqer\BolPlazaClient\Entities\BolPlazaOrder $order)
     {
         $customer = new Customer();
         $customer->lastname = $order->CustomerDetails->BillingDetails->Surname;
@@ -276,7 +289,7 @@ class AdminBolPlazaOrdersController extends AdminController
      * @param string $alias a name for the address
      * @return Address
      */
-    public function parseAddress(
+    public static function parseAddress(
         Picqer\BolPlazaClient\Entities\BolPlazaShipmentDetails $details,
         Customer $customer,
         $alias
@@ -310,20 +323,21 @@ class AdminBolPlazaOrdersController extends AdminController
      * @param Address $shipping
      * @return Cart
      */
-    public function parseCart(
+    public static function parseCart(
         Picqer\BolPlazaClient\Entities\BolPlazaOrder $order,
         Customer $customer,
         Address $billing,
         Address $shipping
     ) {
+        $context = Context::getContext();
         $cart = new Cart();
         $cart->id_customer = $customer->id;
         $cart->id_address_delivery = $shipping->id;
         $cart->id_address_invoice = $billing->id;
         $cart->id_shop = (int)Context::getContext()->shop->id;
         $cart->id_shop_group = (int)Context::getContext()->shop->id_shop_group;
-        $cart->id_lang = $this->context->language->id;
-        $cart->id_currency = Context::getContext()->currency->id;
+        $cart->id_lang = $context->language->id;
+        $cart->id_currency = (int)Currency::getIdByIsoCode('EUR');
         $cart->id_carrier = (int)Configuration::get('BOL_PLAZA_ORDERS_CARRIER');
         $cart->recyclable = 0;
         $cart->gift = 0;
@@ -335,16 +349,16 @@ class AdminBolPlazaOrdersController extends AdminController
             foreach ($items as $item) {
                 $productIds = self::getProductIdByEan($item->EAN);
                 if (empty($productIds) || !array_key_exists('id_product', $productIds)) {
-                    $this->errors[] = $this->l('Couldn\'t find product for EAN: ') . $item->EAN;
+                    $context->controller->errors[] = Translate::getAdminTranslation('Couldn\'t find product for EAN: ', 'AdminBolPlazaOrders') . $item->EAN;
                     continue;
                 }
                 $product = new Product($productIds['id_product']);
                 if (!Validate::isLoadedObject($product)) {
-                    $this->errors[] = $this->l('Couldn\'t load product for EAN: ') . $item->EAN;
+                    $context->controller->errors[] = Translate::getAdminTranslation('Couldn\'t load product for EAN: ', 'AdminBolPlazaOrders') . $item->EAN;
                     continue;
                 }
                 $hasProducts = true;
-                $this->addSpecificPrice(
+                self::addSpecificPrice(
                     $cart,
                     $customer,
                     $product,
@@ -353,7 +367,7 @@ class AdminBolPlazaOrdersController extends AdminController
                 );
                 $cartResult = $cart->updateQty($item->Quantity, $product->id, $productIds['id_product_attribute']);
                 if (!$cartResult) {
-                    $this->errors[] = Tools::displayError(
+                    $context->controller->errors[] = Tools::displayError(
                         'Couldn\'t add product to cart. The product cannot
                          be sold because it\'s unavailable or out of stock'
                     );
@@ -363,7 +377,7 @@ class AdminBolPlazaOrdersController extends AdminController
         }
 
         if (Configuration::get('BOL_PLAZA_ORDERS_FREE_SHIPPING')) {
-            $this->addFreeShippingCartRule($cart);
+            self::addFreeShippingCartRule($cart);
         }
 
         $cart->update();
@@ -378,7 +392,7 @@ class AdminBolPlazaOrdersController extends AdminController
      * @param string $orderId
      * @param Picqer\BolPlazaClient\Entities\BolPlazaOrder $order
      */
-    public function persistBolItems($orderId, Picqer\BolPlazaClient\Entities\BolPlazaOrder $order)
+    public static function persistBolItems($orderId, Picqer\BolPlazaClient\Entities\BolPlazaOrder $order)
     {
         $items = $order->OrderItems;
         $hasProducts = false;
@@ -403,9 +417,9 @@ class AdminBolPlazaOrdersController extends AdminController
      * @param Customer $customer
      * @param Product $product
      * @param string $id_product_attribute
-     * @param decimal $price
+     * @param float $price
      */
-    private function addSpecificPrice(Cart $cart, Customer $customer, Product $product, $id_product_attribute, $price)
+    private static function addSpecificPrice(Cart $cart, Customer $customer, Product $product, $id_product_attribute, $price)
     {
         $specific_price = new SpecificPrice();
         $specific_price->id_cart = (int)$cart->id;
@@ -430,12 +444,12 @@ class AdminBolPlazaOrdersController extends AdminController
      * Adds a cart rule for free shipping
      * @param Cart $cart
      */
-    private function addFreeShippingCartRule(Cart $cart)
+    private static function addFreeShippingCartRule(Cart $cart)
     {
         $cart_rule = new CartRule();
         $cart_rule->code = BolPlazaPayment::CARTRULE_CODE_PREFIX.(int)$cart->id;
         $cart_rule->name = array(
-            Configuration::get('PS_LANG_DEFAULT') => $this->l('Free Shipping', 'AdminTab', false, false)
+            Configuration::get('PS_LANG_DEFAULT') => Translate::getAdminTranslation('Free Shipping', 'AdminTab', false, false)
         );
         $cart_rule->id_customer = (int)$cart->id_customer;
         $cart_rule->free_shipping = true;
@@ -453,7 +467,8 @@ class AdminBolPlazaOrdersController extends AdminController
     /**
      * Return the tax exclusive price
      * @param Product $product
-     * @param decimal $price
+     * @param float $price
+     * @return float the price wihout tax
      */
     public static function getTaxExclusive(Product $product, $price)
     {
@@ -487,6 +502,11 @@ class AdminBolPlazaOrdersController extends AdminController
      * @param string $ean
      * @return array the product/attribute combination
      */
+
+    /**
+     * @param string $ean
+     * @return array|false|int|mysqli_result|null|PDOStatement|resource
+     */
     private static function getAttributeByEan($ean)
     {
         if (empty($ean)) {
@@ -507,7 +527,7 @@ class AdminBolPlazaOrdersController extends AdminController
     /**
      * Get the Payment total of the Bol.com order
      * @param Picqer\BolPlazaClient\Entities\BolPlazaOrder $order
-     * @return decimal the total
+     * @return float the total
      */
     private static function getBolPaymentTotal(Picqer\BolPlazaClient\Entities\BolPlazaOrder $order)
     {

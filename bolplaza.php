@@ -230,7 +230,15 @@ class BolPlaza extends Module
      */
     public function getContent()
     {
-        $output = null;
+        $cron_url = Tools::getShopDomain(true, true).__PS_BASE_URI__.basename(_PS_MODULE_DIR_);
+        $cron_url.= '/bolplaza/cron.php?secure_key='.md5(_COOKIE_KEY_.Configuration::get('PS_SHOP_NAME'));
+
+        $this->context->smarty->assign(array(
+            'cron_url' => $cron_url,
+            'module_dir' => $this->_path,
+            'module_local_dir' => $this->local_path,
+        ));
+        $output = $this->context->smarty->fetch($this->local_path.'views/templates/admin/configure.tpl');
 
         if (Tools::isSubmit('submit'.$this->name)) {
             $enabled = (bool) Tools::getValue('bolplaza_orders_enabled');
@@ -262,6 +270,7 @@ class BolPlaza extends Module
                 $output .= $this->displayConfirmation($this->l('Settings updated'));
             }
         }
+
         return $output.$this->displayForm();
     }
 
@@ -678,5 +687,13 @@ class BolPlaza extends Module
         if (!empty($param['object'])) {
             AdminBolPlazaProductsController::processBolProductDelete($param['object'], $this->context);
         }
+    }
+
+    /**
+     * Synchronize the orders
+     */
+    public static function synchronize()
+    {
+        AdminBolPlazaOrdersController::synchronize();
     }
 }
