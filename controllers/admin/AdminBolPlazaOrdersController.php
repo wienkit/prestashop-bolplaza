@@ -161,12 +161,15 @@ class AdminBolPlazaOrdersController extends AdminController
                     $address = new Address($addressArr['id_address']);
                     $address->delete();
                 }
+                $details = $order->getOrderDetailList();
+                foreach ($details as $detail) {
+                    (new OrderDetail($detail['id_order_detail']))->delete();
+                }
                 (new Cart($order->id_cart))->delete();
                 $payments = OrderPayment::getByOrderReference($order->reference);
                 foreach ($payments as $payment) {
                     $payment->delete();
                 }
-                $order->deleteAssociations();
                 Db::getInstance()->execute('DELETE FROM `'._DB_PREFIX_.'bolplaza_item`
                                               WHERE `id_order` = '.(int)pSQL($order->id));
                 Db::getInstance()->execute('DELETE FROM `'._DB_PREFIX_.'order_history`
