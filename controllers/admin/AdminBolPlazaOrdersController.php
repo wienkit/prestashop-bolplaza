@@ -213,10 +213,6 @@ class AdminBolPlazaOrdersController extends AdminController
                 Context::getContext()->currency = new Currency((int)$cart->id_currency);
                 Context::getContext()->customer = new Customer((int)$cart->id_customer);
 
-//                var_dump($cart);
-//                var_dump($order);
-//                ddd($cart);
-
                 $id_order_state = Configuration::get('BOL_PLAZA_ORDERS_INITIALSTATE');
                 $amount_paid = self::getBolPaymentTotal($order);
                 $verified = $payment_module->validateOrder(
