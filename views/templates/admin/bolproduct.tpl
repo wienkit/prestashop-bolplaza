@@ -12,6 +12,14 @@
 *  @license   LICENSE.txt
 *
 *}
+<style>
+  .clickable {
+    cursor: pointer;
+  }
+  .collapsed.clickable i {
+    transform: rotate(180deg);
+  }
+</style>
 <input type="hidden" name="bolplaza_loaded" value="1">
 {if isset($product->id)}
 <div class="panel product-tab" id="product-ModuleBolplaza">
@@ -40,19 +48,47 @@
           {if array_key_exists($attribute['id_product_attribute'], $bol_products)}
             {assign var=price value=$bol_products[$attribute['id_product_attribute']]['price']}
             {assign var=selected value=$bol_products[$attribute['id_product_attribute']]['published']}
+            {assign var=nostock value=$bol_products[$attribute['id_product_attribute']]['delivery_time_nostock']}
+            {assign var=ean value=$bol_products[$attribute['id_product_attribute']]['ean']}
           {/if}
-          <tr {if $index is odd}class="alt_row"{/if}>
+          <tr{if $index is odd} class="alt_row"{/if}>
             <td class="fixed-width-xs" align="center"><input type="checkbox"
               name="bolplaza_published_{$attribute['id_product']|escape:'htmlall':'UTF-8'}_{$attribute['id_product_attribute']|escape:'htmlall':'UTF-8'}"
               {if $selected == true}checked="checked"{/if}
               value="1" />
             </td>
-            <td>{$product_designation[$attribute['id_product_attribute']]|escape:'htmlall':'UTF-8'}</td>
+            <td class="clickable collapsed" data-toggle="collapse" data-target=".{$index}collapsed">
+              {$product_designation[$attribute['id_product_attribute']]|escape:'htmlall':'UTF-8'}
+              <i class="icon-caret-up pull-right"></i>
+            </td>
             <td>
               <div class="input-group">
           			<span class="input-group-addon"> &euro;</span>
           			<input name="bolplaza_price_{$attribute['id_product']|escape:'htmlall':'UTF-8'}_{$attribute['id_product_attribute']|escape:'htmlall':'UTF-8'}" id="bolplaza_price_{$attribute['id_product']|escape:'htmlall':'UTF-8'}_{$attribute['id_product_attribute']|escape:'htmlall':'UTF-8'}" type="text" value="{$price|escape:'html':'UTF-8'}" onchange="noComma('bolplaza_price_{$attribute['id_product']|escape:'htmlall':'UTF-8'}_{$attribute['id_product_attribute']|escape:'htmlall':'UTF-8'}');" maxlength="27">
           		</div>
+            </td>
+          </tr>
+          <tr class="collapse out {$index}collapsed{if $index is odd} alt_row{/if}">
+            <td>&nbsp;</td>
+            <td>
+              {l s='Custom EAN (optional)' mod='bolplaza'}
+            </td>
+            <td>
+              <input name="bolplaza_ean_{$attribute['id_product']|escape:'htmlall':'UTF-8'}_{$attribute['id_product_attribute']|escape:'htmlall':'UTF-8'}" id="bolplaza_ean_{$attribute['id_product']|escape:'htmlall':'UTF-8'}_{$attribute['id_product_attribute']|escape:'htmlall':'UTF-8'}" type="text" value="{$ean|escape:'html':'UTF-8'}" maxlength="27">
+            </td>
+          </tr>
+          <tr class="collapse out {$index}collapsed{if $index is odd} alt_row{/if}">
+            <td>&nbsp;</td>
+            <td>
+              {l s='Custom Delivery time (when not in stock)' mod='bolplaza'}
+            </td>
+            <td>
+              <select name="bolplaza_nostock_{$attribute['id_product']|escape:'htmlall':'UTF-8'}_{$attribute['id_product_attribute']|escape:'htmlall':'UTF-8'}" id="bolplaza_nostock_{$attribute['id_product']|escape:'htmlall':'UTF-8'}_{$attribute['id_product_attribute']|escape:'htmlall':'UTF-8'}">
+                <option value=""{if $nostock == ''} selected="selected"{/if}>-- {l s='Use default' mod='bolplaza'} --</option>
+              {foreach $delivery_codes AS $code}
+                <option value="{$code['deliverycode']}"{if $nostock == $code['deliverycode']} selected="selected"{/if}>{$code['description']}</option>
+              {/foreach}
+              </select>
             </td>
           </tr>
         {/foreach}

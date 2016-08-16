@@ -29,6 +29,12 @@ class BolPlazaProduct extends ObjectModel
     /** @var int */
     public $id_product_attribute;
 
+    /** @var string */
+    public $ean;
+
+    /** @var string */
+    public $delivery_time_nostock;
+
     /** @var bool */
     public $published = false;
 
@@ -55,6 +61,16 @@ class BolPlazaProduct extends ObjectModel
                 'type' => self::TYPE_INT,
                 'validate' => 'isUnsignedId',
                 'required' => true
+            ),
+            'ean' => array(
+                'type' => self::TYPE_STRING,
+                'shop' => true,
+                'validate' => 'isEan13'
+            ),
+            'delivery_time_nostock' => array(
+                'type' => self::TYPE_STRING,
+                'shop' => true,
+                'validate' => 'isString'
             ),
             'published' => array(
                 'type' => self::TYPE_BOOL,

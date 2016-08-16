@@ -15,23 +15,25 @@
 
 $sql = array();
 $sql[_DB_PREFIX_.'bolplaza_item'] = 'CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'bolplaza_item` (
-              `id_bolplaza_item` int(11) NOT NULL AUTO_INCREMENT,
+              `id_bolplaza_item` INT(11) NOT NULL AUTO_INCREMENT,
               `id_shop` INTEGER DEFAULT \'0\',
               `id_shop_group` INTEGER DEFAULT \'0\',
-              `id_order` int(11) NOT NULL,
-              `id_bol_order_item` varchar(32) NOT NULL,
-              `ean` varchar(13),
-              `title` varchar(255),
+              `id_order` INT(11) NOT NULL,
+              `id_bol_order_item` VARCHAR(32) NOT NULL,
+              `ean` VARCHAR(13),
+              `title` VARCHAR(255),
               `quantity` INTEGER DEFAULT \'1\',
               `status` varchar(12) NOT NULL,
               PRIMARY KEY (`id_bolplaza_item`)
             ) ENGINE='._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8;';
 
 $sql[_DB_PREFIX_.'bolplaza_product'] = 'CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'bolplaza_product` (
-              `id_bolplaza_product` int(11) NOT NULL AUTO_INCREMENT,
-              `id_product` int(10) unsigned NOT NULL,
-              `id_product_attribute` int(10) unsigned NOT NULL,
+              `id_bolplaza_product` INT(11) NOT NULL AUTO_INCREMENT,
+              `id_product` INT(10) unsigned NOT NULL,
+              `id_product_attribute` INT(10) unsigned NOT NULL,
               `id_shop` INT(11) UNSIGNED NOT NULL DEFAULT \'1\',
+              `ean` VARCHAR(13),
+              `delivery_time_nostock` VARCHAR(10),
               `published` tinyint(1) NOT NULL DEFAULT \'0\',
               `price` DECIMAL(20, 6) NOT NULL DEFAULT \'0.000000\',
               `status` tinyint(1) NOT NULL DEFAULT \'1\',

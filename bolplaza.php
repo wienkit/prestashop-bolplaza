@@ -24,7 +24,7 @@ class BolPlaza extends Module
     {
         $this->name = 'bolplaza';
         $this->tab = 'market_place';
-        $this->version = '1.1.1';
+        $this->version = '1.2.0';
         $this->author = 'Wienk IT';
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
@@ -556,7 +556,8 @@ class BolPlaza extends Module
             'attributes' => $attributes,
             'product_designation' => $product_designation,
             'product' => $product,
-            'bol_products' => $indexedBolProducts
+            'bol_products' => $indexedBolProducts,
+            'delivery_codes' => BolPlazaProduct::getDeliveryCodes()
         ));
 
         return $this->display(__FILE__, 'views/templates/admin/bolproduct.tpl');
@@ -603,12 +604,19 @@ class BolPlaza extends Module
             // get elements to manage
             $published = Tools::getValue('bolplaza_published_'.$key);
             $price = Tools::getValue('bolplaza_price_'.$key, 0);
+            $ean = Tools::getValue('bolplaza_ean_'.$key);
+            $delivery_time_nostock = Tools::getValue('bolplaza_nostock_'.$key);
 
             if (array_key_exists($attribute['id_product_attribute'], $indexedBolProducts)) {
                 $bolProduct = new BolPlazaProduct(
                     $indexedBolProducts[$attribute['id_product_attribute']]['id_bolplaza_product']
                 );
-                if ($bolProduct->price == $price && $bolProduct->published == $published) {
+                if (
+                    $bolProduct->price == $price &&
+                    $bolProduct->published == $published &&
+                    $bolProduct->ean == $ean &&
+                    $bolProduct->delivery_time_nostock == $delivery_time_nostock
+                ) {
                     continue;
                 }
                 $bolProduct->status = BolPlazaProduct::STATUS_INFO_UPDATE;
@@ -622,6 +630,8 @@ class BolPlaza extends Module
             $bolProduct->id_product_attribute = $attribute['id_product_attribute'];
             $bolProduct->price = $price;
             $bolProduct->published = $published;
+            $bolProduct->ean = $ean;
+            $bolProduct->delivery_time_nostock = $delivery_time_nostock;
 
             if (!$bolProduct->published && $price == 0) {
                 $bolProduct->delete();
