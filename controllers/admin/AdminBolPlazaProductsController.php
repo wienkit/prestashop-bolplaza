@@ -192,7 +192,7 @@ class AdminBolPlazaProductsController extends AdminController
     {
         DB::getInstance()->update('bolplaza_product', array(
             'status' => (int)$status
-        ), 'id_bolplaza_product = ' . (int)$bolProduct->id_bolplaza_product);
+        ), 'id_bolplaza_product = ' . (int)$bolProduct->id);
     }
 
     /**
@@ -204,7 +204,7 @@ class AdminBolPlazaProductsController extends AdminController
     {
         $Plaza = BolPlaza::getClient();
         try {
-            $Plaza->deleteOffer($bolProduct->id_bolplaza_product);
+            $Plaza->deleteOffer($bolProduct->id);
         } catch (Exception $e) {
             $context->controller->errors[] = Tools::displayError(
                 'Couldn\'t send update to Bol.com, error: ' . $e->getMessage() . 'You have to correct this manually.'
@@ -345,6 +345,7 @@ class AdminBolPlazaProductsController extends AdminController
             $Plaza->createOffer($bolProduct->id, $offerCreate);
             self::setProductStatus($bolProduct, (int)BolPlazaProduct::STATUS_OK);
         } catch (Exception $e) {
+            ddd($e);
             $context->controller->errors[] = Tools::displayError(
                 '[bolplaza] Couldn\'t send update to Bol.com, error: ' . $e->getMessage()
             );
