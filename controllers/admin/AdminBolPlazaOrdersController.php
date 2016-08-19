@@ -92,7 +92,7 @@ class AdminBolPlazaOrdersController extends AdminController
     }
 
     /**
-     * Overrides parent::displayViewLink
+     * {@inheritdoc}
      */
     public function displayViewLink($token = null, $id = 0, $name = null)
     {
@@ -110,7 +110,7 @@ class AdminBolPlazaOrdersController extends AdminController
 
             return $tpl->fetch();
         } else {
-            return;
+            return false;
         }
     }
 
@@ -321,7 +321,7 @@ class AdminBolPlazaOrdersController extends AdminController
      * @param Customer $customer
      * @param Address $billing
      * @param Address $shipping
-     * @return Cart
+     * @return Cart|bool
      */
     public static function parseCart(
         Picqer\BolPlazaClient\Entities\BolPlazaOrder $order,

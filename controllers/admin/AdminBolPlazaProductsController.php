@@ -126,7 +126,7 @@ class AdminBolPlazaProductsController extends AdminController
 
             return $tpl->fetch();
         } else {
-            return;
+            return false;
         }
     }
 
@@ -154,7 +154,7 @@ class AdminBolPlazaProductsController extends AdminController
         if ((bool)Tools::getValue('sync_products')) {
             if (!Configuration::get('BOL_PLAZA_ORDERS_ENABLED')) {
                 $this->errors[] = Tools::displayError('Bol Plaza API isn\'t enabled for the current store.');
-                return;
+                return false;
             }
             self::synchronize($this->context);
             $this->confirmations[] = $this->l('Bol products fully synchronized.');
@@ -192,7 +192,7 @@ class AdminBolPlazaProductsController extends AdminController
     {
         DB::getInstance()->update('bolplaza_product', array(
             'status' => (int)$status
-        ), 'id_bolplaza_product = ' . (int)$bolProduct->id);
+        ), 'id_bolplaza_product = ' . (int)$bolProduct->id_bolplaza_product);
     }
 
     /**
@@ -204,7 +204,7 @@ class AdminBolPlazaProductsController extends AdminController
     {
         $Plaza = BolPlaza::getClient();
         try {
-            $Plaza->deleteOffer($bolProduct->id);
+            $Plaza->deleteOffer($bolProduct->id_bolplaza_product);
         } catch (Exception $e) {
             $context->controller->errors[] = Tools::displayError(
                 'Couldn\'t send update to Bol.com, error: ' . $e->getMessage() . 'You have to correct this manually.'
@@ -221,7 +221,7 @@ class AdminBolPlazaProductsController extends AdminController
     {
         $product = new Product($bolProduct->id_product, false, $context->language->id, $context->shop->id);
         $quantity = StockAvailable::getQuantityAvailableByProduct(
-            $product->id_product,
+            $product->id,
             $bolProduct->id_product_attribute
         );
         self::processBolQuantityUpdate($bolProduct, $quantity, $context);
@@ -308,7 +308,7 @@ class AdminBolPlazaProductsController extends AdminController
             $combination = new Combination($bolProduct->id_product_attribute);
             $offerCreate->EAN = $combination->ean13;
             $offerCreate->QuantityInStock = StockAvailable::getQuantityAvailableByProduct(
-                $product->id_product,
+                $product->id,
                 $bolProduct->id_product_attribute
             );
             $offerCreate->ReferenceCode = $combination->reference;
