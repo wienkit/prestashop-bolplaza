@@ -306,14 +306,14 @@ class AdminBolPlazaProductsController extends AdminController
         $product = new Product($bolProduct->id_product, false, $context->language->id, $context->shop->id);
         if ($bolProduct->id_product_attribute) {
             $combination = new Combination($bolProduct->id_product_attribute);
-            $offerCreate->EAN = $combination->ean13;
+            $offerCreate->EAN = $bolProduct->ean != null? $bolProduct->ean : $combination->ean13;
             $offerCreate->QuantityInStock = StockAvailable::getQuantityAvailableByProduct(
                 $product->id,
                 $bolProduct->id_product_attribute
             );
             $offerCreate->ReferenceCode = $combination->reference;
         } else {
-            $offerCreate->EAN = $product->ean13;
+            $offerCreate->EAN = $bolProduct->ean != null ? $bolProduct->ean : $product->ean13;
             $offerCreate->QuantityInStock = StockAvailable::getQuantityAvailableByProduct($bolProduct->id_product);
             $offerCreate->ReferenceCode = $product->reference;
         }

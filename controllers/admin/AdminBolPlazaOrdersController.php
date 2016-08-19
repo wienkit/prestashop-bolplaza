@@ -349,12 +349,16 @@ class AdminBolPlazaOrdersController extends AdminController
             foreach ($items as $item) {
                 $productIds = self::getProductIdByEan($item->EAN);
                 if (empty($productIds) || !array_key_exists('id_product', $productIds)) {
-                    $context->controller->errors[] = Translate::getAdminTranslation('Couldn\'t find product for EAN: ', 'AdminBolPlazaOrders') . $item->EAN;
+                    $context->controller->errors[] = Translate::getAdminTranslation(
+                        'Couldn\'t find product for EAN: ', 'AdminBolPlazaOrders'
+                    ) . $item->EAN;
                     continue;
                 }
                 $product = new Product($productIds['id_product']);
                 if (!Validate::isLoadedObject($product)) {
-                    $context->controller->errors[] = Translate::getAdminTranslation('Couldn\'t load product for EAN: ', 'AdminBolPlazaOrders') . $item->EAN;
+                    $context->controller->errors[] = Translate::getAdminTranslation(
+                        'Couldn\'t load product for EAN: ', 'AdminBolPlazaOrders'
+                    ) . $item->EAN;
                     continue;
                 }
                 $hasProducts = true;
@@ -395,7 +399,6 @@ class AdminBolPlazaOrdersController extends AdminController
     public static function persistBolItems($orderId, Picqer\BolPlazaClient\Entities\BolPlazaOrder $order)
     {
         $items = $order->OrderItems;
-        $hasProducts = false;
         if (!empty($items)) {
             foreach ($items as $orderItem) {
                 $item = new BolPlazaOrderItem();
@@ -485,6 +488,13 @@ class AdminBolPlazaOrdersController extends AdminController
      */
     public static function getProductIdByEan($ean)
     {
+        $data = BolPlazaProduct::getByEan13($ean);
+        if($data) {
+            return array(
+                'id_product' => $data['id_product'],
+                'id_product_attribute' => $data['id_product_attribute']
+            );
+        }
         $id = Product::getIdByEan13($ean);
         if ($id) {
             return array('id_product' => $id, 'id_product_attribute' => 0);
@@ -499,11 +509,6 @@ class AdminBolPlazaOrdersController extends AdminController
 
     /**
      * Return the attribute for an ean
-     * @param string $ean
-     * @return array the product/attribute combination
-     */
-
-    /**
      * @param string $ean
      * @return array|false|int|mysqli_result|null|PDOStatement|resource
      */
