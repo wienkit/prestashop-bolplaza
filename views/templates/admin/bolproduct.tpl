@@ -48,7 +48,7 @@
           {if array_key_exists($attribute['id_product_attribute'], $bol_products)}
             {assign var=price value=$bol_products[$attribute['id_product_attribute']]['price']}
             {assign var=selected value=$bol_products[$attribute['id_product_attribute']]['published']}
-            {assign var=nostock value=$bol_products[$attribute['id_product_attribute']]['delivery_time_nostock']}
+            {assign var=delivery_time value=$bol_products[$attribute['id_product_attribute']]['delivery_time']}
             {assign var=ean value=$bol_products[$attribute['id_product_attribute']]['ean']}
           {/if}
           <tr{if $index is odd} class="alt_row"{/if}>
@@ -80,13 +80,13 @@
           <tr class="collapse out {$index}collapsed{if $index is odd} alt_row{/if}">
             <td>&nbsp;</td>
             <td>
-              {l s='Custom Delivery time (when not in stock)' mod='bolplaza'}
+              {l s='Custom Delivery time (optional)' mod='bolplaza'}
             </td>
             <td>
-              <select name="bolplaza_nostock_{$attribute['id_product']|escape:'htmlall':'UTF-8'}_{$attribute['id_product_attribute']|escape:'htmlall':'UTF-8'}" id="bolplaza_nostock_{$attribute['id_product']|escape:'htmlall':'UTF-8'}_{$attribute['id_product_attribute']|escape:'htmlall':'UTF-8'}">
-                <option value=""{if !isset($nostock) || $nostock == '' } selected="selected"{/if}>-- {l s='Use default' mod='bolplaza'} --</option>
+              <select name="bolplaza_delivery_time_{$attribute['id_product']|escape:'htmlall':'UTF-8'}_{$attribute['id_product_attribute']|escape:'htmlall':'UTF-8'}" id="bolplaza_delivery_time_{$attribute['id_product']|escape:'htmlall':'UTF-8'}_{$attribute['id_product_attribute']|escape:'htmlall':'UTF-8'}">
+                <option value=""{if !isset($delivery_time) || $delivery_time == '' } selected="selected"{/if}>-- {l s='Use default' mod='bolplaza'} --</option>
               {foreach $delivery_codes AS $code}
-                <option value="{$code['deliverycode']}"{if isset($nostock) && $nostock == $code['deliverycode']} selected="selected"{/if}>{$code['description']}</option>
+                <option value="{$code['deliverycode']}"{if isset($delivery_time) && $delivery_time == $code['deliverycode']} selected="selected"{/if}>{$code['description']}</option>
               {/foreach}
               </select>
             </td>

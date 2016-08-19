@@ -605,7 +605,7 @@ class BolPlaza extends Module
             $published = Tools::getValue('bolplaza_published_'.$key);
             $price = Tools::getValue('bolplaza_price_'.$key, 0);
             $ean = Tools::getValue('bolplaza_ean_'.$key);
-            $delivery_time_nostock = Tools::getValue('bolplaza_nostock_'.$key);
+            $delivery_time = Tools::getValue('bolplaza_delivery_time_'.$key);
 
             if (array_key_exists($attribute['id_product_attribute'], $indexedBolProducts)) {
                 $bolProduct = new BolPlazaProduct(
@@ -615,7 +615,7 @@ class BolPlaza extends Module
                     $bolProduct->price == $price &&
                     $bolProduct->published == $published &&
                     $bolProduct->ean == $ean &&
-                    $bolProduct->delivery_time_nostock == $delivery_time_nostock
+                    $bolProduct->delivery_time == $delivery_time
                 ) {
                     continue;
                 }
@@ -631,7 +631,7 @@ class BolPlaza extends Module
             $bolProduct->price = $price;
             $bolProduct->published = $published;
             $bolProduct->ean = $ean;
-            $bolProduct->delivery_time_nostock = $delivery_time_nostock;
+            $bolProduct->delivery_time = $delivery_time;
 
             if (!$bolProduct->published && $price == 0) {
                 $bolProduct->delete();

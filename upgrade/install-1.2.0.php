@@ -25,7 +25,7 @@ function upgrade_module_1_2_0($object)
             'ALTER TABLE `'._DB_PREFIX_.'bolplaza_product` ADD `ean` VARCHAR(13) AFTER `id_shop`;'
         ) &&
         Db::getInstance()->execute(
-            'ALTER TABLE `'._DB_PREFIX_.'bolplaza_product` ADD `delivery_time_nostock` VARCHAR(10) AFTER `ean`'
+            'ALTER TABLE `'._DB_PREFIX_.'bolplaza_product` ADD `delivery_time` VARCHAR(10) AFTER `ean`'
         )
     );
 }

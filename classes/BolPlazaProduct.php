@@ -33,7 +33,7 @@ class BolPlazaProduct extends ObjectModel
     public $ean;
 
     /** @var string */
-    public $delivery_time_nostock;
+    public $delivery_time;
 
     /** @var bool */
     public $published = false;
@@ -67,7 +67,7 @@ class BolPlazaProduct extends ObjectModel
                 'shop' => true,
                 'validate' => 'isEan13'
             ),
-            'delivery_time_nostock' => array(
+            'delivery_time' => array(
                 'type' => self::TYPE_STRING,
                 'shop' => true,
                 'validate' => 'isString'
