@@ -57,7 +57,7 @@
               {if $selected == true}checked="checked"{/if}
               value="1" />
             </td>
-            <td class="clickable collapsed" data-toggle="collapse" data-target=".{$index}collapsed">
+            <td class="clickable collapsed" data-toggle="collapse" data-target=".{$index|escape:'htmlall':'UTF-8'}collapsed">
               {$product_designation[$attribute['id_product_attribute']]|escape:'htmlall':'UTF-8'}
               <i class="icon-caret-up pull-right"></i>
             </td>
@@ -68,7 +68,7 @@
           		</div>
             </td>
           </tr>
-          <tr class="collapse out {$index}collapsed{if $index is odd} alt_row{/if}">
+          <tr class="collapse out {$index|escape:'htmlall':'UTF-8'}collapsed{if $index is odd} alt_row{/if}">
             <td>&nbsp;</td>
             <td>
               {l s='Custom EAN (optional)' mod='bolplaza'}
@@ -77,7 +77,7 @@
               <input name="bolplaza_ean_{$attribute['id_product']|escape:'htmlall':'UTF-8'}_{$attribute['id_product_attribute']|escape:'htmlall':'UTF-8'}" id="bolplaza_ean_{$attribute['id_product']|escape:'htmlall':'UTF-8'}_{$attribute['id_product_attribute']|escape:'htmlall':'UTF-8'}" type="text" value="{if isset($ean)}{$ean|escape:'html':'UTF-8'}{/if}" maxlength="27">
             </td>
           </tr>
-          <tr class="collapse out {$index}collapsed{if $index is odd} alt_row{/if}">
+          <tr class="collapse out {$index|escape:'htmlall':'UTF-8'}collapsed{if $index is odd} alt_row{/if}">
             <td>&nbsp;</td>
             <td>
               {l s='Custom Delivery time (optional)' mod='bolplaza'}
@@ -86,7 +86,7 @@
               <select name="bolplaza_delivery_time_{$attribute['id_product']|escape:'htmlall':'UTF-8'}_{$attribute['id_product_attribute']|escape:'htmlall':'UTF-8'}" id="bolplaza_delivery_time_{$attribute['id_product']|escape:'htmlall':'UTF-8'}_{$attribute['id_product_attribute']|escape:'htmlall':'UTF-8'}">
                 <option value=""{if !isset($delivery_time) || $delivery_time == '' } selected="selected"{/if}>-- {l s='Use default' mod='bolplaza'} --</option>
               {foreach $delivery_codes AS $code}
-                <option value="{$code['deliverycode']}"{if isset($delivery_time) && $delivery_time == $code['deliverycode']} selected="selected"{/if}>{$code['description']}</option>
+                <option value="{$code['deliverycode']|escape:'htmlall':'UTF-8'}"{if isset($delivery_time) && $delivery_time == $code['deliverycode']} selected="selected"{/if}>{$code['description']|escape:'htmlall':'UTF-8'}</option>
               {/foreach}
               </select>
             </td>

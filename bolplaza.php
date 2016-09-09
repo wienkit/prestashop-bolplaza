@@ -239,33 +239,36 @@ class BolPlaza extends Module
             define('PHP_VERSION_ID', ($version[0] * 10000 + $version[1] * 100 + $version[2]));
         }
 
-        if(PHP_VERSION_ID < 50500) {
+        if (PHP_VERSION_ID < 50500) {
             $errors[] = $this->l('Your PHP version is lower than 5.5, please update your PHP version first.');
         }
 
-        if(!extension_loaded('curl')) {
+        if (!extension_loaded('curl')) {
             $errors[] = $this->l('You don\'t have the cURL php extension enabled, please enable it first.');
         }
 
-        if(!extension_loaded('simplexml')) {
+        if (!extension_loaded('simplexml')) {
             $errors[] = $this->l('You don\'t have the simplexml php extension enabled, please enable it first.');
         }
 
-        if(!extension_loaded('mbstring')) {
+        if (!extension_loaded('mbstring')) {
             $errors[] = $this->l('You don\'t have the mbstring php extension enabled, please enable it first.');
         }
 
-        if(!extension_loaded('mcrypt')) {
+        if (!extension_loaded('mcrypt')) {
             $errors[] = $this->l('You don\'t have the mcrypt php extension enabled, please enable it first.');
         }
 
-        if(!extension_loaded('xsl')) {
+        if (!extension_loaded('xsl')) {
             $errors[] = $this->l('You don\'t have the xsl php extension enabled, please enable it first.');
         }
 
         $version = explode('.', _PS_VERSION_);
-        if(($version[0] * 10000 + $version[1] * 100 + $version[2]) < 10601) {
-            $errors[] = $this->l('Your Prestashop version is too low, please use 1.6.1.x or higher, you can apply for a refund at the addons store.');
+        if (($version[0] * 10000 + $version[1] * 100 + $version[2]) < 10601) {
+            $errors[] = $this->l(
+                'Your Prestashop version is too low, please use 1.6.1.x or higher, 
+                you can apply for a refund at the addons store.'
+            );
         }
 
         $this->context->smarty->assign(array(

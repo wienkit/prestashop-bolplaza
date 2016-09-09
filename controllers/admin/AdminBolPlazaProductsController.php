@@ -258,7 +258,7 @@ class AdminBolPlazaProductsController extends AdminController
         $price_calculator    = Adapter_ServiceLocator::get('Adapter_ProductPriceCalculator');
 
         $offerUpdate = new Picqer\BolPlazaClient\Entities\BolPlazaOfferUpdate();
-        if($bolProduct->delivery_time != null) {
+        if ($bolProduct->delivery_time != null) {
             $offerUpdate->DeliveryCode = $bolProduct->delivery_time;
         } else {
             $offerUpdate->DeliveryCode = Configuration::get('BOL_PLAZA_ORDERS_DELIVERY_CODE');
@@ -304,7 +304,7 @@ class AdminBolPlazaProductsController extends AdminController
         $price_calculator    = Adapter_ServiceLocator::get('Adapter_ProductPriceCalculator');
 
         $offerCreate = new Picqer\BolPlazaClient\Entities\BolPlazaOfferCreate();
-        if($bolProduct->delivery_time != null) {
+        if ($bolProduct->delivery_time != null) {
             $offerCreate->DeliveryCode = $bolProduct->delivery_time;
         } else {
             $offerCreate->DeliveryCode = Configuration::get('BOL_PLAZA_ORDERS_DELIVERY_CODE');

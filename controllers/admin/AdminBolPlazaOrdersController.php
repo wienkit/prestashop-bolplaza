@@ -205,7 +205,10 @@ class AdminBolPlazaOrdersController extends AdminController
                 $cart = self::parse($order);
 
                 if (!$cart) {
-                    $context->controller->errors[] = Translate::getAdminTranslation('Couldn\'t create a cart for order ', 'AdminBolPlazaOrders') .$order->OrderId;
+                    $context->controller->errors[] = Translate::getAdminTranslation(
+                        'Couldn\'t create a cart for order ',
+                        'AdminBolPlazaOrders'
+                    ) .$order->OrderId;
                     continue;
                 }
 
@@ -350,14 +353,16 @@ class AdminBolPlazaOrdersController extends AdminController
                 $productIds = self::getProductIdByEan($item->EAN);
                 if (empty($productIds) || !array_key_exists('id_product', $productIds)) {
                     $context->controller->errors[] = Translate::getAdminTranslation(
-                        'Couldn\'t find product for EAN: ', 'AdminBolPlazaOrders'
+                        'Couldn\'t find product for EAN: ',
+                        'AdminBolPlazaOrders'
                     ) . $item->EAN;
                     continue;
                 }
                 $product = new Product($productIds['id_product']);
                 if (!Validate::isLoadedObject($product)) {
                     $context->controller->errors[] = Translate::getAdminTranslation(
-                        'Couldn\'t load product for EAN: ', 'AdminBolPlazaOrders'
+                        'Couldn\'t load product for EAN: ',
+                        'AdminBolPlazaOrders'
                     ) . $item->EAN;
                     continue;
                 }
@@ -422,8 +427,13 @@ class AdminBolPlazaOrdersController extends AdminController
      * @param string $id_product_attribute
      * @param float $price
      */
-    private static function addSpecificPrice(Cart $cart, Customer $customer, Product $product, $id_product_attribute, $price)
-    {
+    private static function addSpecificPrice(
+        Cart $cart,
+        Customer $customer,
+        Product $product,
+        $id_product_attribute,
+        $price
+    ) {
         $specific_price = new SpecificPrice();
         $specific_price->id_cart = (int)$cart->id;
         $specific_price->id_shop = $cart->id_shop;
@@ -452,7 +462,12 @@ class AdminBolPlazaOrdersController extends AdminController
         $cart_rule = new CartRule();
         $cart_rule->code = BolPlazaPayment::CARTRULE_CODE_PREFIX.(int)$cart->id;
         $cart_rule->name = array(
-            Configuration::get('PS_LANG_DEFAULT') => Translate::getAdminTranslation('Free Shipping', 'AdminTab', false, false)
+            Configuration::get('PS_LANG_DEFAULT') => Translate::getAdminTranslation(
+                'Free Shipping',
+                'AdminTab',
+                false,
+                false
+            )
         );
         $cart_rule->id_customer = (int)$cart->id_customer;
         $cart_rule->free_shipping = true;
@@ -489,7 +504,7 @@ class AdminBolPlazaOrdersController extends AdminController
     public static function getProductIdByEan($ean)
     {
         $data = BolPlazaProduct::getByEan13($ean);
-        if($data) {
+        if ($data) {
             return array(
                 'id_product' => $data['id_product'],
                 'id_product_attribute' => $data['id_product_attribute']
