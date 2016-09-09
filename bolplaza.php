@@ -24,7 +24,7 @@ class BolPlaza extends Module
     {
         $this->name = 'bolplaza';
         $this->tab = 'market_place';
-        $this->version = '1.2.0';
+        $this->version = '1.2.1';
         $this->author = 'Wienk IT';
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
@@ -233,10 +233,46 @@ class BolPlaza extends Module
         $cron_url = Tools::getShopDomain(true, true).__PS_BASE_URI__.basename(_PS_MODULE_DIR_);
         $cron_url.= '/bolplaza/cron.php?secure_key='.md5(_COOKIE_KEY_.Configuration::get('PS_SHOP_NAME').'BOLPLAZA');
 
+        $errors = array();
+        if (!defined('PHP_VERSION_ID')) {
+            $version = explode('.', PHP_VERSION);
+            define('PHP_VERSION_ID', ($version[0] * 10000 + $version[1] * 100 + $version[2]));
+        }
+
+        if(PHP_VERSION_ID < 50500) {
+            $errors[] = $this->l('Your PHP version is lower than 5.5, please update your PHP version first.');
+        }
+
+        if(!extension_loaded('curl')) {
+            $errors[] = $this->l('You don\'t have the cURL php extension enabled, please enable it first.');
+        }
+
+        if(!extension_loaded('simplexml')) {
+            $errors[] = $this->l('You don\'t have the simplexml php extension enabled, please enable it first.');
+        }
+
+        if(!extension_loaded('mbstring')) {
+            $errors[] = $this->l('You don\'t have the mbstring php extension enabled, please enable it first.');
+        }
+
+        if(!extension_loaded('mcrypt')) {
+            $errors[] = $this->l('You don\'t have the mcrypt php extension enabled, please enable it first.');
+        }
+
+        if(!extension_loaded('xsl')) {
+            $errors[] = $this->l('You don\'t have the xsl php extension enabled, please enable it first.');
+        }
+
+        $version = explode('.', _PS_VERSION_);
+        if(($version[0] * 10000 + $version[1] * 100 + $version[2]) < 10601) {
+            $errors[] = $this->l('Your Prestashop version is too low, please use 1.6.1.x or higher, you can apply for a refund at the addons store.');
+        }
+
         $this->context->smarty->assign(array(
             'cron_url' => $cron_url,
             'module_dir' => $this->_path,
             'module_local_dir' => $this->local_path,
+            'errors' => $errors
         ));
         $output = $this->context->smarty->fetch($this->local_path.'views/templates/admin/configure.tpl');
 

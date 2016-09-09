@@ -21,6 +21,15 @@
             <p class="lead">
                 {l s='This module uses the Bol.com seller account functionality. You can apply for an account at Bol.com.' mod='bolplaza'}
             </p>
+            {if count($errors) gt 0}
+            <div class="alert alert-danger">
+                <ul>
+                {foreach $errors AS $error}
+                    <li>{$error}</li>
+                {/foreach}
+                </ul>
+            </div>
+            {/if}
             <p>
                 {l s='Find help online at ' mod='bolplaza'}<a href="http://www.werkaandewebshop.com/bolplaza-docs/">{l s='the online documentation (dutch)' mod='bolplaza'}</a>.
             </p>
