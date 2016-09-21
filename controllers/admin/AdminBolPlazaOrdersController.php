@@ -303,11 +303,11 @@ class AdminBolPlazaOrdersController extends AdminController
         $address->lastname = $details->Surname;
         $address->address1 = $details->Streetname;
         $address->address1.= ' ' . $details->Housenumber;
-        if (!empty($details->HousenumberExtended)) {
+        if (!isset($details->HousenumberExtended) && $details->HousenumberExtended != '') {
             $address->address1.= ' ' . $details->HousenumberExtended;
         }
         $address->address2.= $details->AddressSupplement;
-        if (!empty($details->ExtraAddressInformation)) {
+        if (!isset($details->ExtraAddressInformation) && $details->HousenumberExtended != '') {
             $address->address2.= ' (' . $details->ExtraAddressInformation . ')';
         }
         $address->postcode = $details->ZipCode;
