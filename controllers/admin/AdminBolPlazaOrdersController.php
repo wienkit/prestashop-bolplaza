@@ -299,18 +299,18 @@ class AdminBolPlazaOrdersController extends AdminController
     ) {
         $address = new Address();
         $address->id_customer = $customer->id;
-        if(!isset($details->Company) && $details->Company != '') {
+        if($details->Company != '') {
             $address->company = $details->Company;
         }
         $address->firstname = $details->Firstname;
         $address->lastname = $details->Surname;
         $address->address1 = $details->Streetname;
         $address->address1.= ' ' . $details->Housenumber;
-        if (!isset($details->HousenumberExtended) && $details->HousenumberExtended != '') {
+        if ($details->HousenumberExtended != '') {
             $address->address1.= ' ' . $details->HousenumberExtended;
         }
         $address->address2.= $details->AddressSupplement;
-        if (!isset($details->ExtraAddressInformation) && $details->HousenumberExtended != '') {
+        if ($details->HousenumberExtended != '') {
             $address->address2.= ' (' . $details->ExtraAddressInformation . ')';
         }
         $address->postcode = $details->ZipCode;
