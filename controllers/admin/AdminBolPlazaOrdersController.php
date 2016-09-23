@@ -299,6 +299,9 @@ class AdminBolPlazaOrdersController extends AdminController
     ) {
         $address = new Address();
         $address->id_customer = $customer->id;
+        if(!isset($details->Company) && $details->Company != '') {
+            $address->company = $details->Company;
+        }
         $address->firstname = $details->Firstname;
         $address->lastname = $details->Surname;
         $address->address1 = $details->Streetname;

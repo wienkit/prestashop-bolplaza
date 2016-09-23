@@ -34,9 +34,7 @@ class AdminBolPlazaProductsController extends AdminController
         $this->table = 'bolplaza_product';
         $this->className = 'BolPlazaProduct';
 
-        $this->addRowAction('view');
-
-        $this->identifier = 'id_product';
+        $this->identifier = 'id_bolplaza_product';
 
         $this->_join .= ' INNER JOIN `'._DB_PREFIX_.'product_lang` pl
                             ON (pl.`id_product` = a.`id_product` AND pl.`id_shop` = a.`id_shop`) 
@@ -85,6 +83,13 @@ class AdminBolPlazaProductsController extends AdminController
 
         $this->shopLinkType = 'shop';
 
+        $this->addRowAction('view');
+        $this->addRowAction('resetNew');
+        $this->addRowAction('resetUpdated');
+        $this->addRowAction('resetStock');
+        $this->addRowAction('resetOk');
+
+
         parent::__construct();
     }
 
@@ -112,7 +117,7 @@ class AdminBolPlazaProductsController extends AdminController
     /**
      * Overrides parent::displayViewLink
      */
-    public function displayViewLink($token = null, $id = 0, $name = null)
+    public function displayViewLink($token = null, $id = 0)
     {
         if ($this->tabAccess['view'] == 1) {
             $tpl = $this->createTemplate('helpers/list/list_action_view.tpl');
@@ -120,8 +125,13 @@ class AdminBolPlazaProductsController extends AdminController
                 self::$cache_lang['View'] = $this->l('View', 'Helper');
             }
 
+            $product = new BolPlazaProduct($id);
+            $id_product = $product->id_product;
+
             $tpl->assign(array(
-                'href' => $this->context->link->getAdminLink('AdminProducts').'&updateproduct&id_product='.(int)$id,
+                'href' => $this->context->link->getAdminLink('AdminProducts') .
+                    '&updateproduct&id_product=' .
+                    (int)$id_product,
                 'action' => self::$cache_lang['View'],
                 'id' => $id
             ));
@@ -130,6 +140,75 @@ class AdminBolPlazaProductsController extends AdminController
         } else {
             return false;
         }
+    }
+
+    /**
+     * Show a reset link to the new state
+     * @param null $token
+     * @param $id
+     * @return mixed
+     */
+    public function displayResetNewLink($token = null, $id)
+    {
+        $tpl = $this->createTemplate('helpers/list/list_action_transferstock.tpl');
+        $tpl->assign(array(
+            'href' => self::$currentIndex . '&' . $this->identifier . '=' . $id . '&reset=1&state=new&token='
+                . ($token != null ? $token : $this->token),
+            'action' => $this->l('Reset to new')
+        ));
+        return $tpl->fetch();
+    }
+
+    /**
+     * Show a reset link to the updated state
+     * @param null $token
+     * @param $id
+     * @return mixed
+     */
+    public function displayResetUpdatedLink($token = null, $id)
+    {
+        $tpl = $this->createTemplate('helpers/list/list_action_transferstock.tpl');
+        $tpl->assign(array(
+            'href' => self::$currentIndex . '&' . $this->identifier . '=' . $id . '&reset=1&state=updated&token='
+                . ($token != null ? $token : $this->token),
+            'action' => $this->l('Reset to updated')
+        ));
+        return $tpl->fetch();
+    }
+
+    /**
+     * Show a reset link to the stock updated state
+     * @param null $token
+     * @param $id
+     * @return mixed
+     */
+    public function displayResetStockLink($token = null, $id)
+    {
+        $tpl = $this->createTemplate('helpers/list/list_action_transferstock.tpl');
+        $tpl->assign(array(
+            'href' => self::$currentIndex . '&' . $this->identifier . '=' . $id . '&reset=1&state=stock&token='
+                . ($token != null ? $token : $this->token),
+            'action' => $this->l('Reset to new')
+        ));
+        return $tpl->fetch();
+    }
+
+
+    /**
+     * Show a reset link to the stock updated state
+     * @param null $token
+     * @param $id
+     * @return mixed
+     */
+    public function displayResetOkLink($token = null, $id)
+    {
+        $tpl = $this->createTemplate('helpers/list/list_action_transferstock.tpl');
+        $tpl->assign(array(
+            'href' => self::$currentIndex . '&' . $this->identifier . '=' . $id . '&reset=1&state=ok&token='
+                . ($token != null ? $token : $this->token),
+            'action' => $this->l('Reset to ok')
+        ));
+        return $tpl->fetch();
     }
 
     /**
@@ -160,6 +239,25 @@ class AdminBolPlazaProductsController extends AdminController
             }
             self::synchronize($this->context);
             $this->confirmations[] = $this->l('Bol products fully synchronized.');
+        } elseif ((bool)Tools::getValue('reset') && (int)Tools::getValue('id_bolplaza_product')) {
+            $id_bolplaza_product = (int)Tools::getValue('id_bolplaza_product');
+            $bolProduct = new BolPlazaProduct($id_bolplaza_product);
+            if(in_array((string)Tools::getValue('state'), array("new", "updated"))) {
+                switch ((string)Tools::getValue('state')) {
+                    case 'new':
+                        self::setProductStatus($bolProduct, BolPlazaProduct::STATUS_NEW);
+                        break;
+                    case 'updated':
+                        self::setProductStatus($bolProduct, BolPlazaProduct::STATUS_INFO_UPDATE);
+                        break;
+                    case 'stock':
+                        self::setProductStatus($bolProduct, BolPlazaProduct::STATUS_STOCK_UPDATE);
+                        break;
+                    default:
+                        self::setProductStatus($bolProduct, BolPlazaProduct::STATUS_OK);
+                        break;
+                }
+            }
         }
         return parent::postProcess();
     }
