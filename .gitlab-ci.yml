@@ -1,0 +1,4 @@
+build:
+  image: composer/composer:alpine
+  script:
+    - composer install
