@@ -1,4 +1,0 @@
-build:
-  image: mwienk/php5.6-apache
-  script:
-    - composer install
