@@ -4,18 +4,55 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "1f339aa15c0cdf396a805d1a49e88cb1",
-    "content-hash": "3edfc0c7a14b75506e110a5cf5cceb48",
+    "hash": "bc577a0630551925bb731991bd18eaf3",
+    "content-hash": "476f6a0cdb950bbf8feb34d5e43a662f",
     "packages": [
         {
-            "name": "picqer/bol-plaza-php-client",
-            "version": "2.0.0",
+            "name": "wienkit/bol-plaza-php-client",
+            "version": "2.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wienkit/bol-plaza-php-client.git",
-                "reference": "552a9dd"
+                "reference": "9b4de8005c73ec8dfcddceb136bef6eca2e0fb1f"
             },
-            "type": "library"
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/wienkit/bol-plaza-php-client/zipball/9b4de8005c73ec8dfcddceb136bef6eca2e0fb1f",
+                "reference": "9b4de8005c73ec8dfcddceb136bef6eca2e0fb1f",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.5.9"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Wienkit\\BolPlazaClient\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Mark Wienk",
+                    "email": "info@wienkit.com"
+                }
+            ],
+            "description": "A PHP Client for the BOL.com Plaza API",
+            "homepage": "http://github.com/wienkit/bol-plaza-php-client",
+            "keywords": [
+                "Bol.com",
+                "api",
+                "bol",
+                "php",
+                "plaza"
+            ],
+            "time": "2016-09-23 22:39:26"
         }
     ],
     "packages-dev": [],

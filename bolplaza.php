@@ -481,14 +481,14 @@ class BolPlaza extends Module
 
     /**
      * Retrieve the BolPlaza client
-     * @return Picqer\BolPlazaClient\BolPlazaClient
+     * @return Wienkit\BolPlazaClient\BolPlazaClient
      */
     public static function getClient()
     {
         $publickey = Configuration::get('BOL_PLAZA_ORDERS_PUBKEY');
         $privatekey = Configuration::get('BOL_PLAZA_ORDERS_PRIVKEY');
 
-        $client = new Picqer\BolPlazaClient\BolPlazaClient($publickey, $privatekey);
+        $client = new Wienkit\BolPlazaClient\BolPlazaClient($publickey, $privatekey);
         if ((bool)Configuration::get('BOL_PLAZA_ORDERS_TESTMODE')) {
             $client->setTestMode(true);
         }
@@ -530,12 +530,12 @@ class BolPlaza extends Module
                 $itemsShipped = array();
                 $items = BolPlazaOrderItem::getByOrderId($order->id);
                 foreach ($items as $item) {
-                    $shipment = new Picqer\BolPlazaClient\Entities\BolPlazaShipmentRequest();
+                    $shipment = new Wienkit\BolPlazaClient\Entities\BolPlazaShipmentRequest();
                     $shipment->OrderItemId = $item->id_bol_order_item;
                     $shipment->ShipmentReference = $order->reference . '-' . $orderCarrier->id;
                     $shipment->DateTime = date('Y-m-d\TH:i:s');
                     $shipment->ExpectedDeliveryDate = $this->getDeliveryDate();
-                    $transport = new Picqer\BolPlazaClient\Entities\BolPlazaTransport();
+                    $transport = new Wienkit\BolPlazaClient\Entities\BolPlazaTransport();
                     $transport->TransporterCode = Configuration::get('BOL_PLAZA_ORDERS_CARRIER_CODE');
                     $transport->TrackAndTrace = $orderCarrier->tracking_number;
                     $shipment->Transport = $transport;

@@ -254,10 +254,10 @@ class AdminBolPlazaOrdersController extends AdminController
 
     /**
      * Parse a Bol.com order to a fully prepared Cart object
-     * @param Picqer\BolPlazaClient\Entities\BolPlazaOrder $order
+     * @param Wienkit\BolPlazaClient\Entities\BolPlazaOrder $order
      * @return Cart
      */
-    public static function parse(Picqer\BolPlazaClient\Entities\BolPlazaOrder $order)
+    public static function parse(Wienkit\BolPlazaClient\Entities\BolPlazaOrder $order)
     {
         $customer = self::parseCustomer($order);
         Context::getContext()->customer = $customer;
@@ -269,10 +269,10 @@ class AdminBolPlazaOrdersController extends AdminController
 
     /**
      * Parse a customer for the order
-     * @param Picqer\BolPlazaClient\Entities\BolPlazaOrder $order
+     * @param Wienkit\BolPlazaClient\Entities\BolPlazaOrder $order
      * @return Customer
      */
-    public static function parseCustomer(Picqer\BolPlazaClient\Entities\BolPlazaOrder $order)
+    public static function parseCustomer(Wienkit\BolPlazaClient\Entities\BolPlazaOrder $order)
     {
         $customer = new Customer();
         $customer->lastname = $order->CustomerDetails->BillingDetails->Surname;
@@ -287,13 +287,13 @@ class AdminBolPlazaOrdersController extends AdminController
 
     /**
      * Parse an address for the order
-     * @param Picqer\BolPlazaClient\Entities\BolPlazaShipmentDetails $details
+     * @param Wienkit\BolPlazaClient\Entities\BolPlazaShipmentDetails $details
      * @param Customer $customer
      * @param string $alias a name for the address
      * @return Address
      */
     public static function parseAddress(
-        Picqer\BolPlazaClient\Entities\BolPlazaShipmentDetails $details,
+        Wienkit\BolPlazaClient\Entities\BolPlazaShipmentDetails $details,
         Customer $customer,
         $alias
     ) {
@@ -323,14 +323,14 @@ class AdminBolPlazaOrdersController extends AdminController
 
     /**
      * Parse the cart for the order
-     * @param Picqer\BolPlazaClient\Entities\BolPlazaOrder $order
+     * @param Wienkit\BolPlazaClient\Entities\BolPlazaOrder $order
      * @param Customer $customer
      * @param Address $billing
      * @param Address $shipping
      * @return Cart|bool
      */
     public static function parseCart(
-        Picqer\BolPlazaClient\Entities\BolPlazaOrder $order,
+        Wienkit\BolPlazaClient\Entities\BolPlazaOrder $order,
         Customer $customer,
         Address $billing,
         Address $shipping
@@ -402,9 +402,9 @@ class AdminBolPlazaOrdersController extends AdminController
     /**
      * Persist the BolItems to the database
      * @param string $orderId
-     * @param Picqer\BolPlazaClient\Entities\BolPlazaOrder $order
+     * @param Wienkit\BolPlazaClient\Entities\BolPlazaOrder $order
      */
-    public static function persistBolItems($orderId, Picqer\BolPlazaClient\Entities\BolPlazaOrder $order)
+    public static function persistBolItems($orderId, Wienkit\BolPlazaClient\Entities\BolPlazaOrder $order)
     {
         $items = $order->OrderItems;
         if (!empty($items)) {
@@ -549,10 +549,10 @@ class AdminBolPlazaOrdersController extends AdminController
 
     /**
      * Get the Payment total of the Bol.com order
-     * @param Picqer\BolPlazaClient\Entities\BolPlazaOrder $order
+     * @param Wienkit\BolPlazaClient\Entities\BolPlazaOrder $order
      * @return float the total
      */
-    private static function getBolPaymentTotal(Picqer\BolPlazaClient\Entities\BolPlazaOrder $order)
+    private static function getBolPaymentTotal(Wienkit\BolPlazaClient\Entities\BolPlazaOrder $order)
     {
         $items = $order->OrderItems;
         $total = 0;
