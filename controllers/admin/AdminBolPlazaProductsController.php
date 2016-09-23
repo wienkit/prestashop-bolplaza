@@ -188,7 +188,7 @@ class AdminBolPlazaProductsController extends AdminController
         $tpl->assign(array(
             'href' => self::$currentIndex . '&' . $this->identifier . '=' . $id . '&reset=1&state=stock&token='
                 . ($token != null ? $token : $this->token),
-            'action' => $this->l('Reset to new')
+            'action' => $this->l('Reset to stock updated')
         ));
         return $tpl->fetch();
     }

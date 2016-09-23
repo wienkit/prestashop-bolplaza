@@ -2,7 +2,7 @@
 <module>
 	<name>bolplaza</name>
 	<displayName><![CDATA[Bol.com Plaza API connector]]></displayName>
-	<version><![CDATA[1.2.1]]></version>
+	<version><![CDATA[1.2.2]]></version>
 	<description><![CDATA[Connect to Bol.com Plaza to synchronize your Bol.com
                                        orders and products with your Prestashop website.]]></description>
 	<author><![CDATA[Wienk IT]]></author>
