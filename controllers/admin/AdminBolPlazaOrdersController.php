@@ -299,7 +299,7 @@ class AdminBolPlazaOrdersController extends AdminController
     ) {
         $address = new Address();
         $address->id_customer = $customer->id;
-        if($details->Company != '') {
+        if ($details->Company != '') {
             $address->company = $details->Company;
         }
         $address->firstname = $details->Firstname;

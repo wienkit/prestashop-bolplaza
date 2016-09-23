@@ -148,7 +148,7 @@ class AdminBolPlazaProductsController extends AdminController
      * @param $id
      * @return mixed
      */
-    public function displayResetNewLink($token = null, $id)
+    public function displayResetNewLink($token = null, $id = 0)
     {
         $tpl = $this->createTemplate('helpers/list/list_action_transferstock.tpl');
         $tpl->assign(array(
@@ -165,7 +165,7 @@ class AdminBolPlazaProductsController extends AdminController
      * @param $id
      * @return mixed
      */
-    public function displayResetUpdatedLink($token = null, $id)
+    public function displayResetUpdatedLink($token = null, $id = 0)
     {
         $tpl = $this->createTemplate('helpers/list/list_action_transferstock.tpl');
         $tpl->assign(array(
@@ -182,7 +182,7 @@ class AdminBolPlazaProductsController extends AdminController
      * @param $id
      * @return mixed
      */
-    public function displayResetStockLink($token = null, $id)
+    public function displayResetStockLink($token = null, $id = 0)
     {
         $tpl = $this->createTemplate('helpers/list/list_action_transferstock.tpl');
         $tpl->assign(array(
@@ -200,7 +200,7 @@ class AdminBolPlazaProductsController extends AdminController
      * @param $id
      * @return mixed
      */
-    public function displayResetOkLink($token = null, $id)
+    public function displayResetOkLink($token = null, $id = 0)
     {
         $tpl = $this->createTemplate('helpers/list/list_action_transferstock.tpl');
         $tpl->assign(array(
@@ -242,21 +242,19 @@ class AdminBolPlazaProductsController extends AdminController
         } elseif ((bool)Tools::getValue('reset') && (int)Tools::getValue('id_bolplaza_product')) {
             $id_bolplaza_product = (int)Tools::getValue('id_bolplaza_product');
             $bolProduct = new BolPlazaProduct($id_bolplaza_product);
-            if(in_array((string)Tools::getValue('state'), array("new", "updated"))) {
-                switch ((string)Tools::getValue('state')) {
-                    case 'new':
-                        self::setProductStatus($bolProduct, BolPlazaProduct::STATUS_NEW);
-                        break;
-                    case 'updated':
-                        self::setProductStatus($bolProduct, BolPlazaProduct::STATUS_INFO_UPDATE);
-                        break;
-                    case 'stock':
-                        self::setProductStatus($bolProduct, BolPlazaProduct::STATUS_STOCK_UPDATE);
-                        break;
-                    default:
-                        self::setProductStatus($bolProduct, BolPlazaProduct::STATUS_OK);
-                        break;
-                }
+            switch ((string)Tools::getValue('state')) {
+                case 'new':
+                    self::setProductStatus($bolProduct, BolPlazaProduct::STATUS_NEW);
+                    break;
+                case 'updated':
+                    self::setProductStatus($bolProduct, BolPlazaProduct::STATUS_INFO_UPDATE);
+                    break;
+                case 'stock':
+                    self::setProductStatus($bolProduct, BolPlazaProduct::STATUS_STOCK_UPDATE);
+                    break;
+                default:
+                    self::setProductStatus($bolProduct, BolPlazaProduct::STATUS_OK);
+                    break;
             }
         }
         return parent::postProcess();
