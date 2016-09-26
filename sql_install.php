@@ -40,3 +40,19 @@ $sql[_DB_PREFIX_.'bolplaza_product'] = 'CREATE TABLE IF NOT EXISTS `'._DB_PREFIX
               PRIMARY KEY (`id_bolplaza_product`),
               UNIQUE KEY(`id_product`, `id_product_attribute`, `id_shop`)
             ) ENGINE='._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8;';
+
+$sql[_DB_PREFIX_.'bolplaza_ownoffers'] = 'CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'bolplaza_ownoffers` (
+              `id_bolplaza_product` INT(11) NOT NULL,
+              `reference` VARCHAR(255),
+              `ean` VARCHAR(13),
+              `condition` VARCHAR(10),
+              `stock` INT(10),
+              `price` DECIMAL(20, 6) NOT NULL DEFAULT \'0.000000\',
+              `description` VARCHAR(255),
+              `delivery_code` VARCHAR(10),
+              `publish` tinyint(1) NOT NULL DEFAULT \'0\',
+              `published` tinyint(1) NOT NULL DEFAULT \'0\',
+              `reasoncode` VARCHAR(20),
+              `reason` VARCHAR(255),
+              PRIMARY KEY (`id_bolplaza_product`)
+            ) ENGINE='._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8;';

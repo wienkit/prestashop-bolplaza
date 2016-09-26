@@ -92,7 +92,7 @@ class BolPlazaProduct extends ObjectModel
 
     /**
      * Returns the BolProduct data for a product ID
-     * @param string $id_product
+     * @param int $id_product
      * @return array the BolPlazaProduct data
      */
     public static function getByProductId($id_product)
@@ -104,9 +104,22 @@ class BolPlazaProduct extends ObjectModel
     }
 
     /**
+     * Returns the own offer
+     * @param int $id_bolplaza_product
+     * @return array|false|mysqli_result|null|PDOStatement|resource
+     */
+    public static function getOwnOfferResult($id_bolplaza_product)
+    {
+        return Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS('
+            SELECT *
+            FROM `'._DB_PREFIX_.'bolplaza_ownoffers`
+            WHERE `id_bolplaza_product` = ' . (int)$id_bolplaza_product);
+    }
+
+    /**
      * Returns the BolProduct data for a product ID and attribute ID
-     * @param string $id_product
-     * @param string $id_product_attribute
+     * @param int $id_product
+     * @param int $id_product_attribute
      * @return array the BolPlazaProduct data
      */
     public static function getIdByProductAndAttributeId($id_product, $id_product_attribute)

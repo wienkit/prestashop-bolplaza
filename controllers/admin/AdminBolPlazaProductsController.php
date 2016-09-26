@@ -17,19 +17,10 @@ require_once _PS_MODULE_DIR_.'bolplaza/libraries/autoload.php';
 require_once _PS_MODULE_DIR_.'bolplaza/bolplaza.php';
 require_once _PS_MODULE_DIR_.'bolplaza/classes/BolPlazaProduct.php';
 
-class AdminBolPlazaProductsController extends AdminController
+class AdminBolPlazaProductsController extends ModuleAdminController
 {
     public function __construct()
     {
-
-        if ($id_product = Tools::getValue('id_product')) {
-            Tools::redirectAdmin(
-                Context::getContext()
-                    ->link
-                    ->getAdminLink('AdminProducts').'&updateproduct&id_product='.(int)$id_product
-            );
-        }
-
         $this->bootstrap = true;
         $this->table = 'bolplaza_product';
         $this->className = 'BolPlazaProduct';
@@ -83,7 +74,14 @@ class AdminBolPlazaProductsController extends AdminController
 
         $this->shopLinkType = 'shop';
 
+        $this->tpl_view_vars = array('id_bolplaza_product' => 123, 'product_name' => 'blaat');
+//            'supplier' => $this->object,
+//            'products' => $products,
+//            'stock_management' => Configuration::get('PS_STOCK_MANAGEMENT'),
+//            'shopContext' => Shop::getContext(),
+
         $this->addRowAction('view');
+        $this->addRowAction('viewProduct');
         $this->addRowAction('resetNew');
         $this->addRowAction('resetUpdated');
         $this->addRowAction('resetStock');
@@ -115,31 +113,24 @@ class AdminBolPlazaProductsController extends AdminController
     }
 
     /**
-     * Overrides parent::displayViewLink
+     * Show a link to view the linked product
+     * @param null $token
+     * @param $id
+     * @return mixed
      */
-    public function displayViewLink($token = null, $id = 0)
+    public function displayViewProductLink($token = null, $id = 0)
     {
-        if ($this->tabAccess['view'] == 1) {
-            $tpl = $this->createTemplate('helpers/list/list_action_view.tpl');
-            if (!array_key_exists('View', self::$cache_lang)) {
-                self::$cache_lang['View'] = $this->l('View', 'Helper');
-            }
-
-            $product = new BolPlazaProduct($id);
-            $id_product = $product->id_product;
-
-            $tpl->assign(array(
-                'href' => $this->context->link->getAdminLink('AdminProducts') .
-                    '&updateproduct&id_product=' .
-                    (int)$id_product,
-                'action' => self::$cache_lang['View'],
-                'id' => $id
-            ));
-
-            return $tpl->fetch();
-        } else {
-            return false;
+        if (!array_key_exists('Go to product', self::$cache_lang)) {
+            self::$cache_lang['Go to product'] = $this->l('Go to product');
         }
+
+        $tpl = $this->createTemplate('helpers/list/list_action_view.tpl');
+        $tpl->assign(array(
+            'href' => self::$currentIndex . '&' . $this->identifier . '=' . $id . '&gotoproduct=1&token='
+                . ($token != null ? $token : $this->token),
+            'action' => self::$cache_lang['Go to product']
+        ));
+        return $tpl->fetch();
     }
 
     /**
@@ -150,11 +141,15 @@ class AdminBolPlazaProductsController extends AdminController
      */
     public function displayResetNewLink($token = null, $id = 0)
     {
+        if (!array_key_exists('Reset to new', self::$cache_lang)) {
+            self::$cache_lang['Reset to new'] = $this->l('Reset to new');
+        }
+
         $tpl = $this->createTemplate('helpers/list/list_action_transferstock.tpl');
         $tpl->assign(array(
             'href' => self::$currentIndex . '&' . $this->identifier . '=' . $id . '&reset=1&state=new&token='
                 . ($token != null ? $token : $this->token),
-            'action' => $this->l('Reset to new')
+            'action' => self::$cache_lang['Reset to new']
         ));
         return $tpl->fetch();
     }
@@ -167,11 +162,15 @@ class AdminBolPlazaProductsController extends AdminController
      */
     public function displayResetUpdatedLink($token = null, $id = 0)
     {
+        if (!array_key_exists('Reset to updated', self::$cache_lang)) {
+            self::$cache_lang['Reset to updated'] = $this->l('Reset to updated');
+        }
+
         $tpl = $this->createTemplate('helpers/list/list_action_transferstock.tpl');
         $tpl->assign(array(
             'href' => self::$currentIndex . '&' . $this->identifier . '=' . $id . '&reset=1&state=updated&token='
                 . ($token != null ? $token : $this->token),
-            'action' => $this->l('Reset to updated')
+            'action' => self::$cache_lang['Reset to updated']
         ));
         return $tpl->fetch();
     }
@@ -184,11 +183,15 @@ class AdminBolPlazaProductsController extends AdminController
      */
     public function displayResetStockLink($token = null, $id = 0)
     {
+        if (!array_key_exists('Reset to stock updated', self::$cache_lang)) {
+            self::$cache_lang['Reset to stock updated'] = $this->l('Reset to stock updated');
+        }
+
         $tpl = $this->createTemplate('helpers/list/list_action_transferstock.tpl');
         $tpl->assign(array(
             'href' => self::$currentIndex . '&' . $this->identifier . '=' . $id . '&reset=1&state=stock&token='
                 . ($token != null ? $token : $this->token),
-            'action' => $this->l('Reset to stock updated')
+            'action' => self::$cache_lang['Reset to stock updated']
         ));
         return $tpl->fetch();
     }
@@ -202,11 +205,15 @@ class AdminBolPlazaProductsController extends AdminController
      */
     public function displayResetOkLink($token = null, $id = 0)
     {
+        if (!array_key_exists('Reset to ok', self::$cache_lang)) {
+            self::$cache_lang['Reset to ok'] = $this->l('Reset to ok');
+        }
+
         $tpl = $this->createTemplate('helpers/list/list_action_transferstock.tpl');
         $tpl->assign(array(
             'href' => self::$currentIndex . '&' . $this->identifier . '=' . $id . '&reset=1&state=ok&token='
                 . ($token != null ? $token : $this->token),
-            'action' => $this->l('Reset to ok')
+            'action' => self::$cache_lang['Reset to ok']
         ));
         return $tpl->fetch();
     }
@@ -219,6 +226,13 @@ class AdminBolPlazaProductsController extends AdminController
         parent::initPageHeaderToolbar();
         if (!Configuration::get('BOL_PLAZA_ORDERS_ENABLED')) {
             return;
+        }
+        if (Configuration::get('BOL_PLAZA_ORDERS_OWNOFFERS') != '') {
+            $this->page_header_toolbar_btn['reset_sync'] = array(
+                'href' => self::$currentIndex.'&token='.$this->token.'&reset_sync=1',
+                'desc' => $this->l('Reset sync'),
+                'icon' => 'process-icon-update'
+            );
         }
         $this->page_header_toolbar_btn['sync_products'] = array(
             'href' => self::$currentIndex.'&token='.$this->token.'&sync_products=1',
@@ -242,7 +256,12 @@ class AdminBolPlazaProductsController extends AdminController
             return false;
         }
 
-        if ((bool)Tools::getValue('sync_products')) {
+        if ((bool)Tools::getValue('reset_sync')) {
+            Configuration::deleteByName('BOL_PLAZA_ORDERS_OWNOFFERS');
+            $this->confirmations[] = $this->l(
+                "The sync wil request a new file on the next run."
+            );
+        } elseif ((bool)Tools::getValue('sync_products')) {
             $bolplaza = BolPlaza::getClient();
             $url = Configuration::get('BOL_PLAZA_ORDERS_OWNOFFERS');
             if(!$url) {
@@ -252,9 +271,9 @@ class AdminBolPlazaProductsController extends AdminController
             try {
                 $ownOffersResult = $bolplaza->getOwnOffersResult($url);
                 Configuration::deleteByName('BOL_PLAZA_ORDERS_OWNOFFERS');
-                throw new Wienkit\BolPlazaClient\Exceptions\BolPlazaClientException();
-                ddd($ownOffersResult);
-                // TODO Handle own offers
+                $this->handleOwnOffers($ownOffersResult);
+                $this->updateOwnOffersStock();
+                $this->updateOwnOffersInfo();
             } catch (Wienkit\BolPlazaClient\Exceptions\BolPlazaClientException $e) {
                 Configuration::set('BOL_PLAZA_ORDERS_OWNOFFERS', $url);
                 $this->confirmations[] = $this->l(
@@ -281,6 +300,14 @@ class AdminBolPlazaProductsController extends AdminController
                     self::setProductStatus($bolProduct, BolPlazaProduct::STATUS_OK);
                     break;
             }
+        } elseif ((bool)Tools::getValue('gotoproduct')) {
+            $id_bolplaza_product = (int)Tools::getValue('id_bolplaza_product');
+            $bolProduct = new BolPlazaProduct($id_bolplaza_product);
+            Tools::redirectAdmin(
+                Context::getContext()
+                    ->link
+                    ->getAdminLink('AdminProducts').'&updateproduct&id_product='.(int)$bolProduct->id_product
+            );
         }
         return parent::postProcess();
     }
@@ -292,7 +319,7 @@ class AdminBolPlazaProductsController extends AdminController
     {
         $bolProducts = BolPlazaProduct::getUpdatedProducts();
         foreach ($bolProducts as $bolProduct) {
-            switch($bolProduct->status) {
+            switch ($bolProduct->status) {
                 case BolPlazaProduct::STATUS_NEW:
                     self::processBolProductCreate($bolProduct, $context);
                     break;
@@ -303,6 +330,103 @@ class AdminBolPlazaProductsController extends AdminController
                     self::processBolStockUpdate($bolProduct, $context);
                     break;
             }
+        }
+    }
+
+    /**
+     * Handle the own offers returned result from Bol.com
+     * @param string $ownOffers
+     */
+    public function handleOwnOffers($ownOffers) {
+        DB::getInstance()->delete('bolplaza_ownoffers');
+        $keys = array(
+            'id_bolplaza_product', // OfferId
+            'reference', // Reference
+            'ean', // EAN
+            'condition', // Condition
+            'stock', // Stock
+            'price', // Price
+            'description', // Description
+            'delivery_code', // Deliverycode
+            'publish', // Publish
+            'published', // Published
+            'reasoncode', // ReasonCode
+            'reason' // Reason
+        );
+
+        $data = str_getcsv($ownOffers, "\n");
+        $rows = array();
+        if (count($data) > 1) {
+            for ($x = 1; $x < count($data); $x++) {
+                $values = str_getcsv($data[$x]);
+                if (count($values) == 12) {
+                    $values[0] = preg_replace("/[^0-9,.]/", "", $values[0]);
+                    $values[8] = $values[8] == 'TRUE';
+                    $values[9] = $values[9] == 'TRUE';
+                    $rows[] = array_combine($keys, $values);
+                }
+            }
+        }
+        DB::getInstance()->insert('bolplaza_ownoffers', $rows);
+
+
+    }
+
+    /**
+     * Updates the BolPlazaProduct status with the stock status from Bol.com
+     */
+    protected function updateOwnOffersStock()
+    {
+        // Update stock status
+        $sql = "SELECT bo.id_bolplaza_product
+                FROM "._DB_PREFIX_."bolplaza_ownoffers bo 
+                INNER JOIN "._DB_PREFIX_."bolplaza_product bp 
+                    ON bo.id_bolplaza_product = bp.id_bolplaza_product
+                INNER JOIN "._DB_PREFIX_."stock_available sa 
+                    ON sa.id_product = bp.id_product
+                    AND sa.id_product_attribute = bp.id_product_attribute
+                WHERE sa.quantity <> bo.stock";
+        $results = Db::getInstance()->executeS($sql);
+        $ids = array();
+        foreach($results as $row) {
+            $ids[] = (int) $row['id_bolplaza_product'];
+        }
+        if(count($ids) > 0) {
+            Db::getInstance()->update(
+                'bolplaza_product',
+                array(
+                    'status' => BolPlazaProduct::STATUS_STOCK_UPDATE
+                ),
+                'id_bolplaza_product IN (' . implode(',', $ids) . ')'
+            );
+        }
+    }
+
+    /**
+     * Updates the BolPlazaProduct status with the stock status from Bol.com
+     */
+    protected function updateOwnOffersInfo()
+    {
+        // Update stock status
+        $sql = "SELECT bo.id_bolplaza_product
+                FROM "._DB_PREFIX_."bolplaza_ownoffers bo 
+                INNER JOIN "._DB_PREFIX_."bolplaza_product bp 
+                    ON bo.id_bolplaza_product = bp.id_bolplaza_product
+                WHERE bo.price <> bp.price
+                    OR bo.publish <> bp.published";
+        $results = Db::getInstance()->executeS($sql);
+        $ids = array();
+        foreach($results as $row) {
+            $ids[] = (int) $row['id_bolplaza_product'];
+        }
+        if(count($ids) > 0) {
+            Db::getInstance()->update(
+                'bolplaza_product',
+                array(
+                    'status' => BolPlazaProduct::STATUS_INFO_UPDATE
+                ),
+                'id_bolplaza_product IN (' . implode(',', $ids) . ')'
+            );
         }
     }
 
@@ -476,10 +600,47 @@ class AdminBolPlazaProductsController extends AdminController
             $Plaza->createOffer($bolProduct->id, $offerCreate);
             self::setProductStatus($bolProduct, (int)BolPlazaProduct::STATUS_OK);
         } catch (Exception $e) {
-            ddd($e);
             $context->controller->errors[] = Tools::displayError(
                 '[bolplaza] Couldn\'t send update to Bol.com, error: ' . $e->getMessage()
             );
         }
+    }
+
+    /**
+     * Overrides parent::renderView();
+     * @return string
+     */
+    public function renderView()
+    {
+        $product = new Product($this->object->id_product, $this->context->language->id);
+        $ownOffer = BolPlazaProduct::getOwnOfferResult($this->object->id);
+        if(count($ownOffer) == 1) {
+            $ownOffer = $ownOffer[0];
+        } else {
+            return;
+        }
+
+        $stock = StockAvailable::getQuantityAvailableByProduct($this->object->id_product, $this->object->id_product_attribute);
+        $delivery_code = $this->object->delivery_time;
+        if($delivery_code == '') {
+            $delivery_code = Configuration::get('BOL_PLAZA_ORDERS_DELIVERY_CODE');
+        }
+
+        $this->tpl_view_vars = array(
+            'title' => $product->name[$this->context->language->id],
+            'bolproduct' => $this->object,
+            'ownoffer' => $ownOffer,
+            'stock' => $stock,
+            'delivery_code' => $delivery_code,
+            'links' => array(
+                array(
+                    'title' => 'Go to product',
+                    'link' => Context::getContext()
+                            ->link
+                            ->getAdminLink('AdminProducts').'&updateproduct&id_product='.(int)$product->id
+                )
+            )
+        );
+        return parent::renderView();
     }
 }
