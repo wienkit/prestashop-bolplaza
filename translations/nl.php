@@ -61,7 +61,7 @@ $_MODULE['<{bolplaza}prestashop>adminbolplazaproductscontroller_38194d573282f533
 $_MODULE['<{bolplaza}prestashop>adminbolplazaproductscontroller_e7c0133d5d6cd61f3c135526f4a74d1a'] = 'Status naar \'OK\'';
 $_MODULE['<{bolplaza}prestashop>adminbolplazaproductscontroller_e9973f5a3ae435bcf12d64daf0af0e8e'] = 'Reset Bol.com statuslink';
 $_MODULE['<{bolplaza}prestashop>adminbolplazaproductscontroller_7db59a7e372cf3c6433750f8078559a3'] = 'Verkrijg Bol.com status';
-$_MODULE['<{bolplaza}prestashop>adminbolplazaproductscontroller_e6daf960d8aa69d30038e6977242cb6d'] = 'Meldt producten naar Bol.com';
+$_MODULE['<{bolplaza}prestashop>adminbolplazaproductscontroller_e6daf960d8aa69d30038e6977242cb6d'] = 'Meld producten naar Bol.com';
 $_MODULE['<{bolplaza}prestashop>adminbolplazaproductscontroller_7fdbf6c8696d488fedc55cd4d3bb357b'] = 'Bol.com producten volledig gesynchroniseerd';
 $_MODULE['<{bolplaza}prestashop>bolproduct_b2c2fc46de013d5f8bbf29a3fd35da1a'] = 'Bol.com instellingen';
 $_MODULE['<{bolplaza}prestashop>bolproduct_dabc68b4ef3ef545f484563a270a1cd8'] = 'Hier kun je je Bol.com data beheren.';
