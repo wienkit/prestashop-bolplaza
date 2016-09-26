@@ -274,6 +274,9 @@ class AdminBolPlazaProductsController extends ModuleAdminController
                 $this->handleOwnOffers($ownOffersResult);
                 $this->updateOwnOffersStock();
                 $this->updateOwnOffersInfo();
+                $this->confirmations[] = $this->l(
+                    "The file has been processed."
+                );
             } catch (Wienkit\BolPlazaClient\Exceptions\BolPlazaClientException $e) {
                 Configuration::set('BOL_PLAZA_ORDERS_OWNOFFERS', $url);
                 $this->confirmations[] = $this->l(
@@ -340,36 +343,56 @@ class AdminBolPlazaProductsController extends ModuleAdminController
     public function handleOwnOffers($ownOffers) {
         DB::getInstance()->delete('bolplaza_ownoffers');
         $keys = array(
-            'id_bolplaza_product', // OfferId
-            'reference', // Reference
-            'ean', // EAN
-            'condition', // Condition
-            'stock', // Stock
-            'price', // Price
-            'description', // Description
-            'delivery_code', // Deliverycode
-            'publish', // Publish
-            'published', // Published
-            'reasoncode', // ReasonCode
-            'reason' // Reason
+            'OfferId' => 'id_bolplaza_product',
+            'Reference' => 'reference',
+            'EAN' => 'ean',
+            'Condition' => 'condition',
+            'Stock' => 'stock',
+            'Price' => 'price',
+            'Description' => 'description',
+            'Deliverycode' => 'delivery_code',
+            'Publish' => 'publish',
+            'Published' => 'published',
+            'ReasonCode' => 'reasoncode',
+            'Reason' => 'reason',
+            'ReasonMessage' => 'reason'
         );
 
         $data = str_getcsv($ownOffers, "\n");
-        $rows = array();
-        if (count($data) > 1) {
-            for ($x = 1; $x < count($data); $x++) {
-                $values = str_getcsv($data[$x]);
-                if (count($values) == 12) {
-                    $values[0] = preg_replace("/[^0-9,.]/", "", $values[0]);
-                    $values[8] = $values[8] == 'TRUE';
-                    $values[9] = $values[9] == 'TRUE';
-                    $rows[] = array_combine($keys, $values);
+        $data = array_map("str_getcsv", $data);
+        $header = array_shift($data);
+        array_walk($data, 'AdminBolPlazaProductsController::parseCsvRow', array('header' => $header, 'keys' => $keys));
+        $data = array_filter($data, 'AdminBolPlazaProductsController::filterCsvRow');
+        DB::getInstance()->insert('bolplaza_ownoffers', $data);
+    }
+
+    /**
+     * @param $row
+     * @param $key
+     * @param $settings
+     * Reindex the data for the database
+     */
+    public static function parseCsvRow(&$row, $key, $settings) {
+        $row = array_combine($settings['header'], $row);
+        $row = array_intersect_key($row, $settings['keys']);
+        foreach ($settings['keys'] as $bolKey => $dbKey) {
+            if (array_key_exists($bolKey, $row)) {
+                if($dbKey == 'publish' || $dbKey == 'published') {
+                    $row[$dbKey] = $row[$bolKey] == 'TRUE';
+                } else {
+                    $row[$dbKey] = pSQL($row[$bolKey]);
                 }
+                unset($row[$bolKey]);
             }
         }
-        DB::getInstance()->insert('bolplaza_ownoffers', $rows);
+    }
 
-
+    /**
+     * @param $row
+     * @return bool
+     */
+    public static function filterCsvRow($row) {
+        return ((int) $row['id_bolplaza_product']) != 0;
     }
 
     /**
