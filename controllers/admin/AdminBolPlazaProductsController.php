@@ -30,10 +30,13 @@ class AdminBolPlazaProductsController extends ModuleAdminController
         $this->_join .= ' INNER JOIN `'._DB_PREFIX_.'product_lang` pl
                             ON (pl.`id_product` = a.`id_product` AND pl.`id_shop` = a.`id_shop`) 
                           INNER JOIN `'._DB_PREFIX_.'lang` lang
-                            ON (pl.`id_lang` = lang.`id_lang` AND lang.`iso_code` = \'nl\') ';
+                            ON (pl.`id_lang` = lang.`id_lang` AND lang.`iso_code` = \'nl\')
+                          LEFT JOIN `'._DB_PREFIX_.'bolplaza_ownoffers` bo
+                            ON (a.`id_bolplaza_product` = bo.`id_bolplaza_product`) ';
         $this->_select .= ' pl.`name` as `product_name`,
                             IF(status = 0, 1, 0) as badge_success,
-                            IF(status > 0, 1, 0) as badge_danger ';
+                            IF(status > 0, 1, 0) as badge_danger,
+                            bo.`published` as `bol_published`';
 
         $this->fields_list = array(
             'id_bolplaza_product' => array(
@@ -59,6 +62,13 @@ class AdminBolPlazaProductsController extends ModuleAdminController
                 'title' => $this->l('Published'),
                 'type' => 'bool',
                 'active' => 'published',
+                'align' => 'text-center',
+                'class' => 'fixed-width-sm'
+            ),
+            'bol_published' => array(
+                'title' => $this->l('Published on Bol'),
+                'type' => 'bool',
+                'active' => 'bol_published',
                 'align' => 'text-center',
                 'class' => 'fixed-width-sm'
             ),
