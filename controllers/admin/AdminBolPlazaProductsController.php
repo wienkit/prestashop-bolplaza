@@ -430,7 +430,7 @@ class AdminBolPlazaProductsController extends ModuleAdminController
     }
 
     /**
-     * Updates the BolPlazaProduct status with the stock status from Bol.com
+     * Updates the BolPlazaProduct status to new if there is changed data
      */
     protected function updateOwnOffersInfo()
     {
@@ -451,6 +451,34 @@ class AdminBolPlazaProductsController extends ModuleAdminController
                 'bolplaza_product',
                 array(
                     'status' => BolPlazaProduct::STATUS_INFO_UPDATE
+                ),
+                'id_bolplaza_product IN (' . implode(',', $ids) . ')'
+            );
+        }
+    }
+
+    /**
+     * Updates the BolPlazaProduct status if the product isn't available at Bol.com
+     */
+    protected function updateOwnOffersNew()
+    {
+        // Update stock status
+        $sql = "SELECT bp.id_bolplaza_product
+                FROM "._DB_PREFIX_."bolplaza_product bp
+                LEFT JOIN "._DB_PREFIX_."bolplaza_ownoffers bo
+                    ON bp.id_bolplaza_product = bo.id_bolplaza_product
+                WHERE bo.id_bolplaza_product IS NULL";
+
+        $results = Db::getInstance()->executeS($sql);
+        $ids = array();
+        foreach($results as $row) {
+            $ids[] = (int) $row['id_bolplaza_product'];
+        }
+        if(count($ids) > 0) {
+            Db::getInstance()->update(
+                'bolplaza_product',
+                array(
+                    'status' => BolPlazaProduct::STATUS_NEW
                 ),
                 'id_bolplaza_product IN (' . implode(',', $ids) . ')'
             );
