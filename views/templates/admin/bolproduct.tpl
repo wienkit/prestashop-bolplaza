@@ -42,56 +42,66 @@
           </tr>
         </thead>
         <tbody>
-        {foreach $attributes AS $index => $attribute}
-          {assign var=price value=''}
-          {assign var=selected value=''}
-          {if array_key_exists($attribute['id_product_attribute'], $bol_products)}
-            {assign var=price value=$bol_products[$attribute['id_product_attribute']]['price']}
-            {assign var=selected value=$bol_products[$attribute['id_product_attribute']]['published']}
-            {assign var=delivery_time value=$bol_products[$attribute['id_product_attribute']]['delivery_time']}
-            {assign var=ean value=$bol_products[$attribute['id_product_attribute']]['ean']}
-          {/if}
           <tr{if $index is odd} class="alt_row"{/if}>
-            <td class="fixed-width-xs" align="center"><input type="checkbox"
-              name="bolplaza_published_{$attribute['id_product']|escape:'htmlall':'UTF-8'}_{$attribute['id_product_attribute']|escape:'htmlall':'UTF-8'}"
-              {if $selected == true}checked="checked"{/if}
-              value="1" />
-            </td>
-            <td class="clickable collapsed" data-toggle="collapse" data-target=".{$index|escape:'htmlall':'UTF-8'}collapsed">
-              {$product_designation[$attribute['id_product_attribute']]|escape:'htmlall':'UTF-8'}
-              <i class="icon-caret-up pull-right"></i>
-            </td>
+            <td class="fixed-width-xs" align="center"><input type="checkbox" id="toggle_bolplaza_check"  /> </td>
+            <td>-- {l s='All products' mod='bolplaza'} -- </td>
             <td>
               <div class="input-group">
-          			<span class="input-group-addon"> &euro;</span>
-          			<input name="bolplaza_price_{$attribute['id_product']|escape:'htmlall':'UTF-8'}_{$attribute['id_product_attribute']|escape:'htmlall':'UTF-8'}" id="bolplaza_price_{$attribute['id_product']|escape:'htmlall':'UTF-8'}_{$attribute['id_product_attribute']|escape:'htmlall':'UTF-8'}" type="text" value="{$price|escape:'html':'UTF-8'}" onchange="noComma('bolplaza_price_{$attribute['id_product']|escape:'htmlall':'UTF-8'}_{$attribute['id_product_attribute']|escape:'htmlall':'UTF-8'}');" maxlength="27">
-          		</div>
+                <span class="input-group-addon"> &euro;</span>
+                <input id="toggle_bolplaza_price" type="text" onchange="noComma('toggle_bolplaza_price');" maxlength="27" />
+              </div>
             </td>
           </tr>
-          <tr class="collapse out {$index|escape:'htmlall':'UTF-8'}collapsed{if $index is odd} alt_row{/if}">
-            <td>&nbsp;</td>
-            <td>
-              {l s='Custom EAN (optional)' mod='bolplaza'}
-            </td>
-            <td>
-              <input name="bolplaza_ean_{$attribute['id_product']|escape:'htmlall':'UTF-8'}_{$attribute['id_product_attribute']|escape:'htmlall':'UTF-8'}" id="bolplaza_ean_{$attribute['id_product']|escape:'htmlall':'UTF-8'}_{$attribute['id_product_attribute']|escape:'htmlall':'UTF-8'}" type="text" value="{if isset($ean)}{$ean|escape:'html':'UTF-8'}{/if}" maxlength="27">
-            </td>
-          </tr>
-          <tr class="collapse out {$index|escape:'htmlall':'UTF-8'}collapsed{if $index is odd} alt_row{/if}">
-            <td>&nbsp;</td>
-            <td>
-              {l s='Custom Delivery time (optional)' mod='bolplaza'}
-            </td>
-            <td>
-              <select name="bolplaza_delivery_time_{$attribute['id_product']|escape:'htmlall':'UTF-8'}_{$attribute['id_product_attribute']|escape:'htmlall':'UTF-8'}" id="bolplaza_delivery_time_{$attribute['id_product']|escape:'htmlall':'UTF-8'}_{$attribute['id_product_attribute']|escape:'htmlall':'UTF-8'}">
-                <option value=""{if !isset($delivery_time) || $delivery_time == '' } selected="selected"{/if}>-- {l s='Use default' mod='bolplaza'} --</option>
-              {foreach $delivery_codes AS $code}
-                <option value="{$code['deliverycode']|escape:'htmlall':'UTF-8'}"{if isset($delivery_time) && $delivery_time == $code['deliverycode']} selected="selected"{/if}>{$code['description']|escape:'htmlall':'UTF-8'}</option>
-              {/foreach}
-              </select>
-            </td>
-          </tr>
-        {/foreach}
+          {foreach $attributes AS $index => $attribute}
+            {assign var=price value=''}
+            {assign var=selected value=''}
+            {if array_key_exists($attribute['id_product_attribute'], $bol_products)}
+              {assign var=price value=$bol_products[$attribute['id_product_attribute']]['price']}
+              {assign var=selected value=$bol_products[$attribute['id_product_attribute']]['published']}
+              {assign var=delivery_time value=$bol_products[$attribute['id_product_attribute']]['delivery_time']}
+              {assign var=ean value=$bol_products[$attribute['id_product_attribute']]['ean']}
+            {/if}
+            <tr{if $index is odd} class="alt_row"{/if}>
+              <td class="fixed-width-xs" align="center"><input type="checkbox"
+                name="bolplaza_published_{$attribute['id_product']|escape:'htmlall':'UTF-8'}_{$attribute['id_product_attribute']|escape:'htmlall':'UTF-8'}"
+                {if $selected == true}checked="checked"{/if}
+                value="1" />
+              </td>
+              <td class="clickable collapsed" data-toggle="collapse" data-target=".{$index|escape:'htmlall':'UTF-8'}collapsed">
+                {$product_designation[$attribute['id_product_attribute']]|escape:'htmlall':'UTF-8'}
+                <i class="icon-caret-up pull-right"></i>
+              </td>
+              <td>
+                <div class="input-group">
+                      <span class="input-group-addon"> &euro;</span>
+                      <input name="bolplaza_price_{$attribute['id_product']|escape:'htmlall':'UTF-8'}_{$attribute['id_product_attribute']|escape:'htmlall':'UTF-8'}" id="bolplaza_price_{$attribute['id_product']|escape:'htmlall':'UTF-8'}_{$attribute['id_product_attribute']|escape:'htmlall':'UTF-8'}" type="text" value="{$price|escape:'html':'UTF-8'}" onchange="noComma('bolplaza_price_{$attribute['id_product']|escape:'htmlall':'UTF-8'}_{$attribute['id_product_attribute']|escape:'htmlall':'UTF-8'}');" maxlength="27">
+                  </div>
+              </td>
+            </tr>
+            <tr class="collapse out {$index|escape:'htmlall':'UTF-8'}collapsed{if $index is odd} alt_row{/if}">
+              <td>&nbsp;</td>
+              <td>
+                {l s='Custom EAN (optional)' mod='bolplaza'}
+              </td>
+              <td>
+                <input name="bolplaza_ean_{$attribute['id_product']|escape:'htmlall':'UTF-8'}_{$attribute['id_product_attribute']|escape:'htmlall':'UTF-8'}" id="bolplaza_ean_{$attribute['id_product']|escape:'htmlall':'UTF-8'}_{$attribute['id_product_attribute']|escape:'htmlall':'UTF-8'}" type="text" value="{if isset($ean)}{$ean|escape:'html':'UTF-8'}{/if}" maxlength="27">
+              </td>
+            </tr>
+            <tr class="collapse out {$index|escape:'htmlall':'UTF-8'}collapsed{if $index is odd} alt_row{/if}">
+              <td>&nbsp;</td>
+              <td>
+                {l s='Custom Delivery time (optional)' mod='bolplaza'}
+              </td>
+              <td>
+                <select name="bolplaza_delivery_time_{$attribute['id_product']|escape:'htmlall':'UTF-8'}_{$attribute['id_product_attribute']|escape:'htmlall':'UTF-8'}" id="bolplaza_delivery_time_{$attribute['id_product']|escape:'htmlall':'UTF-8'}_{$attribute['id_product_attribute']|escape:'htmlall':'UTF-8'}">
+                  <option value=""{if !isset($delivery_time) || $delivery_time == '' } selected="selected"{/if}>-- {l s='Use default' mod='bolplaza'} --</option>
+                {foreach $delivery_codes AS $code}
+                  <option value="{$code['deliverycode']|escape:'htmlall':'UTF-8'}"{if isset($delivery_time) && $delivery_time == $code['deliverycode']} selected="selected"{/if}>{$code['description']|escape:'htmlall':'UTF-8'}</option>
+                {/foreach}
+                </select>
+              </td>
+            </tr>
+          {/foreach}
         </tbody>
       </table>
     </div>
@@ -102,4 +112,16 @@
     <button type="submit" name="submitAddproductAndStay" class="btn btn-default pull-right"><i class="process-icon-save"></i> {l s='Save and stay' mod='bolplaza'}</button>
   </div>
 </div>
+<script>
+  $('#toggle_bolplaza_check').click(function() {
+    var value = $('#toggle_bolplaza_check').prop('checked');
+    var checkBoxes = $("input[name^=bolplaza_published_]");
+    checkBoxes.prop("checked", value);
+  });
+  $('#toggle_bolplaza_price').change(function() {
+    var value = $(this).val();
+    var prices = $("input[name^=bolplaza_price_]");
+    prices.val(value);
+  })
+</script>
 {/if}
