@@ -278,6 +278,7 @@ class AdminBolPlazaProductsController extends ModuleAdminController
                 $this->handleOwnOffers($ownOffersResult);
                 $this->updateOwnOffersStock();
                 $this->updateOwnOffersInfo();
+                $this->updateOwnOffersNew();
                 $this->confirmations[] = $this->l(
                     'The file has been processed.'
                 ) . $url;
