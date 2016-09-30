@@ -308,6 +308,22 @@ class BolPlaza extends Module
                 Configuration::updateValue('BOL_PLAZA_ORDERS_FREE_SHIPPING', $freeShipping);
                 $output .= $this->displayConfirmation($this->l('Settings updated'));
             }
+
+            $multiplication = (double) Tools::getValue('bolplaza_price_multiplication');
+            if(!empty($multiplication)) {
+                Configuration::updateValue('BOL_PLAZA_PRICE_MULTIPLICATION', $multiplication);
+            }
+
+            $addition = (double) Tools::getValue('bolplaza_price_addition');
+            if(!empty($addition)) {
+                Configuration::updateValue('BOL_PLAZA_PRICE_ADDITION', $addition);
+            }
+
+            $roundup = (double) Tools::getValue('bolplaza_price_roundup');
+            if(!empty($roundup)) {
+                Configuration::updateValue('BOL_PLAZA_PRICE_ROUNDUP', $roundup);
+            }
+
         }
 
         return $output.$this->displayForm();
@@ -428,13 +444,56 @@ class BolPlaza extends Module
                         )
                     ),
                     'hint' => $this->l('Don\'t calculate shipping costs.')
-                ),
+                )
             ),
             'submit' => array(
                 'title' => $this->l('Save'),
                 'class' => 'btn btn-default pull-right'
+            )
+        );
+
+        $fields_form[1]['form'] = array(
+            'legend' => array(
+                'title' => $this->l('Pricing settings'),
+            ),
+            'description' => $this->l(
+                'These settings are used to generate default pricing settings per product, 
+                you can always override the price per product.
+                '),
+            'input' => array(
+                array(
+                    'type' => 'text',
+                    'label' => $this->l('Addition amount'),
+                    'desc' => $this->l('Adds the amount to the normal price (incl. VAT), for example 1 for € 1,00'),
+                    'name' => 'bolplaza_price_addition',
+                    'size' => 20
+                ),
+                array(
+                    'type' => 'text',
+                    'label' => $this->l('Multiplication factor'),
+                    'desc' => $this->l(
+                        'Multiply the normal price (incl. VAT and addition amount) 
+                        with this factor, for example 1.20 for 20 percent'
+                    ),
+                    'name' => 'bolplaza_price_multiplication',
+                    'size' => 20
+                ),
+                array(
+                    'type' => 'text',
+                    'label' => $this->l('Round up amount'),
+                    'desc' => $this->l(
+                        'Round the amount up to a specific unit. For example, 
+                        use 0.10 to round from 1.52 to 1.60'
+                    ),
+                    'name' => 'bolplaza_price_roundup',
+                    'size' => 20
                 )
-            );
+            ),
+            'submit' => array(
+                'title' => $this->l('Save'),
+                'class' => 'btn btn-default pull-right'
+            )
+        );
 
         $helper = new HelperForm();
 
@@ -475,6 +534,10 @@ class BolPlaza extends Module
         $helper->fields_value['bolplaza_orders_carrier_code'] = Configuration::get('BOL_PLAZA_ORDERS_CARRIER_CODE');
         $helper->fields_value['bolplaza_orders_delivery_code'] = Configuration::get('BOL_PLAZA_ORDERS_DELIVERY_CODE');
         $helper->fields_value['bolplaza_orders_free_shipping'] = Configuration::get('BOL_PLAZA_ORDERS_FREE_SHIPPING');
+        $helper->fields_value['bolplaza_price_addition'] = Configuration::get('BOL_PLAZA_PRICE_ADDITION');
+        $helper->fields_value['bolplaza_price_multiplication'] = Configuration::get('BOL_PLAZA_PRICE_MULTIPLICATION');
+        $helper->fields_value['bolplaza_price_roundup'] = Configuration::get('BOL_PLAZA_PRICE_ROUNDUP');
+
 
         return $helper->generateForm($fields_form);
     }
@@ -577,12 +640,33 @@ class BolPlaza extends Module
         }
 
         $product_designation = array();
+        $product_calculatedprice = array();
+
+        $addition = (double) Configuration::get('BOL_PLAZA_PRICE_ADDITION');
+        $multiplication = (double) Configuration::get('BOL_PLAZA_PRICE_MULTIPLICATION');
+        $roundup = (double) Configuration::get('BOL_PLAZA_PRICE_ROUNDUP');
 
         foreach ($attributes as $attribute) {
             $product_designation[$attribute['id_product_attribute']] = rtrim(
                 $product->name .' - ' . $attribute['attribute_designation'],
                 ' - '
             );
+
+            $price = $product->getPrice();
+            if($attribute['id_product_attribute'] != 0) {
+                $price += Combination::getPrice($attribute['id_product_attribute']);
+            }
+            if($addition > 0) {
+                $price += $addition;
+            }
+            if($multiplication > 0) {
+                $price = $price * $multiplication;
+            }
+            if($roundup > 0) {
+                $price =  ceil($price / $roundup) * $roundup;
+            }
+
+            $product_calculatedprice[$attribute['id_product_attribute']] = $price;
         }
 
         $bolProducts = BolPlazaProduct::getByProductId($id_product);
@@ -594,6 +678,7 @@ class BolPlaza extends Module
         $this->context->smarty->assign(array(
             'attributes' => $attributes,
             'product_designation' => $product_designation,
+            'calculated_price' => $product_calculatedprice,
             'product' => $product,
             'bol_products' => $indexedBolProducts,
             'delivery_codes' => BolPlazaProduct::getDeliveryCodes()

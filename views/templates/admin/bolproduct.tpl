@@ -37,14 +37,15 @@
         <thead>
           <tr>
             <th class="width: 10%; min-width: 50px;" align="center"><span class="title_box">{l s='Published' mod='bolplaza'}</span></th>
-            <th style="width: 50%"><span class="title_box">{l s='Product' mod='bolplaza'}</span></th>
+            <th style="width: 40%"><span class="title_box">{l s='Product' mod='bolplaza'}</span></th>
+            <th style="width: 10%"><span class="title_box">{l s='Calculated price' mod='bolplaza'}</span></th>
             <th style="width: 40%"><span class="title_box">{l s='Custom price (optional)' mod='bolplaza'}</span></th>
           </tr>
         </thead>
         <tbody>
           <tr{if $index is odd} class="alt_row"{/if}>
             <td class="fixed-width-xs" align="center"><input type="checkbox" id="toggle_bolplaza_check"  /> </td>
-            <td>-- {l s='All products' mod='bolplaza'} -- </td>
+            <td colspan="2">-- {l s='All products' mod='bolplaza'} -- </td>
             <td>
               <div class="input-group">
                 <span class="input-group-addon"> &euro;</span>
@@ -72,15 +73,23 @@
                 <i class="icon-caret-up pull-right"></i>
               </td>
               <td>
+                &euro; {$calculated_price[$attribute['id_product_attribute']]|escape:'htmlall':'UTF-8'|string_format:"%.2f"}
+              </td>
+              <td>
                 <div class="input-group">
                       <span class="input-group-addon"> &euro;</span>
-                      <input name="bolplaza_price_{$attribute['id_product']|escape:'htmlall':'UTF-8'}_{$attribute['id_product_attribute']|escape:'htmlall':'UTF-8'}" id="bolplaza_price_{$attribute['id_product']|escape:'htmlall':'UTF-8'}_{$attribute['id_product_attribute']|escape:'htmlall':'UTF-8'}" type="text" value="{$price|escape:'html':'UTF-8'}" onchange="noComma('bolplaza_price_{$attribute['id_product']|escape:'htmlall':'UTF-8'}_{$attribute['id_product_attribute']|escape:'htmlall':'UTF-8'}');" maxlength="27">
+                      <input name="bolplaza_price_{$attribute['id_product']|escape:'htmlall':'UTF-8'}_{$attribute['id_product_attribute']|escape:'htmlall':'UTF-8'}"
+                             id="bolplaza_price_{$attribute['id_product']|escape:'htmlall':'UTF-8'}_{$attribute['id_product_attribute']|escape:'htmlall':'UTF-8'}"
+                             type="text"
+                             value="{if $price}{$price|escape:'html':'UTF-8'|string_format:"%.2f"}{else}{$calculated_price[$attribute['id_product_attribute']]|escape:'htmlall':'UTF-8'|string_format:"%.2f"}{/if}"
+                             onchange="noComma('bolplaza_price_{$attribute['id_product']|escape:'htmlall':'UTF-8'}_{$attribute['id_product_attribute']|escape:'htmlall':'UTF-8'}');"
+                             maxlength="27">
                   </div>
               </td>
             </tr>
             <tr class="collapse out {$index|escape:'htmlall':'UTF-8'}collapsed{if $index is odd} alt_row{/if}">
               <td>&nbsp;</td>
-              <td>
+              <td colspan="2">
                 {l s='Custom EAN (optional)' mod='bolplaza'}
               </td>
               <td>
@@ -89,7 +98,7 @@
             </tr>
             <tr class="collapse out {$index|escape:'htmlall':'UTF-8'}collapsed{if $index is odd} alt_row{/if}">
               <td>&nbsp;</td>
-              <td>
+              <td colspan="2">
                 {l s='Custom Delivery time (optional)' mod='bolplaza'}
               </td>
               <td>

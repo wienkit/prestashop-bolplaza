@@ -672,8 +672,6 @@ class AdminBolPlazaProductsController extends ModuleAdminController
         $ownOffer = BolPlazaProduct::getOwnOfferResult($this->object->id);
         if(count($ownOffer) == 1) {
             $ownOffer = $ownOffer[0];
-        } else {
-            return;
         }
 
         $stock = StockAvailable::getQuantityAvailableByProduct($this->object->id_product, $this->object->id_product_attribute);
