@@ -560,7 +560,7 @@ class BolPlaza extends Module
 
     /**
      * Calculate the delivery date of a shipment
-     * @return Date
+     * @return false|string
      */
     private function getDeliveryDate()
     {

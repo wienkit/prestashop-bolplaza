@@ -73,7 +73,7 @@
                 <i class="icon-caret-up pull-right"></i>
               </td>
               <td>
-                &euro; {$calculated_price[$attribute['id_product_attribute']]|escape:'htmlall':'UTF-8'|string_format:"%.2f"}
+                <a class="use_calculated_price" data-val="{$calculated_price[$attribute['id_product_attribute']]|escape:'htmlall':'UTF-8'|string_format:"%.2f"}">&euro; {$calculated_price[$attribute['id_product_attribute']]|escape:'htmlall':'UTF-8'|string_format:"%.2f"}</a>
               </td>
               <td>
                 <div class="input-group">
@@ -131,6 +131,11 @@
     var value = $(this).val();
     var prices = $("input[name^=bolplaza_price_]");
     prices.val(value);
-  })
+  });
+  $('.use_calculated_price').click(function(e) {
+    var value = $(this).data('val');
+    var prices = $("input[name^=bolplaza_price_]");
+    prices.val(value);
+  });
 </script>
 {/if}
