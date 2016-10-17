@@ -19,6 +19,9 @@ require_once _PS_MODULE_DIR_.'bolplaza/classes/BolPlazaProduct.php';
 
 class AdminBolPlazaProductsController extends ModuleAdminController
 {
+
+    protected $statuses_array;
+
     public function __construct()
     {
         $this->bootstrap = true;
@@ -37,6 +40,13 @@ class AdminBolPlazaProductsController extends ModuleAdminController
                             IF(status = 0, 1, 0) as badge_success,
                             IF(status > 0, 1, 0) as badge_danger,
                             bo.`published` as `bol_published`';
+
+        $this->statuses_array = array(
+            BolPlazaProduct::STATUS_OK => $this->l('OK'),
+            BolPlazaProduct::STATUS_NEW => $this->l('New'),
+            BolPlazaProduct::STATUS_STOCK_UPDATE => $this->l('Stock updated'),
+            BolPlazaProduct::STATUS_INFO_UPDATE => $this->l('Info updated')
+        );
 
         $this->fields_list = array(
             'id_bolplaza_product' => array(
@@ -74,11 +84,15 @@ class AdminBolPlazaProductsController extends ModuleAdminController
             ),
             'status' => array(
                 'title' => $this->l('Synchronized'),
-                'callback' => 'getSychronizedState',
+                'type' => 'select',
+                'callback' => 'getSynchronizedState',
                 'badge_danger' => true,
                 'badge_success' => true,
                 'align' => 'text-center',
-                'class' => 'fixed-width-sm'
+                'class' => 'fixed-width-sm',
+                'list' => $this->statuses_array,
+                'filter_key' => 'status',
+                'filter_type' => 'int'
             )
         );
 
@@ -99,20 +113,9 @@ class AdminBolPlazaProductsController extends ModuleAdminController
      * @param int $status the status
      * @return string the status
      */
-    public function getSychronizedState($status)
+    public function getSynchronizedState($status)
     {
-        switch($status) {
-            case BolPlazaProduct::STATUS_OK:
-                return $this->l('OK');
-            case BolPlazaProduct::STATUS_STOCK_UPDATE:
-                return $this->l('Stock updated');
-            case BolPlazaProduct::STATUS_INFO_UPDATE:
-                return $this->l('Info updated');
-            case BolPlazaProduct::STATUS_NEW:
-                return $this->l('New');
-            default:
-                return $this->l('Unknown');
-        }
+        return $this->statuses_array[$status];
     }
 
     /**
