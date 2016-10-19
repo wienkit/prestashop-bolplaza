@@ -275,7 +275,7 @@ class AdminBolPlazaOrdersController extends AdminController
     public static function parseCustomer(Wienkit\BolPlazaClient\Entities\BolPlazaOrder $order)
     {
         $customers = Customer::getCustomersByEmail($order->CustomerDetails->BillingDetails->Email);
-        if(count($customers) > 0) {
+        if (count($customers) > 0) {
             $customer = $customers[0];
             return new Customer($customer['id_customer']);
         }

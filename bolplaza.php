@@ -310,17 +310,17 @@ class BolPlaza extends Module
             }
 
             $multiplication = (double) Tools::getValue('bolplaza_price_multiplication');
-            if(!empty($multiplication)) {
+            if (!empty($multiplication)) {
                 Configuration::updateValue('BOL_PLAZA_PRICE_MULTIPLICATION', $multiplication);
             }
 
             $addition = (double) Tools::getValue('bolplaza_price_addition');
-            if(!empty($addition)) {
+            if (!empty($addition)) {
                 Configuration::updateValue('BOL_PLAZA_PRICE_ADDITION', $addition);
             }
 
             $roundup = (double) Tools::getValue('bolplaza_price_roundup');
-            if(!empty($roundup)) {
+            if (!empty($roundup)) {
                 Configuration::updateValue('BOL_PLAZA_PRICE_ROUNDUP', $roundup);
             }
 
@@ -458,8 +458,8 @@ class BolPlaza extends Module
             ),
             'description' => $this->l(
                 'These settings are used to generate default pricing settings per product, 
-                you can always override the price per product.
-                '),
+                you can always override the price per product.'
+            ),
             'input' => array(
                 array(
                     'type' => 'text',
@@ -653,16 +653,16 @@ class BolPlaza extends Module
             );
 
             $price = $product->getPrice();
-            if($attribute['id_product_attribute'] != 0) {
+            if ($attribute['id_product_attribute'] != 0) {
                 $price += Combination::getPrice($attribute['id_product_attribute']);
             }
-            if($addition > 0) {
+            if ($addition > 0) {
                 $price += $addition;
             }
-            if($multiplication > 0) {
+            if ($multiplication > 0) {
                 $price = $price * $multiplication;
             }
-            if($roundup > 0) {
+            if ($roundup > 0) {
                 $price =  ceil($price / $roundup) * $roundup;
             }
 

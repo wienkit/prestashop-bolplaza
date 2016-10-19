@@ -76,7 +76,7 @@
             <div class="panel">
                 <div class="row">
                     {foreach $links as $link}
-                        <a href="{$link.link}" class="btn btn-primary">{$link.title}</a>
+                        <a href="{$link.link|escape:'htmlall':'UTF-8'}" class="btn btn-primary">{$link.title|escape:'htmlall':'UTF-8'}</a>
                     {/foreach}
                 </div>
             </div>

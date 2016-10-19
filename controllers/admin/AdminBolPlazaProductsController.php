@@ -271,7 +271,7 @@ class AdminBolPlazaProductsController extends ModuleAdminController
         } elseif ((bool)Tools::getValue('sync_products')) {
             $bolplaza = BolPlaza::getClient();
             $url = Configuration::get('BOL_PLAZA_ORDERS_OWNOFFERS');
-            if(!$url) {
+            if (!$url) {
                 $ownOffers = $bolplaza->getOwnOffers();
                 $url = $ownOffers->Url;
             }
@@ -348,7 +348,8 @@ class AdminBolPlazaProductsController extends ModuleAdminController
      * Handle the own offers returned result from Bol.com
      * @param string $ownOffers
      */
-    public function handleOwnOffers($ownOffers) {
+    public function handleOwnOffers($ownOffers)
+    {
         DB::getInstance()->delete('bolplaza_ownoffers');
         $keys = array(
             'OfferId' => 'id_bolplaza_product',
@@ -380,12 +381,13 @@ class AdminBolPlazaProductsController extends ModuleAdminController
      * @param $settings
      * Reindex the data for the database
      */
-    public static function parseCsvRow(&$row, $key, $settings) {
+    public static function parseCsvRow(&$row, $key, $settings)
+    {
         $row = array_combine($settings['header'], $row);
         $row = array_intersect_key($row, $settings['keys']);
         foreach ($settings['keys'] as $bolKey => $dbKey) {
             if (array_key_exists($bolKey, $row)) {
-                if($dbKey == 'publish' || $dbKey == 'published') {
+                if ($dbKey == 'publish' || $dbKey == 'published') {
                     $row[$dbKey] = $row[$bolKey] == 'TRUE';
                 } else {
                     $row[$dbKey] = pSQL($row[$bolKey]);
@@ -399,7 +401,8 @@ class AdminBolPlazaProductsController extends ModuleAdminController
      * @param $row
      * @return bool
      */
-    public static function filterCsvRow($row) {
+    public static function filterCsvRow($row)
+    {
         return ((int) $row['id_bolplaza_product']) != 0;
     }
 
@@ -419,10 +422,10 @@ class AdminBolPlazaProductsController extends ModuleAdminController
                 WHERE sa.quantity <> bo.stock";
         $results = Db::getInstance()->executeS($sql);
         $ids = array();
-        foreach($results as $row) {
+        foreach ($results as $row) {
             $ids[] = (int) $row['id_bolplaza_product'];
         }
-        if(count($ids) > 0) {
+        if (count($ids) > 0) {
             Db::getInstance()->update(
                 'bolplaza_product',
                 array(
@@ -447,10 +450,10 @@ class AdminBolPlazaProductsController extends ModuleAdminController
                     OR bo.publish <> bp.published";
         $results = Db::getInstance()->executeS($sql);
         $ids = array();
-        foreach($results as $row) {
+        foreach ($results as $row) {
             $ids[] = (int) $row['id_bolplaza_product'];
         }
-        if(count($ids) > 0) {
+        if (count($ids) > 0) {
             Db::getInstance()->update(
                 'bolplaza_product',
                 array(
@@ -475,10 +478,10 @@ class AdminBolPlazaProductsController extends ModuleAdminController
 
         $results = Db::getInstance()->executeS($sql);
         $ids = array();
-        foreach($results as $row) {
+        foreach ($results as $row) {
             $ids[] = (int) $row['id_bolplaza_product'];
         }
-        if(count($ids) > 0) {
+        if (count($ids) > 0) {
             Db::getInstance()->update(
                 'bolplaza_product',
                 array(
@@ -673,13 +676,16 @@ class AdminBolPlazaProductsController extends ModuleAdminController
     {
         $product = new Product($this->object->id_product, $this->context->language->id);
         $ownOffer = BolPlazaProduct::getOwnOfferResult($this->object->id);
-        if(count($ownOffer) == 1) {
+        if (count($ownOffer) == 1) {
             $ownOffer = $ownOffer[0];
         }
 
-        $stock = StockAvailable::getQuantityAvailableByProduct($this->object->id_product, $this->object->id_product_attribute);
+        $stock = StockAvailable::getQuantityAvailableByProduct(
+            $this->object->id_product,
+            $this->object->id_product_attribute
+        );
         $delivery_code = $this->object->delivery_time;
-        if($delivery_code == '') {
+        if ($delivery_code == '') {
             $delivery_code = Configuration::get('BOL_PLAZA_ORDERS_DELIVERY_CODE');
         }
 
