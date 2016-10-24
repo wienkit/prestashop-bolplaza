@@ -518,15 +518,14 @@ class AdminBolPlazaOrdersController extends AdminController
                 'id_product_attribute' => $data['id_product_attribute']
             );
         }
-        $id = Product::getIdByEan13($ean);
-        if ($id) {
-            return array('id_product' => $id, 'id_product_attribute' => 0);
-        } else {
-            $attributes = self::getAttributeByEan($ean);
-            if (count($attributes) == 1) {
-                return $attributes[0];
-            }
-            return $attributes;
+        $attribute = self::getAttributeByEan($ean);
+        if(count($attribute) == 1) {
+            return $attribute[0];
+        }
+
+        $product = Product::getIdByEan13($ean);
+        if($product) {
+            return array('id_product' => $product, 'id_product_attribute' => 0);
         }
     }
 
