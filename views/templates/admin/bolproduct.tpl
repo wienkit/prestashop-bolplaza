@@ -43,7 +43,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr{if $index is odd} class="alt_row"{/if}>
+          <tr class="alt_row">
             <td class="fixed-width-xs" align="center"><input type="checkbox" id="toggle_bolplaza_check"  /> </td>
             <td colspan="2">-- {l s='All products' mod='bolplaza'} -- </td>
             <td>
