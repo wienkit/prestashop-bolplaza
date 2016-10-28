@@ -48,6 +48,10 @@ $_MODULE['<{bolplaza}prestashop>adminbolplazaorderscontroller_4351cfebe4b61d8aa5
 $_MODULE['<{bolplaza}prestashop>adminbolplazaorderscontroller_9fec7a6c9775983557d9e67356831c4d'] = 'Synchroniseer bestellingen';
 $_MODULE['<{bolplaza}prestashop>adminbolplazaorderscontroller_84554a51873fc755f9c4d8759921bfe4'] = 'Verwijder testdata';
 $_MODULE['<{bolplaza}prestashop>adminbolplazaorderscontroller_a9e826d36405aaada8366e942e5746e3'] = 'Bol.com order synchronisatie compleet';
+$_MODULE['<{bolplaza}prestashop>adminbolplazaproductscontroller_e0aa021e21dddbd6d8cecec71e9cf564'] = 'OK';
+$_MODULE['<{bolplaza}prestashop>adminbolplazaproductscontroller_03c2e7e41ffc181a4e84080b4710e81e'] = 'Nieuw';
+$_MODULE['<{bolplaza}prestashop>adminbolplazaproductscontroller_698487014d16702298a35e712c0c6745'] = 'Voorraad bijgewerkt';
+$_MODULE['<{bolplaza}prestashop>adminbolplazaproductscontroller_f19216ecc2afee9da3a61de55128d9d1'] = 'Info bijgewerkt';
 $_MODULE['<{bolplaza}prestashop>adminbolplazaproductscontroller_4108d69da8f42e39d4b844a332ced904'] = 'Offer ID';
 $_MODULE['<{bolplaza}prestashop>adminbolplazaproductscontroller_deb10517653c255364175796ace3553f'] = 'Product';
 $_MODULE['<{bolplaza}prestashop>adminbolplazaproductscontroller_b11ab6582de5c5df25f69247d6172042'] = 'Combinatie';
@@ -55,11 +59,6 @@ $_MODULE['<{bolplaza}prestashop>adminbolplazaproductscontroller_4af249e66e0c0cbd
 $_MODULE['<{bolplaza}prestashop>adminbolplazaproductscontroller_9b9d8a976b42e0bd66381797644943d5'] = 'Gepubliceerd';
 $_MODULE['<{bolplaza}prestashop>adminbolplazaproductscontroller_ec0513498eb8b29583d497289676d4b6'] = 'Gepubliceerd op Bol.com';
 $_MODULE['<{bolplaza}prestashop>adminbolplazaproductscontroller_fda39cc5b167799979a72d7ebb73171e'] = 'Gesynchroniseerd';
-$_MODULE['<{bolplaza}prestashop>adminbolplazaproductscontroller_e0aa021e21dddbd6d8cecec71e9cf564'] = 'OK';
-$_MODULE['<{bolplaza}prestashop>adminbolplazaproductscontroller_698487014d16702298a35e712c0c6745'] = 'Voorraad bijgewerkt';
-$_MODULE['<{bolplaza}prestashop>adminbolplazaproductscontroller_f19216ecc2afee9da3a61de55128d9d1'] = 'Info bijgewerkt';
-$_MODULE['<{bolplaza}prestashop>adminbolplazaproductscontroller_03c2e7e41ffc181a4e84080b4710e81e'] = 'Nieuw';
-$_MODULE['<{bolplaza}prestashop>adminbolplazaproductscontroller_88183b946cc5f0e8c96b2e66e1c74a7e'] = 'Onbekend';
 $_MODULE['<{bolplaza}prestashop>adminbolplazaproductscontroller_276e865971083f399c1f814c3848cb7f'] = 'Ga naar product';
 $_MODULE['<{bolplaza}prestashop>adminbolplazaproductscontroller_16b03cbfda766dc978f308d11ee2eed7'] = 'Status naar \'Nieuw\'';
 $_MODULE['<{bolplaza}prestashop>adminbolplazaproductscontroller_08c32fa449ef27a95f0b2f6a667b521f'] = 'Status naar \'Info bijgewerkt\'';
