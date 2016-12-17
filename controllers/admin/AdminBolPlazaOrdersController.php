@@ -380,7 +380,7 @@ class AdminBolPlazaOrdersController extends AdminController
                     $customer,
                     $product,
                     $productIds['id_product_attribute'],
-                    round(self::getTaxExclusive($product, $item->OfferPrice), 6)
+                    round(self::getTaxExclusive($product, $item->OfferPrice / $item->Quantity), 6)
                 );
                 $cartResult = $cart->updateQty($item->Quantity, $product->id, $productIds['id_product_attribute']);
                 if (!$cartResult) {
