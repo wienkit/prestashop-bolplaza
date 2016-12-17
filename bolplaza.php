@@ -24,7 +24,7 @@ class BolPlaza extends Module
     {
         $this->name = 'bolplaza';
         $this->tab = 'market_place';
-        $this->version = '1.3.0';
+        $this->version = '1.3.1';
         $this->author = 'Wienk IT';
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
@@ -266,7 +266,7 @@ class BolPlaza extends Module
         $version = explode('.', _PS_VERSION_);
         if (($version[0] * 10000 + $version[1] * 100 + $version[2]) < 10601) {
             $errors[] = $this->l(
-                'Your Prestashop version is too low, please use 1.6.1.x or higher, 
+                'Your Prestashop version is too low, please use 1.6.1.x or higher,
                 you can apply for a refund at the addons store.'
             );
         }
@@ -457,7 +457,7 @@ class BolPlaza extends Module
                 'title' => $this->l('Pricing settings'),
             ),
             'description' => $this->l(
-                'These settings are used to generate default pricing settings per product, 
+                'These settings are used to generate default pricing settings per product,
                 you can always override the price per product.'
             ),
             'input' => array(
@@ -472,7 +472,7 @@ class BolPlaza extends Module
                     'type' => 'text',
                     'label' => $this->l('Multiplication factor'),
                     'desc' => $this->l(
-                        'Multiply the normal price (incl. VAT and addition amount) 
+                        'Multiply the normal price (incl. VAT and addition amount)
                         with this factor, for example 1.20 for 20 percent'
                     ),
                     'name' => 'bolplaza_price_multiplication',
@@ -482,7 +482,7 @@ class BolPlaza extends Module
                     'type' => 'text',
                     'label' => $this->l('Round up amount'),
                     'desc' => $this->l(
-                        'Round the amount up to a specific unit. For example, 
+                        'Round the amount up to a specific unit. For example,
                         use 0.10 to round from 1.52 to 1.60'
                     ),
                     'name' => 'bolplaza_price_roundup',
