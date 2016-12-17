@@ -519,12 +519,12 @@ class AdminBolPlazaOrdersController extends AdminController
             );
         }
         $attribute = self::getAttributeByEan($ean);
-        if(count($attribute) == 1) {
+        if (count($attribute) == 1) {
             return $attribute[0];
         }
 
         $product = Product::getIdByEan13($ean);
-        if($product) {
+        if ($product) {
             return array('id_product' => $product, 'id_product_attribute' => 0);
         }
     }
