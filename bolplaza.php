@@ -828,6 +828,8 @@ class BolPlaza extends Module
      */
     public static function synchronize()
     {
+        $context = Context::getContext();
         AdminBolPlazaOrdersController::synchronize();
+        AdminBolPlazaProductsController::synchronize($context);
     }
 }
