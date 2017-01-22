@@ -562,9 +562,7 @@ class AdminBolPlazaOrdersController extends AdminController
         $total = 0;
         if (!empty($items)) {
             foreach ($items as $orderItem) {
-                $quantity = $orderItem->Quantity;
-                $price = $orderItem->OfferPrice;
-                $total += $quantity * $price;
+                $total += $orderItem->OfferPrice;
             }
         }
         return $total;
