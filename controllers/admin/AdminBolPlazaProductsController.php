@@ -581,7 +581,13 @@ class AdminBolPlazaProductsController extends ModuleAdminController
         } else {
             $offerUpdate->ReferenceCode = $product->reference;
         }
-        $offerUpdate->Description = !empty($product->description) ? $product->description : $product->name;
+
+        if (!empty($product->description)) {
+            $offerUpdate->Description = html_entity_decode($product->description);
+        } else {
+            $offerUpdate->Description = html_entity_decode($product->name);
+        }
+
         $price = $bolProduct->price;
         if ($price == 0) {
             $price = $price_calculator->getProductPrice(
@@ -645,8 +651,12 @@ class AdminBolPlazaProductsController extends ModuleAdminController
                 $offerCreate->Condition = 'NEW';
                 break;
         }
+        if (!empty($product->description)) {
+            $offerCreate->Description = html_entity_decode($product->description);
+        } else {
+            $offerCreate->Description = html_entity_decode($product->name);
+        }
 
-        $offerCreate->Description = !empty($product->description) ? $product->description : $product->name;
         $price = $bolProduct->price;
         if ($price == 0) {
             $price = $price_calculator->getProductPrice(
