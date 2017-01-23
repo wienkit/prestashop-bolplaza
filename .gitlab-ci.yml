@@ -9,7 +9,7 @@ build:
      - rm -rf .git
      - rm -rf .gitignore
      - mkdir bolplaza
-     - mv * bolplaza/
+     - mv !(bolplaza) bolplaza
   artifacts:
     paths:
       - .
