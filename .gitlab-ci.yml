@@ -1,0 +1,11 @@
+stages:
+- build
+
+build:
+  image: mwienk/docker-bolt-builder
+  stage: build
+  script:
+     - composer install --no-dev
+  artifacts:
+    paths:
+      - .
