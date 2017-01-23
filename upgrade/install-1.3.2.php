@@ -17,7 +17,7 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-function upgrade_module_1_3_1($object)
+function upgrade_module_1_3_2($object)
 {
     return Configuration::updateValue('BOL_PLAZA_ORDERS_CUSTOMER_GROUP', Configuration::get('PS_CUSTOMER_GROUP'));
 }
