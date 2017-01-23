@@ -155,7 +155,8 @@ class BolPlazaProduct extends ObjectModel
             Db::getInstance()->executeS('
                 SELECT *
                 FROM `'._DB_PREFIX_.'bolplaza_product`
-                WHERE `status` > 0')
+                WHERE `status` > 0
+                LIMIT 1000')
         );
     }
 
