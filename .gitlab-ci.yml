@@ -8,8 +8,9 @@ build:
      - composer install --no-dev
      - rm -rf .git
      - rm -rf .gitignore
-     - mkdir bolplaza
-     - mv !(bolplaza) bolplaza
+     - mkdir ../bolplaza
+     - mv * ../bolplaza
+     - mv ../bolplaza .
   artifacts:
     paths:
       - .
