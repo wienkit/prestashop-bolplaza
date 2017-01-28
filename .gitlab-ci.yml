@@ -1,0 +1,15 @@
+stages:
+- build
+
+build:
+  image: mwienk/docker-bolt-builder
+  stage: build
+  script:
+     - composer install --no-dev
+     - rm -rf .git*
+     - mkdir ../bolplaza
+     - mv * ../bolplaza
+     - mv ../bolplaza .
+  artifacts:
+    paths:
+      - .

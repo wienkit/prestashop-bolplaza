@@ -13,15 +13,11 @@
  *  @license   LICENSE.txt
  */
 
-class BolPlazaPayment extends PaymentModule
+if (!defined('_PS_VERSION_')) {
+    exit;
+}
+
+function upgrade_module_1_3_2($object)
 {
-    public $active = 1;
-    public $name = 'bolplaza';
-
-    const CARTRULE_CODE_PREFIX = 'BOLPLAZA_';
-
-    public function __construct()
-    {
-        $this->displayName = $this->l('Bol Plaza order');
-    }
+    return Configuration::updateValue('BOL_PLAZA_ORDERS_CUSTOMER_GROUP', Configuration::get('PS_CUSTOMER_GROUP'));
 }

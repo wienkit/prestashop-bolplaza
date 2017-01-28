@@ -9,7 +9,7 @@
  * You must not modify, adapt or create derivative works of this source code
  *
  *  @author    Mark Wienk
- *  @copyright 2013-2016 Wienk IT
+ *  @copyright 2013-2017 Wienk IT
  *  @license   LICENSE.txt
  */
 
@@ -24,7 +24,7 @@ class BolPlaza extends Module
     {
         $this->name = 'bolplaza';
         $this->tab = 'market_place';
-        $this->version = '1.3.1';
+        $this->version = '1.3.2';
         $this->author = 'Wienk IT';
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
@@ -288,6 +288,7 @@ class BolPlaza extends Module
             $carrierCode = (string) Tools::getValue('bolplaza_orders_carrier_code');
             $deliveryCode = (string) Tools::getValue('bolplaza_orders_delivery_code');
             $freeShipping = (bool) Tools::getValue('bolplaza_orders_free_shipping');
+            $customerGroup = (int) Tools::getValue('bolplaza_orders_customer_group');
 
             if (!$privkey
                 || ! $pubkey
@@ -295,7 +296,8 @@ class BolPlaza extends Module
                 || empty($pubkey)
                 || empty($carrier)
                 || empty($deliveryCode)
-                || empty($carrierCode)) {
+                || empty($carrierCode)
+                || empty($customerGroup)) {
                 $output .= $this->displayError($this->l('Invalid Configuration value'));
             } else {
                 Configuration::updateValue('BOL_PLAZA_ORDERS_ENABLED', $enabled);
@@ -306,6 +308,7 @@ class BolPlaza extends Module
                 Configuration::updateValue('BOL_PLAZA_ORDERS_CARRIER_CODE', $carrierCode);
                 Configuration::updateValue('BOL_PLAZA_ORDERS_DELIVERY_CODE', $deliveryCode);
                 Configuration::updateValue('BOL_PLAZA_ORDERS_FREE_SHIPPING', $freeShipping);
+                Configuration::updateValue('BOL_PLAZA_ORDERS_CUSTOMER_GROUP', $customerGroup);
                 $output .= $this->displayConfirmation($this->l('Settings updated'));
             }
 
@@ -340,6 +343,7 @@ class BolPlaza extends Module
 
         $carriers = Carrier::getCarriers(Context::getContext()->language->id);
         $delivery_codes = BolPlazaProduct::getDeliveryCodes();
+        $customer_groups = Group::getGroups(Context::getContext()->language->id);
 
         // Init Fields form array
         $fields_form = array();
@@ -424,6 +428,17 @@ class BolPlaza extends Module
                         'query' => $delivery_codes,
                         'id' => 'deliverycode',
                         'name' => 'description'
+                    )
+                ),
+                array(
+                    'type' => 'select',
+                    'label' => $this->l('Customer group'),
+                    'desc' => $this->l('Choose a customer group for your Bol.com customers'),
+                    'name' => 'bolplaza_orders_customer_group',
+                    'options' => array(
+                        'query' => $customer_groups,
+                        'id' => 'id_group',
+                        'name' => 'name'
                     )
                 ),
                 array(
@@ -534,6 +549,11 @@ class BolPlaza extends Module
         $helper->fields_value['bolplaza_orders_carrier_code'] = Configuration::get('BOL_PLAZA_ORDERS_CARRIER_CODE');
         $helper->fields_value['bolplaza_orders_delivery_code'] = Configuration::get('BOL_PLAZA_ORDERS_DELIVERY_CODE');
         $helper->fields_value['bolplaza_orders_free_shipping'] = Configuration::get('BOL_PLAZA_ORDERS_FREE_SHIPPING');
+        $customerGroup = Configuration::get('BOL_PLAZA_ORDERS_CUSTOMER_GROUP');
+        if (empty($customerGroup)) {
+            $customerGroup = Configuration::get('PS_CUSTOMER_GROUP');
+        }
+        $helper->fields_value['bolplaza_orders_customer_group'] = $customerGroup;
         $helper->fields_value['bolplaza_price_addition'] = Configuration::get('BOL_PLAZA_PRICE_ADDITION');
         $helper->fields_value['bolplaza_price_multiplication'] = Configuration::get('BOL_PLAZA_PRICE_MULTIPLICATION');
         $helper->fields_value['bolplaza_price_roundup'] = Configuration::get('BOL_PLAZA_PRICE_ROUNDUP');
@@ -828,6 +848,8 @@ class BolPlaza extends Module
      */
     public static function synchronize()
     {
+        $context = Context::getContext();
         AdminBolPlazaOrdersController::synchronize();
+        AdminBolPlazaProductsController::synchronize($context);
     }
 }

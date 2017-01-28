@@ -9,7 +9,7 @@
  * You must not modify, adapt or create derivative works of this source code
  *
  *  @author    Mark Wienk
- *  @copyright 2013-2016 Wienk IT
+ *  @copyright 2013-2017 Wienk IT
  *  @license   LICENSE.txt
  */
 
@@ -284,7 +284,7 @@ class AdminBolPlazaOrdersController extends AdminController
         $customer->firstname = $order->CustomerDetails->BillingDetails->Firstname;
         $customer->email = $order->CustomerDetails->BillingDetails->Email;
         $customer->passwd = Tools::passwdGen(8, 'RANDOM');
-        $customer->id_default_group = Configuration::get('PS_CUSTOMER_GROUP');
+        $customer->id_default_group = Configuration::get('BOL_PLAZA_ORDERS_CUSTOMER_GROUP');
         $customer->newsletter = false;
         $customer->add();
         return $customer;
@@ -562,9 +562,7 @@ class AdminBolPlazaOrdersController extends AdminController
         $total = 0;
         if (!empty($items)) {
             foreach ($items as $orderItem) {
-                $quantity = $orderItem->Quantity;
-                $price = $orderItem->OfferPrice;
-                $total += $quantity * $price;
+                $total += $orderItem->OfferPrice;
             }
         }
         return $total;

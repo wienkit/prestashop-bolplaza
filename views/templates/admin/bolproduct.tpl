@@ -8,7 +8,7 @@
 * You must not modify, adapt or create derivative works of this source code
 *
 *  @author    Mark Wienk
-*  @copyright 2013-2016 Wienk IT
+*  @copyright 2013-2017 Wienk IT
 *  @license   LICENSE.txt
 *
 *}
@@ -81,7 +81,7 @@
                       <input name="bolplaza_price_{$attribute['id_product']|escape:'htmlall':'UTF-8'}_{$attribute['id_product_attribute']|escape:'htmlall':'UTF-8'}"
                              id="bolplaza_price_{$attribute['id_product']|escape:'htmlall':'UTF-8'}_{$attribute['id_product_attribute']|escape:'htmlall':'UTF-8'}"
                              type="text"
-                             value="{if $price}{$price|escape:'html':'UTF-8'|string_format:"%.2f"}{else}{$calculated_price[$attribute['id_product_attribute']]|escape:'htmlall':'UTF-8'|string_format:"%.2f"}{/if}"
+                             value="{if $price}{$price|escape:'html':'UTF-8'|string_format:"%.2f"}{/if}"
                              onchange="noComma('bolplaza_price_{$attribute['id_product']|escape:'htmlall':'UTF-8'}_{$attribute['id_product_attribute']|escape:'htmlall':'UTF-8'}');"
                              maxlength="27">
                   </div>
