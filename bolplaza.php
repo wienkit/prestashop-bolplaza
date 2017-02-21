@@ -672,9 +672,11 @@ class BolPlaza extends Module
                 ' - '
             );
 
-            $price = $product->getPrice();
+            $price = 0;
             if ($attribute['id_product_attribute'] != 0) {
-                $price += Combination::getPrice($attribute['id_product_attribute']);
+                $price = $product->getPrice(true, $attribute['id_product_attribute']);
+            } else {
+                $price = $product->getPrice();
             }
             if ($addition > 0) {
                 $price += $addition;
