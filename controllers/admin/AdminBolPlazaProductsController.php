@@ -66,6 +66,8 @@ class AdminBolPlazaProductsController extends ModuleAdminController
             'price' => array(
                 'title' => $this->l('Bol specific price'),
                 'type' => 'price',
+                'filter' => false,
+                'search' => false,
                 'align' => 'text-right',
             ),
             'published' => array(
@@ -73,12 +75,14 @@ class AdminBolPlazaProductsController extends ModuleAdminController
                 'type' => 'bool',
                 'active' => 'published',
                 'align' => 'text-center',
+                'filter_key' => 'a!published',
                 'class' => 'fixed-width-sm'
             ),
             'bol_published' => array(
                 'title' => $this->l('Published on Bol'),
                 'type' => 'bool',
                 'active' => 'bol_published',
+                'filter_key' => 'bo!published',
                 'align' => 'text-center',
                 'class' => 'fixed-width-sm'
             ),
