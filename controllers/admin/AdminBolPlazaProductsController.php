@@ -577,9 +577,17 @@ class AdminBolPlazaProductsController extends ModuleAdminController
         $product = new Product($bolProduct->id_product, false, $context->language->id, $context->shop->id);
         if ($bolProduct->id_product_attribute) {
             $combination = new Combination($bolProduct->id_product_attribute);
-            $offerUpdate->ReferenceCode = $combination->reference;
+            if ($combination->reference) {
+                $offerUpdate->ReferenceCode = $combination->reference;
+            } else {
+                $offerUpdate->ReferenceCode = $combination->id . '-' . $combination->id_product;
+            }
         } else {
-            $offerUpdate->ReferenceCode = $product->reference;
+            if ($product->reference) {
+                $offerUpdate->ReferenceCode = $product->reference;
+            } else {
+                $offerUpdate->ReferenceCode = $product->id;
+            }
         }
 
         if (!empty($product->description)) {
@@ -634,11 +642,19 @@ class AdminBolPlazaProductsController extends ModuleAdminController
                 $product->id,
                 $bolProduct->id_product_attribute
             );
-            $offerCreate->ReferenceCode = $combination->reference;
+            if ($combination->reference) {
+                $offerCreate->ReferenceCode = $combination->reference;
+            } else {
+                $offerCreate->ReferenceCode = $combination->id . '-' . $combination->id_product;
+            }
         } else {
             $offerCreate->EAN = $bolProduct->ean != null ? $bolProduct->ean : $product->ean13;
             $offerCreate->QuantityInStock = StockAvailable::getQuantityAvailableByProduct($bolProduct->id_product);
-            $offerCreate->ReferenceCode = $product->reference;
+            if ($product->reference) {
+                $offerCreate->ReferenceCode = $product->reference;
+            } else {
+                $offerCreate->ReferenceCode = $product->id;
+            }
         }
         switch($product->condition) {
             case 'refurbished':
