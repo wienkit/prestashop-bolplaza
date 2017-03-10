@@ -50,6 +50,8 @@ class AdminBolPlazaOrdersController extends AdminController
                           IF(STRCMP(status,\'shipped\'), 1, 0) as badge_danger,
                           IF (STRCMP(status,\'shipped\'), 0, 1) as badge_success';
 
+        parent::__construct();
+
         $this->fields_list = array(
             'id_order' => array(
                 'title' => $this->l('Order ID'),
@@ -87,8 +89,6 @@ class AdminBolPlazaOrdersController extends AdminController
         );
 
         $this->shopLinkType = 'shop';
-
-        parent::__construct();
     }
 
     /**
