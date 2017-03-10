@@ -635,14 +635,14 @@ class BolPlaza extends Module
     /**
      * Add a new tab to the product page
      * Executes hook: displayAdminProductsExtra
-     * @param array $param
+     * @param array $params
      */
     public function hookDisplayAdminProductsExtra($params)
     {
         if (!Configuration::get('BOL_PLAZA_ORDERS_ENABLED')) {
             return $this->display(__FILE__, 'views/templates/admin/disabled.tpl');
         }
-        if ($id_product = (int)Tools::getValue('id_product')) {
+        if ($id_product = (int)Tools::getValue('id_product', $params['id_product'])) {
             $product = new Product($id_product, true, $this->context->language->id, $this->context->shop->id);
         }
         if (!Validate:: isLoadedObject($product)) {
@@ -667,10 +667,7 @@ class BolPlaza extends Module
         $roundup = (double) Configuration::get('BOL_PLAZA_PRICE_ROUNDUP');
 
         foreach ($attributes as $attribute) {
-            $product_designation[$attribute['id_product_attribute']] = rtrim(
-                $product->name .' - ' . $attribute['attribute_designation'],
-                ' - '
-            );
+            $product_designation[$attribute['id_product_attribute']] = $attribute['attribute_designation'];
 
             $price = $product->getPrice();
             if ($attribute['id_product_attribute'] != 0) {
@@ -704,7 +701,11 @@ class BolPlaza extends Module
             'delivery_codes' => BolPlazaProduct::getDeliveryCodes()
         ));
 
-        return $this->display(__FILE__, 'views/templates/admin/bolproduct.tpl');
+
+        if (version_compare(_PS_VERSION_, '1.7', '>=')) {
+            return $this->display(__FILE__, 'views/templates/admin/bolproduct-panel.tpl');
+        }
+        return $this->display(__FILE__, 'views/templates/admin/bolproduct-tab.tpl');
     }
 
     /**
