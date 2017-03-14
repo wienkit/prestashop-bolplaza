@@ -340,8 +340,14 @@ class BolPlaza extends Module
     {
         // Get default language
         $default_lang = (int)Configuration::get('PS_LANG_DEFAULT');
-
-        $carriers = Carrier::getCarriers(Context::getContext()->language->id);
+        $carriers = Carrier::getCarriers(
+            Context::getContext()->language->id,
+            false,
+            false,
+            false,
+            null,
+            Carrier::ALL_CARRIERS
+        );
         $delivery_codes = BolPlazaProduct::getDeliveryCodes();
         $customer_groups = Group::getGroups(Context::getContext()->language->id);
 
