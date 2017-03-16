@@ -24,7 +24,7 @@ class BolPlaza extends Module
     {
         $this->name = 'bolplaza';
         $this->tab = 'market_place';
-        $this->version = '1.3.2';
+        $this->version = '1.3.3';
         $this->author = 'Wienk IT';
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
@@ -123,7 +123,13 @@ class BolPlaza extends Module
             $order_states = OrderState::getOrderStates($lang['id_lang']);
             foreach ($order_states as $state) {
                 if ($state['name'] == $orderStateName) {
-                    Configuration::updateValue('BOL_PLAZA_ORDERS_INITIALSTATE', $state['id_order_state']);
+                    Configuration::updateValue(
+                        'BOL_PLAZA_ORDERS_INITIALSTATE',
+                        $state['id_order_state'],
+                        false,
+                        null,
+                        null
+                    );
                     return true;
                 }
             }
@@ -149,7 +155,13 @@ class BolPlaza extends Module
         $order_state->hidden = false;
         $order_state->deleted = false;
         $order_state->add();
-        Configuration::updateValue('BOL_PLAZA_ORDERS_INITIALSTATE', $order_state->id);
+        Configuration::updateValue(
+            'BOL_PLAZA_ORDERS_INITIALSTATE',
+            $order_state->id,
+            false,
+            null,
+            null
+        );
         return true;
     }
 
@@ -159,7 +171,9 @@ class BolPlaza extends Module
      */
     public function uninstallOrderState()
     {
-        Configuration::deleteByName('BOL_PLAZA_ORDERS_INITIALSTATE');
+        $order_state = new OrderState(Configuration::get('BOL_PLAZA_ORDERS_INITIALSTATE'));
+        $order_state->hidden = true;
+        $order_state->save();
         return true;
     }
 
