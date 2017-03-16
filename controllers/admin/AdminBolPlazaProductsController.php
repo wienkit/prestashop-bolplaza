@@ -257,6 +257,16 @@ class AdminBolPlazaProductsController extends ModuleAdminController
         );
     }
 
+    public function initProcess()
+    {
+        if (Tools::getIsset('published'.$this->table)) {
+            $this->action = 'published';
+        }
+        if (!$this->action) {
+            parent::initProcess();
+        }
+    }
+
     /**
      * Processes the request
      */
@@ -304,6 +314,15 @@ class AdminBolPlazaProductsController extends ModuleAdminController
             );
         }
         return parent::postProcess();
+    }
+
+    public function processPublished()
+    {
+        /** @var BolPlazaProduct $bolProduct */
+        if (Validate::isLoadedObject($bolProduct = $this->loadObject())) {
+            $bolProduct->published = $bolProduct->published ? 0 : 1;
+            $bolProduct->save();
+        }
     }
 
     /**
