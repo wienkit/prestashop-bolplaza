@@ -303,6 +303,8 @@ class BolPlaza extends Module
             $deliveryCode = (string) Tools::getValue('bolplaza_orders_delivery_code');
             $freeShipping = (bool) Tools::getValue('bolplaza_orders_free_shipping');
             $customerGroup = (int) Tools::getValue('bolplaza_orders_customer_group');
+            $useAddress2 = (bool) Tools::getValue('bolplaza_orders_use_address2');
+
 
             if (!$privkey
                 || ! $pubkey
@@ -323,6 +325,7 @@ class BolPlaza extends Module
                 Configuration::updateValue('BOL_PLAZA_ORDERS_DELIVERY_CODE', $deliveryCode);
                 Configuration::updateValue('BOL_PLAZA_ORDERS_FREE_SHIPPING', $freeShipping);
                 Configuration::updateValue('BOL_PLAZA_ORDERS_CUSTOMER_GROUP', $customerGroup);
+                Configuration::updateValue('BOL_PLAZA_ORDERS_USE_ADDRESS2', $useAddress2);
                 $output .= $this->displayConfirmation($this->l('Settings updated'));
             }
 
@@ -479,6 +482,25 @@ class BolPlaza extends Module
                         )
                     ),
                     'hint' => $this->l('Don\'t calculate shipping costs.')
+                ),
+                array(
+                    'type' => 'switch',
+                    'label' => $this->l('Housenumber in address2'),
+                    'name' => 'bolplaza_orders_use_address2',
+                    'is_bool' => true,
+                    'values' => array(
+                        array(
+                            'id' => 'bolplaza_orders_use_address2_1',
+                            'value' => 1,
+                            'label' => $this->l('Yes'),
+                        ),
+                        array(
+                            'id' => 'bolplaza_orders_use_address2_0',
+                            'value' => 0,
+                            'label' => $this->l('No')
+                        )
+                    ),
+                    'desc' => $this->l('Won\'t append housenumber to street but uses separate field for housenumber')
                 )
             ),
             'submit' => array(
@@ -569,6 +591,7 @@ class BolPlaza extends Module
         $helper->fields_value['bolplaza_orders_carrier_code'] = Configuration::get('BOL_PLAZA_ORDERS_CARRIER_CODE');
         $helper->fields_value['bolplaza_orders_delivery_code'] = Configuration::get('BOL_PLAZA_ORDERS_DELIVERY_CODE');
         $helper->fields_value['bolplaza_orders_free_shipping'] = Configuration::get('BOL_PLAZA_ORDERS_FREE_SHIPPING');
+        $helper->fields_value['bolplaza_orders_use_address2'] = Configuration::get('BOL_PLAZA_ORDERS_USE_ADDRESS2');
         $customerGroup = Configuration::get('BOL_PLAZA_ORDERS_CUSTOMER_GROUP');
         if (empty($customerGroup)) {
             $customerGroup = Configuration::get('PS_CUSTOMER_GROUP');
@@ -621,7 +644,7 @@ class BolPlaza extends Module
     /**
      * Update a shipment to Bol.com
      * Executes hook: actionObjectOrderCarrierUpdateAfter
-     * @param array $param
+     * @param array $params
      */
     public function hookActionObjectOrderCarrierUpdateAfter($params)
     {
@@ -655,7 +678,8 @@ class BolPlaza extends Module
     /**
      * Add a new tab to the product page
      * Executes hook: displayAdminProductsExtra
-     * @param array $param
+     * @param $params
+     * @return string
      */
     public function hookDisplayAdminProductsExtra($params)
     {
@@ -666,7 +690,7 @@ class BolPlaza extends Module
             $product = new Product($id_product, true, $this->context->language->id, $this->context->shop->id);
         }
         if (!Validate:: isLoadedObject($product)) {
-            return;
+            return "";
         }
 
         $attributes = $product->getAttributesResume($this->context->language->id);

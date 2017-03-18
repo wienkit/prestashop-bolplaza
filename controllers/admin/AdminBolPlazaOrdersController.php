@@ -310,14 +310,25 @@ class AdminBolPlazaOrdersController extends AdminController
         $address->firstname = $details->Firstname;
         $address->lastname = $details->Surname;
         $address->address1 = $details->Streetname;
-        $address->address1.= ' ' . $details->Housenumber;
+
+        $houseNumber = $details->Housenumber;
+        $address2 = "";
         if ($details->HousenumberExtended != '') {
-            $address->address1.= ' ' . $details->HousenumberExtended;
+            $houseNumber .= ' ' . $details->HousenumberExtended;
         }
-        $address->address2.= $details->AddressSupplement;
-        if ($details->HousenumberExtended != '') {
-            $address->address2.= ' (' . $details->ExtraAddressInformation . ')';
+        if (Configuration::get('BOL_PLAZA_ORDERS_USE_ADDRESS2')) {
+            $address2 = $houseNumber;
+        } else {
+            $address->address1 .= ' ' . $houseNumber;
         }
+
+        if ($details->AddressSupplement) {
+            $address2 .= ' ' . $details->AddressSupplement;
+        }
+        if ($details->ExtraAddressInformation != '') {
+            $address2 .= ' (' . $details->ExtraAddressInformation . ')';
+        }
+        $address->address2 = trim($address2);
         $address->postcode = $details->ZipCode;
         $address->city = $details->City;
         $address->id_country = Country::getByIso($details->CountryCode);
