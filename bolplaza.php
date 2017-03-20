@@ -705,6 +705,7 @@ class BolPlaza extends Module
 
         $product_designation = array();
         $product_calculatedprice = array();
+        $product_baseprice = array();
 
         $addition = (double) Configuration::get('BOL_PLAZA_PRICE_ADDITION');
         $multiplication = (double) Configuration::get('BOL_PLAZA_PRICE_MULTIPLICATION');
@@ -719,8 +720,10 @@ class BolPlaza extends Module
             $price = 0;
             if ($attribute['id_product_attribute'] != 0) {
                 $price = $product->getPrice(true, $attribute['id_product_attribute']);
+                $product_baseprice[$attribute['id_product_attribute']] = $price;
             } else {
                 $price = $product->getPrice();
+                $product_baseprice[$attribute['id_product_attribute']] = $price;
             }
             if ($addition > 0) {
                 $price += $addition;
@@ -745,6 +748,7 @@ class BolPlaza extends Module
             'attributes' => $attributes,
             'product_designation' => $product_designation,
             'calculated_price' => $product_calculatedprice,
+            'base_price' => $product_baseprice,
             'product' => $product,
             'bol_products' => $indexedBolProducts,
             'delivery_codes' => BolPlazaProduct::getDeliveryCodes()
@@ -756,7 +760,7 @@ class BolPlaza extends Module
     /**
      * Process BolProduct entities added on the product page
      * Executes hook: actionProductUpdate
-     * @param array $param
+     * @param array $params
      */
     public function hookActionProductUpdate($params)
     {
