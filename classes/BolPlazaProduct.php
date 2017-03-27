@@ -146,6 +146,20 @@ class BolPlazaProduct extends ObjectModel
 
     /**
      * Returns a list of BolProduct objects that need an update
+     * @return BolPlazaProduct[]
+     */
+    public static function getAll()
+    {
+        return ObjectModel::hydrateCollection(
+            'BolPlazaProduct',
+            Db::getInstance()->executeS('
+                SELECT *
+                FROM `'._DB_PREFIX_.'bolplaza_product`')
+        );
+    }
+
+    /**
+     * Returns a list of BolProduct objects that need an update
      * @return array
      */
     public static function getUpdatedProducts()

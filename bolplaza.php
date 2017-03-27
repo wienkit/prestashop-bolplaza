@@ -24,7 +24,7 @@ class BolPlaza extends Module
     {
         $this->name = 'bolplaza';
         $this->tab = 'market_place';
-        $this->version = '1.3.3';
+        $this->version = '1.3.4';
         $this->author = 'Wienk IT';
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
@@ -271,10 +271,6 @@ class BolPlaza extends Module
 
         if (!extension_loaded('mcrypt')) {
             $errors[] = $this->l('You don\'t have the mcrypt php extension enabled, please enable it first.');
-        }
-
-        if (!extension_loaded('xsl')) {
-            $errors[] = $this->l('You don\'t have the xsl php extension enabled, please enable it first.');
         }
 
         $version = explode('.', _PS_VERSION_);
@@ -791,7 +787,7 @@ class BolPlaza extends Module
             $indexedBolProducts[$bolProduct['id_product_attribute']] = $bolProduct;
         }
 
-        // get form inforamtion
+        // get form information
         foreach ($attributes as $attribute) {
             $key = $product->id.'_'.$attribute['id_product_attribute'];
 

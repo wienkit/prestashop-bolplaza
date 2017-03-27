@@ -64,7 +64,7 @@ class AdminBolPlazaProductsController extends ModuleAdminController
                 'align' => 'text-left',
             ),
             'price' => array(
-                'title' => $this->l('Bol specific price'),
+                'title' => $this->l('Bol.com price addition'),
                 'type' => 'price',
                 'filter' => false,
                 'search' => false,
@@ -327,6 +327,7 @@ class AdminBolPlazaProductsController extends ModuleAdminController
 
     /**
      * Synchronize changed products
+     * @param Context $context
      */
     public static function synchronize($context)
     {
@@ -377,6 +378,7 @@ class AdminBolPlazaProductsController extends ModuleAdminController
         $data = array_filter($data, 'AdminBolPlazaProductsController::filterCsvRow');
         DB::getInstance()->insert('bolplaza_ownoffers', $data);
     }
+
 
     /**
      * @param $row
@@ -567,8 +569,6 @@ class AdminBolPlazaProductsController extends ModuleAdminController
      */
     public static function processBolProductUpdate($bolProduct, $context)
     {
-        $price_calculator    = Adapter_ServiceLocator::get('Adapter_ProductPriceCalculator');
-
         $offerUpdate = new Wienkit\BolPlazaClient\Entities\BolPlazaOfferUpdate();
         if ($bolProduct->delivery_time != null) {
             $offerUpdate->DeliveryCode = $bolProduct->delivery_time;
@@ -599,15 +599,8 @@ class AdminBolPlazaProductsController extends ModuleAdminController
             $offerUpdate->Description = html_entity_decode($product->name);
         }
 
-        $price = $bolProduct->price;
-        if ($price == 0) {
-            $price = $price_calculator->getProductPrice(
-                (int)$bolProduct->id_product,
-                true,
-                (int)$bolProduct->id_product_attribute
-            );
-        }
-        $offerUpdate->Price = $price;
+        $price = Product::getPriceStatic((int)$bolProduct->id_product, true, (int)$bolProduct->id_product_attribute);
+        $offerUpdate->Price = $price + $bolProduct->price;
 
         $Plaza = BolPlaza::getClient();
         try {
@@ -627,8 +620,6 @@ class AdminBolPlazaProductsController extends ModuleAdminController
      */
     public static function processBolProductCreate($bolProduct, $context)
     {
-        $price_calculator    = Adapter_ServiceLocator::get('Adapter_ProductPriceCalculator');
-
         $offerCreate = new Wienkit\BolPlazaClient\Entities\BolPlazaOfferCreate();
         if ($bolProduct->delivery_time != null) {
             $offerCreate->DeliveryCode = $bolProduct->delivery_time;
@@ -676,15 +667,8 @@ class AdminBolPlazaProductsController extends ModuleAdminController
             $offerCreate->Description = html_entity_decode($product->name);
         }
 
-        $price = $bolProduct->price;
-        if ($price == 0) {
-            $price = $price_calculator->getProductPrice(
-                (int)$bolProduct->id_product,
-                true,
-                (int)$bolProduct->id_product_attribute
-            );
-        }
-        $offerCreate->Price = $price;
+        $price = Product::getPriceStatic((int)$bolProduct->id_product, true, (int)$bolProduct->id_product_attribute);
+        $offerCreate->Price = $price + $bolProduct->price;
 
         $Plaza = BolPlaza::getClient();
         try {
