@@ -68,7 +68,7 @@ class AdminBolPlazaProductsController extends ModuleAdminController
                 'type' => 'price',
                 'filter' => false,
                 'search' => false,
-                'align' => 'text-right',
+                'align' => 'text-right'
             ),
             'published' => array(
                 'title' => $this->l('Published'),
