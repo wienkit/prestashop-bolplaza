@@ -108,8 +108,13 @@ class AdminBolPlazaProductsController extends ModuleAdminController
         $this->addRowAction('resetUpdated');
         $this->addRowAction('resetStock');
         $this->addRowAction('resetOk');
-
         parent::__construct();
+    }
+
+    public function setMedia()
+    {
+        parent::setMedia();
+        $this->addJS(__PS_BASE_URI__ . 'modules/bolplaza/views/js/bolplaza.js');
     }
 
     /**
@@ -264,6 +269,25 @@ class AdminBolPlazaProductsController extends ModuleAdminController
         }
         if (!$this->action) {
             parent::initProcess();
+        }
+    }
+
+    public function ajaxProcessUpdateBolPrice()
+    {
+        $id_bolplaza_product = Tools::getValue("id_bolplaza_product");
+        $price = Tools::getValue("price");
+        if ($id_bolplaza_product && $price) {
+            $price = str_replace(',', '.', $price);
+            $bolProduct = new BolPlazaProduct($id_bolplaza_product);
+            $bolProduct->price = $price;
+            $bolProduct->save();
+            return die(Tools::jsonEncode(array(
+                'error' => false,
+                'message' => sprintf($this->l('Updated Bol.com ID: %s'), $bolProduct->id_bolplaza_product),
+                'price' => $bolProduct->price
+            )));
+        } else {
+            return die(Tools::jsonEncode(array('error' => $this->l('You did not send the right parameters'))));
         }
     }
 
