@@ -7,6 +7,7 @@
                     id = BolPlaza.getIdFromOnclickAttribute($item.attr('onclick'));
                 $item.attr('bolplaza-id', id)
                     .removeAttr('onclick')
+                    .append("<a><i class=\"icon-pencil\"></i></a>")
                     .click(function(e) {
                         e.preventDefault();
                         if(!($item.attr("editmode") === "true")) {
@@ -63,9 +64,10 @@
                     $.growl.error({ title: "", message: content.message});
                 } else {
                     $.growl.notice({title: "", message: content.message});
-                    $item.empty();
-                    $item.text(content.price);
-                    $item.attr("editmode", "false");
+                    $item.empty()
+                        .text(content.price)
+                        .append("<a><i class=\"icon-pencil\"></i></a>")
+                        .attr("editmode", "false");
                 }
             }).fail(function(xhr, status, error) {
                 $.growl.error({ title: "", message:error});
