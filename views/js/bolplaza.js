@@ -59,7 +59,7 @@
                 id_bolplaza_product: $item.attr("bolplaza-id"),
                 price:text
             }).done(function(content) {
-                var content = JSON.parse(content);
+                content = JSON.parse(content);
                 if(content.failed) {
                     $.growl.error({ title: "", message: content.message});
                 } else {
