@@ -605,14 +605,10 @@ class AdminBolPlazaProductsController extends ModuleAdminController
         if ($bolProduct->id_product_attribute) {
             $combination = new Combination($bolProduct->id_product_attribute);
             if ($combination->reference) {
-                $offerUpdate->ReferenceCode = $combination->reference;
-            } else {
                 $offerUpdate->ReferenceCode = $combination->id . '-' . $combination->id_product;
             }
         } else {
             if ($product->reference) {
-                $offerUpdate->ReferenceCode = $product->reference;
-            } else {
                 $offerUpdate->ReferenceCode = $product->id;
             }
         }
@@ -661,16 +657,12 @@ class AdminBolPlazaProductsController extends ModuleAdminController
                 $bolProduct->id_product_attribute
             );
             if ($combination->reference) {
-                $offerCreate->ReferenceCode = $combination->reference;
-            } else {
                 $offerCreate->ReferenceCode = $combination->id . '-' . $combination->id_product;
             }
         } else {
             $offerCreate->EAN = $bolProduct->ean != null ? $bolProduct->ean : $product->ean13;
             $offerCreate->QuantityInStock = StockAvailable::getQuantityAvailableByProduct($bolProduct->id_product);
             if ($product->reference) {
-                $offerCreate->ReferenceCode = $product->reference;
-            } else {
                 $offerCreate->ReferenceCode = $product->id;
             }
         }

@@ -369,7 +369,10 @@ class AdminBolPlazaOrdersController extends AdminController
         $hasProducts = false;
         if (!empty($items)) {
             foreach ($items as $item) {
-                $productIds = self::getProductIdByEan($item->EAN);
+                $productIds = self::getProductIdFromReference($item->OfferReference);
+                if (!$productIds) {
+                    $productIds = self::getProductIdByEan($item->EAN);
+                }
                 if (empty($productIds) || !array_key_exists('id_product', $productIds)) {
                     $context->controller->errors[] = Translate::getAdminTranslation(
                         'Couldn\'t find product for EAN: ',
@@ -516,6 +519,47 @@ class AdminBolPlazaOrdersController extends AdminController
     }
 
     /**
+     * Split the saved reference and check if a product exists
+     *
+     * @param $reference
+     * @return array|bool
+     */
+    public static function getProductIdFromReference($reference)
+    {
+        $splitted = explode('-', $reference);
+        if (count($splitted) == 2) {
+            $query = new DbQuery();
+            $query->select('pa.id_product, pa.id_product_attribute');
+            $query->from('product_attribute', 'pa');
+            $query->where(
+                'pa.id_product = \'' . (int)$splitted[1] . '\' AND ' .
+                'pa.id_product_attribute = \'' . (int)$splitted[0] . '\''
+            );
+            if ((bool)Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query)) {
+                return array(
+                    array(
+                        'id_product' => $splitted[1],
+                        'id_product_attribute' => $splitted[0]
+                    )
+                );
+            }
+        } elseif (count($splitted) == 1) {
+            $query = new DbQuery();
+            $query->select('p.id_product');
+            $query->from('product', 'p');
+            $query->where('p.id_product = \'' . (int)$splitted[0] . '\'');
+            if ((bool)Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query)) {
+                return array(
+                    array(
+                        'id_product' => $splitted[0]
+                    )
+                );
+            }
+        }
+        return false;
+    }
+
+    /**
      * Return the product ID for an EAN number
      * @param string $ean
      * @return array the product (and attribute)
@@ -538,6 +582,7 @@ class AdminBolPlazaOrdersController extends AdminController
         if ($product) {
             return array('id_product' => $product, 'id_product_attribute' => 0);
         }
+        return null;
     }
 
     /**
