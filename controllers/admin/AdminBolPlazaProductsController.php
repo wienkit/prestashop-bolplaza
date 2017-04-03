@@ -402,8 +402,6 @@ class AdminBolPlazaProductsController extends ModuleAdminController
         foreach ($bolProducts as $bolProduct) {
             switch ($bolProduct->status) {
                 case BolPlazaProduct::STATUS_NEW:
-                    self::processBolProductCreate($bolProduct, $context);
-                    break;
                 case BolPlazaProduct::STATUS_INFO_UPDATE:
                     self::processBolProductUpdate($bolProduct, $context);
                     break;
@@ -619,7 +617,6 @@ class AdminBolPlazaProductsController extends ModuleAdminController
         $offer->QuantityInStock = $quantity;
         $request = new Wienkit\BolPlazaClient\Requests\BolPlazaUpsertRequest();
         $request->RetailerOffer = $offer;
-
         try {
             $Plaza->updateOfferStock($request);
             self::setProductStatus($bolProduct, (int)BolPlazaProduct::STATUS_OK);
@@ -638,92 +635,18 @@ class AdminBolPlazaProductsController extends ModuleAdminController
     public static function processBolProductUpdate($bolProduct, $context)
     {
         $offerUpdate = $bolProduct->toRetailerOffer();
-        if ($bolProduct->delivery_time != null) {
-            $offerUpdate->DeliveryCode = $bolProduct->delivery_time;
-        } else {
-            $offerUpdate->DeliveryCode = Configuration::get('BOL_PLAZA_ORDERS_DELIVERY_CODE');
-        }
-        $offerUpdate->Publish = $bolProduct->published == 1 ? 'true' : 'false';
-
         $product = new Product($bolProduct->id_product, false, $context->language->id, $context->shop->id);
-        if ($bolProduct->id_product_attribute) {
-            $combination = new Combination($bolProduct->id_product_attribute);
-            if ($combination->reference) {
-                $offerUpdate->ReferenceCode = $combination->id . '-' . $combination->id_product;
-            }
-        } else {
-            if ($product->reference) {
-                $offerUpdate->ReferenceCode = $product->id;
-            }
-        }
-
         if (!empty($product->description)) {
             $offerUpdate->Description = html_entity_decode($product->description);
         } else {
             $offerUpdate->Description = html_entity_decode($product->name);
         }
 
-        $price = Product::getPriceStatic((int)$bolProduct->id_product, true, (int)$bolProduct->id_product_attribute);
-        $offerUpdate->Price = $price + $bolProduct->price;
-
         $Plaza = BolPlaza::getClient();
         try {
             $request = new Wienkit\BolPlazaClient\Requests\BolPlazaUpsertRequest();
             $request->RetailerOffer = $offerUpdate;
             $Plaza->updateOffer($request);
-            self::setProductStatus($bolProduct, (int)BolPlazaProduct::STATUS_OK);
-        } catch (Exception $e) {
-            $context->controller->errors[] = Tools::displayError(
-                '[bolplaza] Couldn\'t send update to Bol.com, error: ' . $e->getMessage()
-            );
-        }
-    }
-
-    /**
-     * Add a product from Bol.com
-     * @param BolPlazaProduct $bolProduct
-     * @param Context $context
-     */
-    public static function processBolProductCreate($bolProduct, $context)
-    {
-        $offerCreate = $bolProduct->toRetailerOffer();
-        if ($bolProduct->delivery_time != null) {
-            $offerCreate->DeliveryCode = $bolProduct->delivery_time;
-        } else {
-            $offerCreate->DeliveryCode = Configuration::get('BOL_PLAZA_ORDERS_DELIVERY_CODE');
-        }
-        $offerCreate->Publish = $bolProduct->published == 1 ? 'true' : 'false';
-
-        $product = new Product($bolProduct->id_product, false, $context->language->id, $context->shop->id);
-        if ($bolProduct->id_product_attribute) {
-            $combination = new Combination($bolProduct->id_product_attribute);
-            $offerCreate->QuantityInStock = StockAvailable::getQuantityAvailableByProduct(
-                $product->id,
-                $bolProduct->id_product_attribute
-            );
-            if ($combination->reference) {
-                $offerCreate->ReferenceCode = $combination->id . '-' . $combination->id_product;
-            }
-        } else {
-            $offerCreate->QuantityInStock = StockAvailable::getQuantityAvailableByProduct($bolProduct->id_product);
-            if ($product->reference) {
-                $offerCreate->ReferenceCode = $product->id;
-            }
-        }
-        if (!empty($product->description)) {
-            $offerCreate->Description = html_entity_decode($product->description);
-        } else {
-            $offerCreate->Description = html_entity_decode($product->name);
-        }
-
-        $price = Product::getPriceStatic((int)$bolProduct->id_product, true, (int)$bolProduct->id_product_attribute);
-        $offerCreate->Price = $price + $bolProduct->price;
-
-        $Plaza = BolPlaza::getClient();
-        try {
-            $request = new Wienkit\BolPlazaClient\Requests\BolPlazaUpsertRequest();
-            $request->RetailerOffer = $offerCreate;
-            $Plaza->createOffer($request);
             self::setProductStatus($bolProduct, (int)BolPlazaProduct::STATUS_OK);
         } catch (Exception $e) {
             $context->controller->errors[] = Tools::displayError(

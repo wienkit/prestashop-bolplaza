@@ -853,7 +853,7 @@ class BolPlaza extends Module
     public function hookActionObjectBolPlazaProductAddAfter($param)
     {
         if (!empty($param['object'])) {
-            AdminBolPlazaProductsController::processBolProductCreate($param['object'], $this->context);
+            AdminBolPlazaProductsController::processBolProductUpdate($param['object'], $this->context);
         }
     }
 

@@ -138,9 +138,33 @@ class BolPlazaProduct extends ObjectModel
      */
     public function toRetailerOffer()
     {
+        $id_product_attribute = $this->id_product_attribute ? $this->id_product_attribute : null;
         $offer = new \Wienkit\BolPlazaClient\Entities\BolPlazaRetailerOffer();
-        $offer->Condition = $this->getCondition();
         $offer->EAN = $this->ean;
+        $offer->Condition = $this->getCondition();
+        $price = Product::getPriceStatic($this->id_product, true, $id_product_attribute);
+        $offer->Price = $price + $this->price;
+        if ($this->delivery_time != null) {
+            $offer->DeliveryCode = $this->delivery_time;
+        } else {
+            $offer->DeliveryCode = Configuration::get('BOL_PLAZA_ORDERS_DELIVERY_CODE');
+        }
+        $stock = StockAvailable::getQuantityAvailableByProduct(
+            $this->id_product,
+            $id_product_attribute
+        );
+        if ($stock < 0) {
+            $stock = 0;
+        } elseif ($stock > 999) {
+            $stock = 999;
+        }
+        $offer->QuantityInStock = $stock;
+        $offer->Publish = $this->published == 1 ? 'true' : 'false';
+        if ($this->id_product_attribute) {
+            $offer->ReferenceCode = $this->id_product_attribute . '-' . $this->id_product;
+        } else {
+            $offer->ReferenceCode = $this->id_product;
+        }
         return $offer;
     }
 
