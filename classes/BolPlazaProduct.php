@@ -20,6 +20,12 @@ class BolPlazaProduct extends ObjectModel
     const STATUS_STOCK_UPDATE = 2;
     const STATUS_INFO_UPDATE = 3;
 
+    const CONDITION_NEW = 0;
+    const CONDITION_AS_NEW = 1;
+    const CONDITION_GOOD = 2;
+    const CONDITION_REASONABLE = 3;
+    const CONDITION_MODERATE = 4;
+
     /** @var int */
     public $id_bolplaza_product;
 
@@ -31,6 +37,9 @@ class BolPlazaProduct extends ObjectModel
 
     /** @var string */
     public $ean;
+
+    /** @var int */
+    public $condition = 0;
 
     /** @var string */
     public $delivery_time;
@@ -67,6 +76,10 @@ class BolPlazaProduct extends ObjectModel
                 'shop' => true,
                 'validate' => 'isEan13'
             ),
+            'condition' => array(
+                'type' => self::TYPE_INT,
+                'validate' => 'isUnsignedId'
+            ),
             'delivery_time' => array(
                 'type' => self::TYPE_STRING,
                 'shop' => true,
@@ -89,6 +102,47 @@ class BolPlazaProduct extends ObjectModel
             )
         )
     );
+
+//    /**
+//     * Returns the EAN13 (default or overridden)
+//     * @return string
+//     */
+//    public function getEan13()
+//    {
+//        if (isset($this->ean) && $this->ean != "" && $this->ean != "0") {
+//            return $this->ean;
+//        } else {
+//            if ($this->id_product_attribute) {
+//                $combination = new Combination($this->id_product_attribute);
+//                return $combination->ean13;
+//            } else {
+//                $product = new Product($this->id_product);
+//                return $product->ean13;
+//            }
+//        }
+//    }
+
+    /**
+     * Returns the condition for the product
+     * @return array
+     */
+    public function getCondition()
+    {
+        $conditions = self::getConditions();
+        return $conditions[$this->condition]['code'];
+    }
+
+    /**
+     * Parse the Product to a Bol processable entity
+     * @return \Wienkit\BolPlazaClient\Entities\BolPlazaRetailerOffer
+     */
+    public function toRetailerOffer()
+    {
+        $offer = new \Wienkit\BolPlazaClient\Entities\BolPlazaRetailerOffer();
+        $offer->Condition = $this->getCondition();
+        $offer->EAN = $this->ean;
+        return $offer;
+    }
 
     /**
      * Returns the BolProduct data for a product ID
@@ -128,7 +182,7 @@ class BolPlazaProduct extends ObjectModel
 			SELECT `id_bolplaza_product`
 			FROM `'._DB_PREFIX_.'bolplaza_product`
 			WHERE `id_product` = '.(int)$id_product.'
-      AND `id_product_attribute` = '.(int)$id_product_attribute);
+            AND `id_product_attribute` = '.(int)$id_product_attribute);
     }
 
     /**
@@ -171,6 +225,41 @@ class BolPlazaProduct extends ObjectModel
                 FROM `'._DB_PREFIX_.'bolplaza_product`
                 WHERE `status` > 0
                 LIMIT 1000')
+        );
+    }
+
+    /**
+     * Returns a list of the possible conditions
+     * @return array
+     */
+    public static function getConditions()
+    {
+        return array(
+            self::CONDITION_NEW => [
+                'value' => self::CONDITION_NEW,
+                'code' => 'NEW',
+                'description' => 'New'
+            ],
+            self::CONDITION_AS_NEW => [
+                'value' => self::CONDITION_AS_NEW,
+                'code' => 'AS_NEW',
+                'description' => 'As new'
+            ],
+            self::CONDITION_GOOD => [
+                'value' => self::CONDITION_GOOD,
+                'code' => 'GOOD',
+                'description' => 'Good'
+            ],
+            self::CONDITION_REASONABLE => [
+                'value' => self::CONDITION_REASONABLE,
+                'code' => 'REASONABLE',
+                'description' => 'Reasonable'
+            ],
+            self::CONDITION_MODERATE => [
+                'value' => self::CONDITION_MODERATE,
+                'code' => 'MODERATE',
+                'description' => 'Moderate'
+            ],
         );
     }
 

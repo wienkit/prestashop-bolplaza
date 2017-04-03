@@ -695,7 +695,8 @@ class BolPlaza extends Module
             $attributes[] = array(
                 'id_product' => $product->id,
                 'id_product_attribute' => 0,
-                'attribute_designation' => ''
+                'attribute_designation' => '',
+                'ean13' => $product->ean13
             );
         }
 
@@ -747,7 +748,9 @@ class BolPlaza extends Module
             'base_price' => $product_baseprice,
             'product' => $product,
             'bol_products' => $indexedBolProducts,
-            'delivery_codes' => BolPlazaProduct::getDeliveryCodes()
+            'token' => Tools::getAdminTokenLite('AdminBolPlazaProducts'),
+            'delivery_codes' => BolPlazaProduct::getDeliveryCodes(),
+            'conditions' => BolPlazaProduct::getConditions()
         ));
 
         return $this->display(__FILE__, 'views/templates/admin/bolproduct.tpl');
@@ -796,6 +799,7 @@ class BolPlaza extends Module
             $price = Tools::getValue('bolplaza_price_'.$key, 0);
             $ean = Tools::getValue('bolplaza_ean_'.$key);
             $delivery_time = Tools::getValue('bolplaza_delivery_time_'.$key);
+            $condition = Tools::getValue('bolplaza_condition_'.$key);
 
             if (array_key_exists($attribute['id_product_attribute'], $indexedBolProducts)) {
                 $bolProduct = new BolPlazaProduct(
@@ -804,13 +808,19 @@ class BolPlaza extends Module
                 if (
                     $bolProduct->price == $price &&
                     $bolProduct->published == $published &&
+                    $bolProduct->condition == $condition &&
                     $bolProduct->ean == $ean &&
                     $bolProduct->delivery_time == $delivery_time
                 ) {
                     continue;
+                } elseif ($ean != $bolProduct->ean || $condition != $bolProduct->condition) {
+                    // New identifying info, so remove the old product and add as a new one
+                    AdminBolPlazaProductsController::processBolProductDelete($bolProduct, $this->context);
+                    $bolProduct->status = BolPlazaProduct::STATUS_NEW;
+                } else {
+                    $bolProduct->status = BolPlazaProduct::STATUS_INFO_UPDATE;
                 }
-                $bolProduct->status = BolPlazaProduct::STATUS_INFO_UPDATE;
-            } elseif (!$published && $price == 0) {
+            } elseif (!$published && $price == 0 && $condition == 0 && $ean == '' && $delivery_time == '') {
                 continue;
             } else {
                 $bolProduct = new BolPlazaProduct();
@@ -820,10 +830,11 @@ class BolPlaza extends Module
             $bolProduct->id_product_attribute = $attribute['id_product_attribute'];
             $bolProduct->price = $price;
             $bolProduct->published = $published;
+            $bolProduct->condition = $condition;
             $bolProduct->ean = $ean;
             $bolProduct->delivery_time = $delivery_time;
 
-            if (!$bolProduct->published && $price == 0) {
+            if (!$published && $price == 0 && $condition == 0 && $ean == '' && $delivery_time == '') {
                 $bolProduct->delete();
             } else {
                 $bolProduct->save();

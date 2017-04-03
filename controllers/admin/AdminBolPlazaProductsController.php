@@ -272,6 +272,9 @@ class AdminBolPlazaProductsController extends ModuleAdminController
         }
     }
 
+    /**
+     * Process the price updater widget
+     */
     public function ajaxProcessUpdateBolPrice()
     {
         $id_bolplaza_product = Tools::getValue("id_bolplaza_product");
@@ -288,6 +291,45 @@ class AdminBolPlazaProductsController extends ModuleAdminController
             )));
         } else {
             return die(Tools::jsonEncode(array('error' => $this->l('You did not send the right parameters'))));
+        }
+    }
+
+    /**
+     * Process the commission calculation
+     */
+    public function ajaxProcessCalculateCommission()
+    {
+        $ean = Tools::getValue("ean");
+        $condition = Tools::getValue("condition");
+        $price = Tools::getValue("price");
+
+        try {
+            $Plaza = BolPlaza::getClient();
+            $commission = $Plaza->getCommission($ean, $condition, $price);
+            $reductions = array();
+            foreach ($commission->Reductions as $reduction) {
+                $reduction[] = [
+                    'max' => $reduction->MaximumPrice,
+                    'reduction' => $reduction->CostReduction,
+                    'start' => $reduction->StartDate,
+                    'end' => $reduction->EndDate
+                ];
+            }
+            return die(Tools::jsonEncode(array(
+                'error' => false,
+                'cost' => [
+                    'fixed' => $commission->FixedAmount,
+                    'percentage' => $commission->Percentage,
+                    'total' => $commission->TotalCost,
+                    'totalWithoutReduction' => $commission->TotalCostWithoutReduction,
+                ],
+                'reductions' => $reductions
+            )));
+        } catch (Exception $e) {
+            return die(Tools::jsonEncode(array(
+                'error' => true,
+                'message' => sprintf($e->getMessage())
+            )));
         }
     }
 
@@ -541,7 +583,7 @@ class AdminBolPlazaProductsController extends ModuleAdminController
     {
         $Plaza = BolPlaza::getClient();
         try {
-            $Plaza->deleteOffer($bolProduct->id);
+            $Plaza->deleteOffer($bolProduct->ean, $bolProduct->getCondition());
         } catch (Exception $e) {
             $context->controller->errors[] = Tools::displayError(
                 'Couldn\'t send update to Bol.com, error: ' . $e->getMessage() . 'You have to correct this manually.'
@@ -573,10 +615,13 @@ class AdminBolPlazaProductsController extends ModuleAdminController
     public static function processBolQuantityUpdate($bolProduct, $quantity, $context)
     {
         $Plaza = BolPlaza::getClient();
-        $stockUpdate = new Wienkit\BolPlazaClient\Entities\BolPlazaStockUpdate();
-        $stockUpdate->QuantityInStock = $quantity;
+        $offer = $bolProduct->toRetailerOffer();
+        $offer->QuantityInStock = $quantity;
+        $request = new Wienkit\BolPlazaClient\Requests\BolPlazaUpsertRequest();
+        $request->RetailerOffer = $offer;
+
         try {
-            $Plaza->updateOfferStock($bolProduct->id, $stockUpdate);
+            $Plaza->updateOfferStock($request);
             self::setProductStatus($bolProduct, (int)BolPlazaProduct::STATUS_OK);
         } catch (Exception $e) {
             $context->controller->errors[] = Tools::displayError(
@@ -592,7 +637,7 @@ class AdminBolPlazaProductsController extends ModuleAdminController
      */
     public static function processBolProductUpdate($bolProduct, $context)
     {
-        $offerUpdate = new Wienkit\BolPlazaClient\Entities\BolPlazaOfferUpdate();
+        $offerUpdate = $bolProduct->toRetailerOffer();
         if ($bolProduct->delivery_time != null) {
             $offerUpdate->DeliveryCode = $bolProduct->delivery_time;
         } else {
@@ -623,7 +668,9 @@ class AdminBolPlazaProductsController extends ModuleAdminController
 
         $Plaza = BolPlaza::getClient();
         try {
-            $Plaza->updateOffer($bolProduct->id, $offerUpdate);
+            $request = new Wienkit\BolPlazaClient\Requests\BolPlazaUpsertRequest();
+            $request->RetailerOffer = $offerUpdate;
+            $Plaza->updateOffer($request);
             self::setProductStatus($bolProduct, (int)BolPlazaProduct::STATUS_OK);
         } catch (Exception $e) {
             $context->controller->errors[] = Tools::displayError(
@@ -639,7 +686,7 @@ class AdminBolPlazaProductsController extends ModuleAdminController
      */
     public static function processBolProductCreate($bolProduct, $context)
     {
-        $offerCreate = new Wienkit\BolPlazaClient\Entities\BolPlazaOfferCreate();
+        $offerCreate = $bolProduct->toRetailerOffer();
         if ($bolProduct->delivery_time != null) {
             $offerCreate->DeliveryCode = $bolProduct->delivery_time;
         } else {
@@ -650,7 +697,6 @@ class AdminBolPlazaProductsController extends ModuleAdminController
         $product = new Product($bolProduct->id_product, false, $context->language->id, $context->shop->id);
         if ($bolProduct->id_product_attribute) {
             $combination = new Combination($bolProduct->id_product_attribute);
-            $offerCreate->EAN = $bolProduct->ean != null? $bolProduct->ean : $combination->ean13;
             $offerCreate->QuantityInStock = StockAvailable::getQuantityAvailableByProduct(
                 $product->id,
                 $bolProduct->id_product_attribute
@@ -659,22 +705,10 @@ class AdminBolPlazaProductsController extends ModuleAdminController
                 $offerCreate->ReferenceCode = $combination->id . '-' . $combination->id_product;
             }
         } else {
-            $offerCreate->EAN = $bolProduct->ean != null ? $bolProduct->ean : $product->ean13;
             $offerCreate->QuantityInStock = StockAvailable::getQuantityAvailableByProduct($bolProduct->id_product);
             if ($product->reference) {
                 $offerCreate->ReferenceCode = $product->id;
             }
-        }
-        switch($product->condition) {
-            case 'refurbished':
-                $offerCreate->Condition = 'AS_NEW';
-                break;
-            case 'used':
-                $offerCreate->Condition = 'GOOD';
-                break;
-            default:
-                $offerCreate->Condition = 'NEW';
-                break;
         }
         if (!empty($product->description)) {
             $offerCreate->Description = html_entity_decode($product->description);
@@ -687,7 +721,9 @@ class AdminBolPlazaProductsController extends ModuleAdminController
 
         $Plaza = BolPlaza::getClient();
         try {
-            $Plaza->createOffer($bolProduct->id, $offerCreate);
+            $request = new Wienkit\BolPlazaClient\Requests\BolPlazaUpsertRequest();
+            $request->RetailerOffer = $offerCreate;
+            $Plaza->createOffer($request);
             self::setProductStatus($bolProduct, (int)BolPlazaProduct::STATUS_OK);
         } catch (Exception $e) {
             $context->controller->errors[] = Tools::displayError(
