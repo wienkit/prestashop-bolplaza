@@ -66,13 +66,13 @@
                     {foreach $attributes AS $index => $attribute}
                         {assign var=price value=''}
                         {assign var=selected value=''}
+                        {assign var=key value=$attribute['id_product']|cat:'_'|cat:$attribute['id_product_attribute']}
                         {if array_key_exists($attribute['id_product_attribute'], $bol_products)}
                             {assign var=price value=$bol_products[$attribute['id_product_attribute']]['price']}
                             {assign var=selected value=$bol_products[$attribute['id_product_attribute']]['published']}
                             {assign var=delivery_time value=$bol_products[$attribute['id_product_attribute']]['delivery_time']}
                             {assign var=prod_condition value=$bol_products[$attribute['id_product_attribute']]['condition']}
                             {assign var=ean value=$bol_products[$attribute['id_product_attribute']]['ean']}
-                            {assign var=key value=$attribute['id_product']|cat:'_'|cat:$attribute['id_product_attribute']}
                         {/if}
                         <tr class="bol-plaza-item" data-key="{$key|escape:'htmlall':'UTF-8'}">
                             <td class="fixed-width-xs" align="center"><input type="checkbox"
