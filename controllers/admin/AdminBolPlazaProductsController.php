@@ -308,12 +308,12 @@ class AdminBolPlazaProductsController extends ModuleAdminController
             $commission = $Plaza->getCommission($ean, $condition, $price);
             $reductions = array();
             foreach ($commission->Reductions as $reduction) {
-                $reduction[] = [
+                $reduction[] = array(
                     'max' => $reduction->MaximumPrice,
                     'reduction' => $reduction->CostReduction,
                     'start' => $reduction->StartDate,
                     'end' => $reduction->EndDate
-                ];
+                );
             }
             return die(Tools::jsonEncode(array(
                 'error' => false,
@@ -790,8 +790,8 @@ class AdminBolPlazaProductsController extends ModuleAdminController
             self::updateOwnOffersInfo();
             self::updateOwnOffersNew();
             $context->controller->confirmations[] = $context->controller->l(
-                    'This file has been processed: '
-                ) . $url;
+                'This file has been processed: '
+            ) . $url;
         } catch (Wienkit\BolPlazaClient\Exceptions\BolPlazaClientException $e) {
             Configuration::set('BOL_PLAZA_ORDERS_OWNOFFERS', $url);
             $context->controller->confirmations[] = $context->controller->l(

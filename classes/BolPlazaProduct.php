@@ -235,31 +235,31 @@ class BolPlazaProduct extends ObjectModel
     public static function getConditions()
     {
         return array(
-            self::CONDITION_NEW => [
+            self::CONDITION_NEW => array(
                 'value' => self::CONDITION_NEW,
                 'code' => 'NEW',
                 'description' => 'New'
-            ],
-            self::CONDITION_AS_NEW => [
+            ),
+            self::CONDITION_AS_NEW => array(
                 'value' => self::CONDITION_AS_NEW,
                 'code' => 'AS_NEW',
                 'description' => 'As new'
-            ],
-            self::CONDITION_GOOD => [
+            ),
+            self::CONDITION_GOOD => array(
                 'value' => self::CONDITION_GOOD,
                 'code' => 'GOOD',
                 'description' => 'Good'
-            ],
-            self::CONDITION_REASONABLE => [
+            ),
+            self::CONDITION_REASONABLE => array(
                 'value' => self::CONDITION_REASONABLE,
                 'code' => 'REASONABLE',
                 'description' => 'Reasonable'
-            ],
-            self::CONDITION_MODERATE => [
+            ),
+            self::CONDITION_MODERATE => array(
                 'value' => self::CONDITION_MODERATE,
                 'code' => 'MODERATE',
                 'description' => 'Moderate'
-            ],
+            ),
         );
     }
 

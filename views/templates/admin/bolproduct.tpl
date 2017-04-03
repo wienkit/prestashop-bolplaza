@@ -338,7 +338,7 @@
             calculateCommission: function(ean, condition, price) {
                 $.post('ajax-tab.php', {
                     controller:'AdminBolPlazaProducts',
-                    token:'{$token}',
+                    token:'{$token|escape:'htmlall':'UTF-8'}',
                     action:'calculateCommission',
                     ean: ean,
                     price: price,
@@ -354,7 +354,7 @@
                         $('#calculator_total_without_reduction').val(content.cost.totalWithoutReduction);
                         $('#calculator_reductions tbody').empty();
                         if(content.reductions.length === 0) {
-                            $('#calculator_reductions tbody').append('<tr><td colspan="4">{l s="None" mod="bolplaza"}</td></tr>');
+                            $('#calculator_reductions tbody').append('<tr><td colspan="4">{l s='None' mod='bolplaza'}</td></tr>');
                         } else {
                             for (var i = 0; i < content.reductions.length; i++) {
                                 $('#calculator_reductions tbody').append(

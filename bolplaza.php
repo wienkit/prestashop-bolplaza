@@ -40,7 +40,6 @@ class BolPlaza extends Module
                                        orders and products with your Prestashop website.');
 
         $this->confirmUninstall = $this->l('Are you sure you want to uninstall?');
-
     }
 
     /**
@@ -95,7 +94,6 @@ class BolPlaza extends Module
             $return &= Db::getInstance()->execute($s);
         }
         return $return;
-
     }
 
     /**
@@ -339,9 +337,7 @@ class BolPlaza extends Module
             if (!empty($roundup)) {
                 Configuration::updateValue('BOL_PLAZA_PRICE_ROUNDUP', $roundup);
             }
-
         }
-
         return $output.$this->displayForm();
     }
 

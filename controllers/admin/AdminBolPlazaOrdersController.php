@@ -201,7 +201,6 @@ class AdminBolPlazaOrdersController extends AdminController
 
         foreach ($Plaza->getOrders() as $order) {
             if (!self::getTransactionExists($order->OrderId)) {
-
                 $cart = self::parse($order);
 
                 if (!$cart) {
