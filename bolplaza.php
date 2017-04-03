@@ -795,6 +795,9 @@ class BolPlaza extends Module
             $price = Tools::getValue('bolplaza_price_'.$key, 0);
             $ean = Tools::getValue('bolplaza_ean_'.$key);
             $delivery_time = Tools::getValue('bolplaza_delivery_time_'.$key);
+            if ($delivery_time == 'default') {
+               $delivery_time = null;
+            }
             $condition = Tools::getValue('bolplaza_condition_'.$key);
 
             if (array_key_exists($attribute['id_product_attribute'], $indexedBolProducts)) {
@@ -815,7 +818,12 @@ class BolPlaza extends Module
                 } else {
                     $bolProduct->status = BolPlazaProduct::STATUS_INFO_UPDATE;
                 }
-            } elseif (!$published && $price == 0 && $condition == 0 && $ean == '' && $delivery_time == '') {
+            } elseif (!$published &&
+                $price == 0 &&
+                $condition == 0 &&
+                $ean == $attribute['ean13'] &&
+                $delivery_time == null
+            ) {
                 continue;
             } else {
                 $bolProduct = new BolPlazaProduct();

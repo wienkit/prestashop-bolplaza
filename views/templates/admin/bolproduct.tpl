@@ -73,6 +73,12 @@
                             {assign var=delivery_time value=$bol_products[$attribute['id_product_attribute']]['delivery_time']}
                             {assign var=prod_condition value=$bol_products[$attribute['id_product_attribute']]['condition']}
                             {assign var=ean value=$bol_products[$attribute['id_product_attribute']]['ean']}
+                        {else}
+                            {assign var=price value=0}
+                            {assign var=selected value=false}
+                            {assign var=delivery_time value='default'}
+                            {assign var=prod_condition value='0'}
+                            {assign var=ean value=$attribute['ean13']}
                         {/if}
                         <tr class="bol-plaza-item" data-key="{$key|escape:'htmlall':'UTF-8'}">
                             <td class="fixed-width-xs" align="center"><input type="checkbox"
@@ -139,7 +145,7 @@
                                 {l s='EAN' mod='bolplaza'}
                             </td>
                             <td>
-                                <input name="bolplaza_ean_{$key|escape:'htmlall':'UTF-8'}" id="bolplaza_ean_{$key|escape:'htmlall':'UTF-8'}" type="text" value="{if isset($ean)}{$ean|escape:'html':'UTF-8'}{else}{$attribute['ean13']}{/if}" maxlength="27">
+                                <input name="bolplaza_ean_{$key|escape:'htmlall':'UTF-8'}" id="bolplaza_ean_{$key|escape:'htmlall':'UTF-8'}" type="text" value="{if isset($ean)}{$ean|escape:'html':'UTF-8'}{/if}" maxlength="27">
                             </td>
                             <td colspan="2"></td>
                         </tr>
@@ -150,7 +156,7 @@
                             </td>
                             <td>
                                 <select name="bolplaza_delivery_time_{$key|escape:'htmlall':'UTF-8'}" id="bolplaza_delivery_time_{$key|escape:'htmlall':'UTF-8'}">
-                                    <option value=""{if !isset($delivery_time) || $delivery_time == '' } selected="selected"{/if}>-- {l s='Use default' mod='bolplaza'} --</option>
+                                    <option value="default" {if $delivery_time == 'default'} selected="selected"{/if}>-- {l s='Use default' mod='bolplaza'} --</option>
                                     {foreach $delivery_codes AS $code}
                                         <option value="{$code['deliverycode']|escape:'htmlall':'UTF-8'}"{if isset($delivery_time) && $delivery_time == $code['deliverycode']} selected="selected"{/if}>{$code['description']|escape:'htmlall':'UTF-8'}</option>
                                     {/foreach}
