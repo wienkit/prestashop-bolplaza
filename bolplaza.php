@@ -801,8 +801,7 @@ class BolPlaza extends Module
                 $bolProduct = new BolPlazaProduct(
                     $indexedBolProducts[$attribute['id_product_attribute']]['id_bolplaza_product']
                 );
-                if (
-                    $bolProduct->price == $price &&
+                if ($bolProduct->price == $price &&
                     $bolProduct->published == $published &&
                     $bolProduct->condition == $condition &&
                     $bolProduct->ean == $ean &&

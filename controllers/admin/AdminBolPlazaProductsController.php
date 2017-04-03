@@ -317,12 +317,12 @@ class AdminBolPlazaProductsController extends ModuleAdminController
             }
             return die(Tools::jsonEncode(array(
                 'error' => false,
-                'cost' => [
+                'cost' => array(
                     'fixed' => $commission->FixedAmount,
                     'percentage' => $commission->Percentage,
                     'total' => $commission->TotalCost,
                     'totalWithoutReduction' => $commission->TotalCostWithoutReduction,
-                ],
+                ),
                 'reductions' => $reductions
             )));
         } catch (Exception $e) {
