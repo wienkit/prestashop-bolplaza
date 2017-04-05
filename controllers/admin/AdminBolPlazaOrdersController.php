@@ -369,7 +369,7 @@ class AdminBolPlazaOrdersController extends AdminController
         if (!empty($items)) {
             foreach ($items as $item) {
                 $productIds = self::getProductIdFromReference($item->OfferReference);
-                if (!$productIds) {
+                if (empty($productIds)) {
                     $productIds = self::getProductIdByEan($item->EAN);
                 }
                 if (empty($productIds) || !array_key_exists('id_product', $productIds)) {
@@ -536,10 +536,8 @@ class AdminBolPlazaOrdersController extends AdminController
             );
             if ((bool)Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query)) {
                 return array(
-                    array(
-                        'id_product' => $splitted[1],
-                        'id_product_attribute' => $splitted[0]
-                    )
+                    'id_product' => $splitted[1],
+                    'id_product_attribute' => $splitted[0]
                 );
             }
         } elseif (count($splitted) == 1) {
@@ -548,11 +546,7 @@ class AdminBolPlazaOrdersController extends AdminController
             $query->from('product', 'p');
             $query->where('p.id_product = \'' . (int)$splitted[0] . '\'');
             if ((bool)Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query)) {
-                return array(
-                    array(
-                        'id_product' => $splitted[0]
-                    )
-                );
+                array('id_product' => $splitted[0]);
             }
         }
         return false;
