@@ -21,6 +21,11 @@ require_once(dirname(__FILE__).'/controllers/admin/AdminBolPlazaOrdersController
 if (Tools::getIsset('secure_key')) {
     $secureKey = md5(_COOKIE_KEY_.Configuration::get('PS_SHOP_NAME').'BOLPLAZA');
     if (!empty($secureKey) && $secureKey === Tools::getValue('secure_key')) {
+        $context = Context::getContext();
+        $employee = new Employee(1);
+        $employee->firstname = "BolPlaza";
+        $employee->lastname = "Cron";
+        $context->employee = $employee;
         BolPlaza::synchronize();
     }
 }
