@@ -525,29 +525,14 @@ class AdminBolPlazaOrdersController extends AdminController
      */
     public static function getProductIdFromReference($reference)
     {
-        $splitted = explode('-', $reference);
-        if (count($splitted) == 2) {
-            $query = new DbQuery();
-            $query->select('pa.id_product, pa.id_product_attribute');
-            $query->from('product_attribute', 'pa');
-            $query->where(
-                'pa.id_product = \'' . (int)$splitted[1] . '\' AND ' .
-                'pa.id_product_attribute = \'' . (int)$splitted[0] . '\''
-            );
-            if ((bool)Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query)) {
-                return array(
-                    'id_product' => $splitted[1],
-                    'id_product_attribute' => $splitted[0]
-                );
+        $bolProduct = new BolPlazaProduct($reference);
+        if ($bolProduct != null) {
+            $result = array();
+            $result['id_product'] = $bolProduct->id_product;
+            if ($bolProduct->id_product_attribute) {
+                $result['id_product_attribute'] = $bolProduct->id_product_attribute;
             }
-        } elseif (count($splitted) == 1) {
-            $query = new DbQuery();
-            $query->select('p.id_product');
-            $query->from('product', 'p');
-            $query->where('p.id_product = \'' . (int)$splitted[0] . '\'');
-            if ((bool)Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($query)) {
-                array('id_product' => $splitted[0]);
-            }
+            return $result;
         }
         return false;
     }

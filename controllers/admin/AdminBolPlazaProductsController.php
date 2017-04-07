@@ -420,15 +420,16 @@ class AdminBolPlazaProductsController extends ModuleAdminController
     {
         DB::getInstance()->delete('bolplaza_ownoffers');
         $keys = array(
-            'OfferId' => 'id_bolplaza_product',
-            'Reference' => 'reference',
             'EAN' => 'ean',
             'Condition' => 'condition',
-            'Stock' => 'stock',
             'Price' => 'price',
-            'Description' => 'description',
             'Deliverycode' => 'delivery_code',
+            'Stock' => 'stock',
             'Publish' => 'publish',
+            'Reference' => 'id_bolplaza_product',
+            'Description' => 'description',
+            'Title' => 'title',
+            'FulfillmentMethod' => 'fulfillment',
             'Published' => 'published',
             'ReasonCode' => 'reasoncode',
             'Reason' => 'reason',
