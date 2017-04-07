@@ -158,16 +158,14 @@ class BolPlazaProduct extends ObjectModel
         } elseif ($stock > 999) {
             $stock = 999;
         }
-        if ($this->status === self::STATUS_NEW) {
-            $product = new Product($this->id_product, false, Language::getIdByIso('NL'));
-            $offer->Title = $product->name;
-            if (!empty($product->description)) {
-                $offer->Description = html_entity_decode($product->description);
-            } elseif (!empty($product->description_short)) {
-                $offer->Description = html_entity_decode($product->description_short);
-            } else {
-                $offer->Description = html_entity_decode($product->name);
-            }
+        $product = new Product($this->id_product, false, Language::getIdByIso('NL'));
+        $offer->Title = $product->name;
+        if (!empty($product->description)) {
+            $offer->Description = html_entity_decode($product->description);
+        } elseif (!empty($product->description_short)) {
+            $offer->Description = html_entity_decode($product->description_short);
+        } else {
+            $offer->Description = html_entity_decode($product->name);
         }
         $offer->QuantityInStock = $stock;
         $offer->Publish = $this->published == 1 ? 'true' : 'false';
