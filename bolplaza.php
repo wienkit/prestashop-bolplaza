@@ -796,7 +796,7 @@ class BolPlaza extends Module
             $ean = Tools::getValue('bolplaza_ean_'.$key);
             $delivery_time = Tools::getValue('bolplaza_delivery_time_'.$key);
             if ($delivery_time == 'default') {
-               $delivery_time = null;
+                $delivery_time = null;
             }
             $condition = Tools::getValue('bolplaza_condition_'.$key);
 
