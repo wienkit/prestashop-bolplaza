@@ -160,7 +160,7 @@ class BolPlazaProduct extends ObjectModel
         }
         $offer->QuantityInStock = $stock;
         $offer->Publish = $this->published == 1 ? 'true' : 'false';
-        $offer->Reference = $this->id_bolplaza_product;
+        $offer->ReferenceCode = $this->id_bolplaza_product;
         return $offer;
     }
 
