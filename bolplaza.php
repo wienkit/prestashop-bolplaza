@@ -545,20 +545,16 @@ class BolPlaza extends Module
                 array(
                     'type' => 'text',
                     'label' => $this->l('Multiplication factor'),
-                    'desc' => $this->l(
-                        'Multiply the normal price (incl. VAT and addition amount)
-                        with this factor, for example 1.20 for 20 percent'
-                    ),
+                    'desc' => $this->l('Multiply the normal price (incl. VAT and addition amount)' .
+                        ' with this factor, for example 1.20 for 20 percent'),
                     'name' => 'bolplaza_price_multiplication',
                     'size' => 20
                 ),
                 array(
                     'type' => 'text',
                     'label' => $this->l('Round up amount'),
-                    'desc' => $this->l(
-                        'Round the amount up to a specific unit. For example,
-                        use 0.10 to round from 1.52 to 1.60'
-                    ),
+                    'desc' => $this->l('Round the amount up to a specific unit. For example,' .
+                        ' use 0.10 to round from 1.52 to 1.60'),
                     'name' => 'bolplaza_price_roundup',
                     'size' => 20
                 ),
@@ -578,8 +574,8 @@ class BolPlaza extends Module
                         )
                     ),
                     'label' => $this->l('Update pricing'),
-                    'desc' => $this->l('Use this option to update your pricing after release 1.3.5, 
-                        which makes use of the difference instead of the value of the price.'),
+                    'desc' => $this->l('Use this option to update your pricing after release 1.3.5,' .
+                        ' which makes use of the difference instead of the value of the price.'),
                     'name' => 'bolplaza_orders_update_prices',
                 )
             ),
