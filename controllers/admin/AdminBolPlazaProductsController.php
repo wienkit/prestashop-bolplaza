@@ -308,7 +308,7 @@ class AdminBolPlazaProductsController extends ModuleAdminController
             $commission = $Plaza->getCommission($ean, $condition, $price);
             $reductions = array();
             foreach ($commission->Reductions as $reduction) {
-                $reduction[] = array(
+                $reductions[] = array(
                     'max' => $reduction->MaximumPrice,
                     'reduction' => $reduction->CostReduction,
                     'start' => $reduction->StartDate,
