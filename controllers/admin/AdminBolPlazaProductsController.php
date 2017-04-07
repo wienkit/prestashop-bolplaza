@@ -481,7 +481,7 @@ class AdminBolPlazaProductsController extends ModuleAdminController
                     ON sa.id_product = bp.id_product
                     AND sa.id_product_attribute = bp.id_product_attribute
                 WHERE (sa.quantity <> bo.stock)
-                    OR (bo.stock = 999 AND sa.quantity > 999)";
+                    AND (bo.stock <> 999 OR (sa.quantity > 0 AND sa.quantity < 1000))";
         $results = Db::getInstance()->executeS($sql);
         $ids = array();
         foreach ($results as $row) {
