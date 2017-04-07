@@ -10,7 +10,7 @@
   ],
   "minimum-stability": "dev",
   "require": {
-    "wienkit/bol-plaza-php-client": "2.2.1"
+    "wienkit/bol-plaza-php-client": "2.2.2"
   },
   "autoload": {
     "psr-4": {
