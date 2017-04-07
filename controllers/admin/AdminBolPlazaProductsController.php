@@ -489,7 +489,8 @@ class AdminBolPlazaProductsController extends ModuleAdminController
                 INNER JOIN "._DB_PREFIX_."stock_available sa 
                     ON sa.id_product = bp.id_product
                     AND sa.id_product_attribute = bp.id_product_attribute
-                WHERE sa.quantity <> bo.stock";
+                WHERE (sa.quantity <> bo.stock)
+                    OR (bo.stock = 999 AND sa.quantity > 999)";
         $results = Db::getInstance()->executeS($sql);
         $ids = array();
         foreach ($results as $row) {

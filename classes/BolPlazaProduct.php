@@ -158,6 +158,10 @@ class BolPlazaProduct extends ObjectModel
         } elseif ($stock > 999) {
             $stock = 999;
         }
+        if ($this->status === self::STATUS_NEW) {
+            $product = new Product($this->id_product, false, Language::getIdByIso('NL'));
+            $offer->Title = $product->name;
+        }
         $offer->QuantityInStock = $stock;
         $offer->Publish = $this->published == 1 ? 'true' : 'false';
         $offer->ReferenceCode = $this->id_bolplaza_product;
