@@ -338,7 +338,7 @@ class BolPlaza extends Module
                 Configuration::updateValue('BOL_PLAZA_PRICE_ROUNDUP', $roundup);
             }
 
-            if (!$updatePrices) {
+            if ($updatePrices) {
                 $products = BolPlazaProduct::getAll();
                 foreach ($products as $product) {
                     $id_product = $product->id_product;
