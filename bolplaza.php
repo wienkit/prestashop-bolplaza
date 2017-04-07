@@ -893,7 +893,7 @@ class BolPlaza extends Module
         if (!empty($bolProductId)) {
             $bolProduct = new BolPlazaProduct($bolProductId);
             AdminBolPlazaProductsController::setProductStatus($bolProduct, (int)BolPlazaProduct::STATUS_STOCK_UPDATE);
-            AdminBolPlazaProductsController::processBolQuantityUpdate($bolProduct, $param['quantity'], $this->context);
+            AdminBolPlazaProductsController::processBolProductUpdate($bolProduct, $this->context);
         }
     }
 

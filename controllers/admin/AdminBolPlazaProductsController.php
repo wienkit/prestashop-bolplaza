@@ -397,18 +397,9 @@ class AdminBolPlazaProductsController extends ModuleAdminController
      */
     public static function synchronize($context)
     {
-
         $bolProducts = BolPlazaProduct::getUpdatedProducts();
         foreach ($bolProducts as $bolProduct) {
-            switch ($bolProduct->status) {
-                case BolPlazaProduct::STATUS_NEW:
-                case BolPlazaProduct::STATUS_INFO_UPDATE:
-                    self::processBolProductUpdate($bolProduct, $context);
-                    break;
-                case BolPlazaProduct::STATUS_STOCK_UPDATE:
-                    self::processBolStockUpdate($bolProduct, $context);
-                    break;
-            }
+            self::processBolProductUpdate($bolProduct, $context);
         }
     }
 
@@ -592,58 +583,13 @@ class AdminBolPlazaProductsController extends ModuleAdminController
     }
 
     /**
-     * Update the stock on Bol.com
-     * @param BolPlazaProduct $bolProduct
-     * @param Context $context
-     */
-    public static function processBolStockUpdate($bolProduct, $context)
-    {
-        $product = new Product($bolProduct->id_product, false, $context->language->id, $context->shop->id);
-        $quantity = StockAvailable::getQuantityAvailableByProduct(
-            $product->id,
-            $bolProduct->id_product_attribute
-        );
-        self::processBolQuantityUpdate($bolProduct, $quantity, $context);
-    }
-
-    /**
-     * Update the stock on Bol.com
-     * @param BolPlazaProduct $bolProduct
-     * @param int $quantity
-     * @param Context $context
-     */
-    public static function processBolQuantityUpdate($bolProduct, $quantity, $context)
-    {
-        $Plaza = BolPlaza::getClient();
-        $offer = $bolProduct->toRetailerOffer();
-        $offer->QuantityInStock = $quantity;
-        $request = new Wienkit\BolPlazaClient\Requests\BolPlazaUpsertRequest();
-        $request->RetailerOffer = $offer;
-        try {
-            $Plaza->updateOfferStock($request);
-            self::setProductStatus($bolProduct, (int)BolPlazaProduct::STATUS_OK);
-        } catch (Exception $e) {
-            $context->controller->errors[] = Tools::displayError(
-                '[bolplaza] Couldn\'t send update to Bol.com, error: ' . $e->getMessage()
-            );
-        }
-    }
-
-    /**
      * Update a product on Bol.com
      * @param BolPlazaProduct $bolProduct
      * @param Context $context
      */
     public static function processBolProductUpdate($bolProduct, $context)
     {
-        $offerUpdate = $bolProduct->toRetailerOffer();
-        $product = new Product($bolProduct->id_product, false, $context->language->id, $context->shop->id);
-        if (!empty($product->description)) {
-            $offerUpdate->Description = html_entity_decode($product->description);
-        } else {
-            $offerUpdate->Description = html_entity_decode($product->name);
-        }
-
+        $offerUpdate = $bolProduct->toRetailerOffer($context);
         $Plaza = BolPlaza::getClient();
         try {
             $request = new Wienkit\BolPlazaClient\Requests\BolPlazaUpsertRequest();

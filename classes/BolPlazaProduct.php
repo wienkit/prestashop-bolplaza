@@ -103,25 +103,6 @@ class BolPlazaProduct extends ObjectModel
         )
     );
 
-//    /**
-//     * Returns the EAN13 (default or overridden)
-//     * @return string
-//     */
-//    public function getEan13()
-//    {
-//        if (isset($this->ean) && $this->ean != "" && $this->ean != "0") {
-//            return $this->ean;
-//        } else {
-//            if ($this->id_product_attribute) {
-//                $combination = new Combination($this->id_product_attribute);
-//                return $combination->ean13;
-//            } else {
-//                $product = new Product($this->id_product);
-//                return $product->ean13;
-//            }
-//        }
-//    }
-
     /**
      * Returns the condition for the product
      * @return array
@@ -134,9 +115,10 @@ class BolPlazaProduct extends ObjectModel
 
     /**
      * Parse the Product to a Bol processable entity
+     * @param $context Context
      * @return \Wienkit\BolPlazaClient\Entities\BolPlazaRetailerOffer
      */
-    public function toRetailerOffer()
+    public function toRetailerOffer($context)
     {
         $id_product_attribute = $this->id_product_attribute ? $this->id_product_attribute : null;
         $offer = new \Wienkit\BolPlazaClient\Entities\BolPlazaRetailerOffer();
@@ -158,7 +140,7 @@ class BolPlazaProduct extends ObjectModel
         } elseif ($stock > 999) {
             $stock = 999;
         }
-        $product = new Product($this->id_product, false, Language::getIdByIso('NL'));
+        $product = new Product($this->id_product, false, $context->language->id, $context->shop->id);
         $offer->Title = $product->name;
         if (!empty($product->description)) {
             $offer->Description = html_entity_decode($product->description);
