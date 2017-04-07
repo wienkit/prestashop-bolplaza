@@ -298,7 +298,7 @@ class BolPlaza extends Module
             $freeShipping = (bool) Tools::getValue('bolplaza_orders_free_shipping');
             $customerGroup = (int) Tools::getValue('bolplaza_orders_customer_group');
             $useAddress2 = (bool) Tools::getValue('bolplaza_orders_use_address2');
-
+            $updatePrices = (bool) Tools::getValue('bolplaza_orders_update_prices');
 
             if (!$privkey
                 || ! $pubkey
@@ -336,6 +336,31 @@ class BolPlaza extends Module
             $roundup = (double) Tools::getValue('bolplaza_price_roundup');
             if (!empty($roundup)) {
                 Configuration::updateValue('BOL_PLAZA_PRICE_ROUNDUP', $roundup);
+            }
+
+            if (!$updatePrices) {
+                $products = BolPlazaProduct::getAll();
+                foreach ($products as $product) {
+                    $id_product = $product->id_product;
+                    $id_product_attribute = $product->id_product_attribute;
+                    $changed = false;
+                    if (isset($product->price) && $product->price > 0) {
+                        $price = Product::getPriceStatic($id_product, true, $id_product_attribute);
+                        if ($product->price > $price) {
+                            $product->price = $product->price - $price;
+                            $changed = true;
+                        }
+                    }
+                    if (!isset($product->ean) || $product->ean == '' || $product->ean == '0') {
+                        $combination = $id_product_attribute ? new Combination($id_product_attribute) : new Product($id_product);
+                        $product->ean = $combination->ean13;
+                        $changed = true;
+                    }
+                    if ($changed) {
+                        $product->save();
+                    }
+                }
+
             }
         }
         return $output.$this->displayForm();
@@ -536,6 +561,26 @@ class BolPlaza extends Module
                     ),
                     'name' => 'bolplaza_price_roundup',
                     'size' => 20
+                ),
+                array(
+                    'type' => 'switch',
+                    'is_bool' => true,
+                    'values' => array(
+                        array(
+                            'id' => 'bolplaza_orders_update_prices_1',
+                            'value' => 1,
+                            'label' => $this->l('Yes'),
+                        ),
+                        array(
+                            'id' => 'bolplaza_orders_update_prices_0',
+                            'value' => 0,
+                            'label' => $this->l('No')
+                        )
+                    ),
+                    'label' => $this->l('Update pricing'),
+                    'desc' => $this->l('Use this option to update your pricing after release 1.3.5, 
+                        which makes use of the difference instead of the value of the price.'),
+                    'name' => 'bolplaza_orders_update_prices',
                 )
             ),
             'submit' => array(
@@ -592,6 +637,7 @@ class BolPlaza extends Module
         $helper->fields_value['bolplaza_price_addition'] = Configuration::get('BOL_PLAZA_PRICE_ADDITION');
         $helper->fields_value['bolplaza_price_multiplication'] = Configuration::get('BOL_PLAZA_PRICE_MULTIPLICATION');
         $helper->fields_value['bolplaza_price_roundup'] = Configuration::get('BOL_PLAZA_PRICE_ROUNDUP');
+        $helper->fields_value['bolplaza_orders_update_prices'] = 0;
 
 
         return $helper->generateForm($fields_form);
