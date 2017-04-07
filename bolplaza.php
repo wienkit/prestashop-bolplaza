@@ -838,7 +838,12 @@ class BolPlaza extends Module
             $bolProduct->ean = $ean;
             $bolProduct->delivery_time = $delivery_time;
 
-            if (!$published && $price == 0 && $condition == 0 && $ean == $attribute['ean13'] && $delivery_time == '') {
+            if (!$published &&
+                $price == 0 &&
+                $condition == BolPlazaProduct::CONDITION_NEW &&
+                $ean == $attribute['ean13'] &&
+                $delivery_time == ''
+            ) {
                 $bolProduct->delete();
             } else {
                 $bolProduct->save();
