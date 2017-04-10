@@ -143,11 +143,11 @@ class BolPlazaProduct extends ObjectModel
         $product = new Product($this->id_product, false, $context->language->id, $context->shop->id);
         $offer->Title = $product->name;
         if (!empty($product->description)) {
-            $offer->Description = substr(html_entity_decode($product->description), 0, 2000);
+            $offer->Description = Tools::substr(html_entity_decode($product->description), 0, 2000);
         } elseif (!empty($product->description_short)) {
-            $offer->Description = substr(html_entity_decode($product->description_short), 0, 2000);
+            $offer->Description = Tools::substr(html_entity_decode($product->description_short), 0, 2000);
         } else {
-            $offer->Description = substr(html_entity_decode($product->name), 0, 2000);
+            $offer->Description = Tools::substr(html_entity_decode($product->name), 0, 2000);
         }
         $offer->QuantityInStock = $stock;
         $offer->Publish = $this->published == 1 ? 'true' : 'false';

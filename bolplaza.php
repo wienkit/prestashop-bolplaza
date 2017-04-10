@@ -360,7 +360,6 @@ class BolPlaza extends Module
                         $product->save();
                     }
                 }
-
             }
         }
         return $output.$this->displayForm();
