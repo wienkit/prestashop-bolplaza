@@ -24,7 +24,7 @@ class BolPlaza extends Module
     {
         $this->name = 'bolplaza';
         $this->tab = 'market_place';
-        $this->version = '1.3.2';
+        $this->version = '1.3.5';
         $this->author = 'Wienk IT';
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
@@ -40,7 +40,6 @@ class BolPlaza extends Module
                                        orders and products with your Prestashop website.');
 
         $this->confirmUninstall = $this->l('Are you sure you want to uninstall?');
-
     }
 
     /**
@@ -95,7 +94,6 @@ class BolPlaza extends Module
             $return &= Db::getInstance()->execute($s);
         }
         return $return;
-
     }
 
     /**
@@ -123,7 +121,13 @@ class BolPlaza extends Module
             $order_states = OrderState::getOrderStates($lang['id_lang']);
             foreach ($order_states as $state) {
                 if ($state['name'] == $orderStateName) {
-                    Configuration::updateValue('BOL_PLAZA_ORDERS_INITIALSTATE', $state['id_order_state']);
+                    Configuration::updateValue(
+                        'BOL_PLAZA_ORDERS_INITIALSTATE',
+                        $state['id_order_state'],
+                        false,
+                        null,
+                        null
+                    );
                     return true;
                 }
             }
@@ -149,7 +153,13 @@ class BolPlaza extends Module
         $order_state->hidden = false;
         $order_state->deleted = false;
         $order_state->add();
-        Configuration::updateValue('BOL_PLAZA_ORDERS_INITIALSTATE', $order_state->id);
+        Configuration::updateValue(
+            'BOL_PLAZA_ORDERS_INITIALSTATE',
+            $order_state->id,
+            false,
+            null,
+            null
+        );
         return true;
     }
 
@@ -159,7 +169,9 @@ class BolPlaza extends Module
      */
     public function uninstallOrderState()
     {
-        Configuration::deleteByName('BOL_PLAZA_ORDERS_INITIALSTATE');
+        $order_state = new OrderState(Configuration::get('BOL_PLAZA_ORDERS_INITIALSTATE'));
+        $order_state->hidden = true;
+        $order_state->save();
         return true;
     }
 
@@ -259,10 +271,6 @@ class BolPlaza extends Module
             $errors[] = $this->l('You don\'t have the mcrypt php extension enabled, please enable it first.');
         }
 
-        if (!extension_loaded('xsl')) {
-            $errors[] = $this->l('You don\'t have the xsl php extension enabled, please enable it first.');
-        }
-
         $version = explode('.', _PS_VERSION_);
         if (($version[0] * 10000 + $version[1] * 100 + $version[2]) < 10601) {
             $errors[] = $this->l(
@@ -289,6 +297,8 @@ class BolPlaza extends Module
             $deliveryCode = (string) Tools::getValue('bolplaza_orders_delivery_code');
             $freeShipping = (bool) Tools::getValue('bolplaza_orders_free_shipping');
             $customerGroup = (int) Tools::getValue('bolplaza_orders_customer_group');
+            $useAddress2 = (bool) Tools::getValue('bolplaza_orders_use_address2');
+            $updatePrices = (bool) Tools::getValue('bolplaza_orders_update_prices');
 
             if (!$privkey
                 || ! $pubkey
@@ -309,6 +319,7 @@ class BolPlaza extends Module
                 Configuration::updateValue('BOL_PLAZA_ORDERS_DELIVERY_CODE', $deliveryCode);
                 Configuration::updateValue('BOL_PLAZA_ORDERS_FREE_SHIPPING', $freeShipping);
                 Configuration::updateValue('BOL_PLAZA_ORDERS_CUSTOMER_GROUP', $customerGroup);
+                Configuration::updateValue('BOL_PLAZA_ORDERS_USE_ADDRESS2', $useAddress2);
                 $output .= $this->displayConfirmation($this->l('Settings updated'));
             }
 
@@ -327,8 +338,34 @@ class BolPlaza extends Module
                 Configuration::updateValue('BOL_PLAZA_PRICE_ROUNDUP', $roundup);
             }
 
+            if ($updatePrices) {
+                $products = BolPlazaProduct::getAll();
+                foreach ($products as $product) {
+                    $id_product = $product->id_product;
+                    $id_product_attribute = $product->id_product_attribute;
+                    $changed = false;
+                    if (isset($product->price) && $product->price > 0) {
+                        $price = Product::getPriceStatic($id_product, true, $id_product_attribute);
+                        if ($product->price > $price) {
+                            $product->price = $product->price - $price;
+                            $changed = true;
+                        }
+                    }
+                    if (!isset($product->ean) || $product->ean == '' || $product->ean == '0') {
+                        if (isset($id_product_attribute) && $id_product_attribute > 0) {
+                            $combination = new Combination($id_product_attribute);
+                        } else {
+                            $combination = new Product($id_product);
+                        }
+                        $product->ean = $combination->ean13;
+                        $changed = true;
+                    }
+                    if ($changed) {
+                        $product->save();
+                    }
+                }
+            }
         }
-
         return $output.$this->displayForm();
     }
 
@@ -340,8 +377,14 @@ class BolPlaza extends Module
     {
         // Get default language
         $default_lang = (int)Configuration::get('PS_LANG_DEFAULT');
-
-        $carriers = Carrier::getCarriers(Context::getContext()->language->id);
+        $carriers = Carrier::getCarriers(
+            Context::getContext()->language->id,
+            false,
+            false,
+            false,
+            null,
+            Carrier::ALL_CARRIERS
+        );
         $delivery_codes = BolPlazaProduct::getDeliveryCodes();
         $customer_groups = Group::getGroups(Context::getContext()->language->id);
 
@@ -459,6 +502,25 @@ class BolPlaza extends Module
                         )
                     ),
                     'hint' => $this->l('Don\'t calculate shipping costs.')
+                ),
+                array(
+                    'type' => 'switch',
+                    'label' => $this->l('Housenumber in address2'),
+                    'name' => 'bolplaza_orders_use_address2',
+                    'is_bool' => true,
+                    'values' => array(
+                        array(
+                            'id' => 'bolplaza_orders_use_address2_1',
+                            'value' => 1,
+                            'label' => $this->l('Yes'),
+                        ),
+                        array(
+                            'id' => 'bolplaza_orders_use_address2_0',
+                            'value' => 0,
+                            'label' => $this->l('No')
+                        )
+                    ),
+                    'desc' => $this->l('Won\'t append housenumber to street but uses separate field for housenumber')
                 )
             ),
             'submit' => array(
@@ -486,22 +548,38 @@ class BolPlaza extends Module
                 array(
                     'type' => 'text',
                     'label' => $this->l('Multiplication factor'),
-                    'desc' => $this->l(
-                        'Multiply the normal price (incl. VAT and addition amount)
-                        with this factor, for example 1.20 for 20 percent'
-                    ),
+                    'desc' => $this->l('Multiply the normal price (incl. VAT and addition amount)' .
+                        ' with this factor, for example 1.20 for 20 percent'),
                     'name' => 'bolplaza_price_multiplication',
                     'size' => 20
                 ),
                 array(
                     'type' => 'text',
                     'label' => $this->l('Round up amount'),
-                    'desc' => $this->l(
-                        'Round the amount up to a specific unit. For example,
-                        use 0.10 to round from 1.52 to 1.60'
-                    ),
+                    'desc' => $this->l('Round the amount up to a specific unit. For example,' .
+                        ' use 0.10 to round from 1.52 to 1.60'),
                     'name' => 'bolplaza_price_roundup',
                     'size' => 20
+                ),
+                array(
+                    'type' => 'switch',
+                    'is_bool' => true,
+                    'values' => array(
+                        array(
+                            'id' => 'bolplaza_orders_update_prices_1',
+                            'value' => 1,
+                            'label' => $this->l('Yes'),
+                        ),
+                        array(
+                            'id' => 'bolplaza_orders_update_prices_0',
+                            'value' => 0,
+                            'label' => $this->l('No')
+                        )
+                    ),
+                    'label' => $this->l('Update pricing'),
+                    'desc' => $this->l('Use this option to update your pricing after release 1.3.5,' .
+                        ' which makes use of the difference instead of the value of the price.'),
+                    'name' => 'bolplaza_orders_update_prices',
                 )
             ),
             'submit' => array(
@@ -549,6 +627,7 @@ class BolPlaza extends Module
         $helper->fields_value['bolplaza_orders_carrier_code'] = Configuration::get('BOL_PLAZA_ORDERS_CARRIER_CODE');
         $helper->fields_value['bolplaza_orders_delivery_code'] = Configuration::get('BOL_PLAZA_ORDERS_DELIVERY_CODE');
         $helper->fields_value['bolplaza_orders_free_shipping'] = Configuration::get('BOL_PLAZA_ORDERS_FREE_SHIPPING');
+        $helper->fields_value['bolplaza_orders_use_address2'] = Configuration::get('BOL_PLAZA_ORDERS_USE_ADDRESS2');
         $customerGroup = Configuration::get('BOL_PLAZA_ORDERS_CUSTOMER_GROUP');
         if (empty($customerGroup)) {
             $customerGroup = Configuration::get('PS_CUSTOMER_GROUP');
@@ -557,6 +636,7 @@ class BolPlaza extends Module
         $helper->fields_value['bolplaza_price_addition'] = Configuration::get('BOL_PLAZA_PRICE_ADDITION');
         $helper->fields_value['bolplaza_price_multiplication'] = Configuration::get('BOL_PLAZA_PRICE_MULTIPLICATION');
         $helper->fields_value['bolplaza_price_roundup'] = Configuration::get('BOL_PLAZA_PRICE_ROUNDUP');
+        $helper->fields_value['bolplaza_orders_update_prices'] = 0;
 
 
         return $helper->generateForm($fields_form);
@@ -601,7 +681,7 @@ class BolPlaza extends Module
     /**
      * Update a shipment to Bol.com
      * Executes hook: actionObjectOrderCarrierUpdateAfter
-     * @param array $param
+     * @param array $params
      */
     public function hookActionObjectOrderCarrierUpdateAfter($params)
     {
@@ -635,7 +715,8 @@ class BolPlaza extends Module
     /**
      * Add a new tab to the product page
      * Executes hook: displayAdminProductsExtra
-     * @param array $param
+     * @param $params
+     * @return string
      */
     public function hookDisplayAdminProductsExtra($params)
     {
@@ -646,7 +727,7 @@ class BolPlaza extends Module
             $product = new Product($id_product, true, $this->context->language->id, $this->context->shop->id);
         }
         if (!Validate:: isLoadedObject($product)) {
-            return;
+            return "";
         }
 
         $attributes = $product->getAttributesResume($this->context->language->id);
@@ -655,12 +736,14 @@ class BolPlaza extends Module
             $attributes[] = array(
                 'id_product' => $product->id,
                 'id_product_attribute' => 0,
-                'attribute_designation' => ''
+                'attribute_designation' => '',
+                'ean13' => $product->ean13
             );
         }
 
         $product_designation = array();
         $product_calculatedprice = array();
+        $product_baseprice = array();
 
         $addition = (double) Configuration::get('BOL_PLAZA_PRICE_ADDITION');
         $multiplication = (double) Configuration::get('BOL_PLAZA_PRICE_MULTIPLICATION');
@@ -672,9 +755,13 @@ class BolPlaza extends Module
                 ' - '
             );
 
-            $price = $product->getPrice();
+            $price = 0;
             if ($attribute['id_product_attribute'] != 0) {
-                $price += Combination::getPrice($attribute['id_product_attribute']);
+                $price = $product->getPrice(true, $attribute['id_product_attribute']);
+                $product_baseprice[$attribute['id_product_attribute']] = $price;
+            } else {
+                $price = $product->getPrice();
+                $product_baseprice[$attribute['id_product_attribute']] = $price;
             }
             if ($addition > 0) {
                 $price += $addition;
@@ -699,9 +786,12 @@ class BolPlaza extends Module
             'attributes' => $attributes,
             'product_designation' => $product_designation,
             'calculated_price' => $product_calculatedprice,
+            'base_price' => $product_baseprice,
             'product' => $product,
             'bol_products' => $indexedBolProducts,
-            'delivery_codes' => BolPlazaProduct::getDeliveryCodes()
+            'token' => Tools::getAdminTokenLite('AdminBolPlazaProducts'),
+            'delivery_codes' => BolPlazaProduct::getDeliveryCodes(),
+            'conditions' => BolPlazaProduct::getConditions()
         ));
 
         return $this->display(__FILE__, 'views/templates/admin/bolproduct.tpl');
@@ -710,7 +800,7 @@ class BolPlaza extends Module
     /**
      * Process BolProduct entities added on the product page
      * Executes hook: actionProductUpdate
-     * @param array $param
+     * @param array $params
      */
     public function hookActionProductUpdate($params)
     {
@@ -731,7 +821,8 @@ class BolPlaza extends Module
         if (empty($attributes)) {
             $attributes[] = array(
                 'id_product_attribute' => 0,
-                'attribute_designation' => ''
+                'attribute_designation' => '',
+                'ean13' => $product->ean13
             );
         }
 
@@ -741,7 +832,7 @@ class BolPlaza extends Module
             $indexedBolProducts[$bolProduct['id_product_attribute']] = $bolProduct;
         }
 
-        // get form inforamtion
+        // get form information
         foreach ($attributes as $attribute) {
             $key = $product->id.'_'.$attribute['id_product_attribute'];
 
@@ -750,21 +841,35 @@ class BolPlaza extends Module
             $price = Tools::getValue('bolplaza_price_'.$key, 0);
             $ean = Tools::getValue('bolplaza_ean_'.$key);
             $delivery_time = Tools::getValue('bolplaza_delivery_time_'.$key);
+            if ($delivery_time == 'default') {
+                $delivery_time = null;
+            }
+            $condition = Tools::getValue('bolplaza_condition_'.$key);
 
             if (array_key_exists($attribute['id_product_attribute'], $indexedBolProducts)) {
                 $bolProduct = new BolPlazaProduct(
                     $indexedBolProducts[$attribute['id_product_attribute']]['id_bolplaza_product']
                 );
-                if (
-                    $bolProduct->price == $price &&
+                if ($bolProduct->price == $price &&
                     $bolProduct->published == $published &&
+                    $bolProduct->condition == $condition &&
                     $bolProduct->ean == $ean &&
                     $bolProduct->delivery_time == $delivery_time
                 ) {
                     continue;
+                } elseif ($ean != $bolProduct->ean || $condition != $bolProduct->condition) {
+                    // New identifying info, so remove the old product and add as a new one
+                    AdminBolPlazaProductsController::processBolProductDelete($bolProduct, $this->context);
+                    $bolProduct->status = BolPlazaProduct::STATUS_NEW;
+                } else {
+                    $bolProduct->status = BolPlazaProduct::STATUS_INFO_UPDATE;
                 }
-                $bolProduct->status = BolPlazaProduct::STATUS_INFO_UPDATE;
-            } elseif (!$published && $price == 0) {
+            } elseif (!$published &&
+                $price == 0 &&
+                $condition == 0 &&
+                $ean == $attribute['ean13'] &&
+                $delivery_time == null
+            ) {
                 continue;
             } else {
                 $bolProduct = new BolPlazaProduct();
@@ -774,10 +879,16 @@ class BolPlaza extends Module
             $bolProduct->id_product_attribute = $attribute['id_product_attribute'];
             $bolProduct->price = $price;
             $bolProduct->published = $published;
+            $bolProduct->condition = $condition;
             $bolProduct->ean = $ean;
             $bolProduct->delivery_time = $delivery_time;
 
-            if (!$bolProduct->published && $price == 0) {
+            if (!$published &&
+                $price == 0 &&
+                $condition == BolPlazaProduct::CONDITION_NEW &&
+                $ean == $attribute['ean13'] &&
+                $delivery_time == ''
+            ) {
                 $bolProduct->delete();
             } else {
                 $bolProduct->save();
@@ -793,7 +904,7 @@ class BolPlaza extends Module
     public function hookActionObjectBolPlazaProductAddAfter($param)
     {
         if (!empty($param['object'])) {
-            AdminBolPlazaProductsController::processBolProductCreate($param['object'], $this->context);
+            AdminBolPlazaProductsController::processBolProductUpdate($param['object'], $this->context);
         }
     }
 
@@ -827,7 +938,7 @@ class BolPlaza extends Module
         if (!empty($bolProductId)) {
             $bolProduct = new BolPlazaProduct($bolProductId);
             AdminBolPlazaProductsController::setProductStatus($bolProduct, (int)BolPlazaProduct::STATUS_STOCK_UPDATE);
-            AdminBolPlazaProductsController::processBolQuantityUpdate($bolProduct, $param['quantity'], $this->context);
+            AdminBolPlazaProductsController::processBolProductUpdate($bolProduct, $this->context);
         }
     }
 
@@ -850,6 +961,7 @@ class BolPlaza extends Module
     {
         $context = Context::getContext();
         AdminBolPlazaOrdersController::synchronize();
+        AdminBolPlazaProductsController::synchronizeFromBol($context);
         AdminBolPlazaProductsController::synchronize($context);
     }
 }

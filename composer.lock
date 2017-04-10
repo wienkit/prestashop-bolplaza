@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "df9efce6ed6ef7d055500a7b42ffa096",
+    "content-hash": "f6e7552026462a015e3b6c06c0cdd15a",
     "packages": [
         {
             "name": "wienkit/bol-plaza-php-client",
-            "version": "2.1.0",
+            "version": "2.2.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wienkit/bol-plaza-php-client.git",
-                "reference": "9b4de8005c73ec8dfcddceb136bef6eca2e0fb1f"
+                "reference": "001ebdbe3c12033d50b2dc363730d64c5b7782c5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wienkit/bol-plaza-php-client/zipball/9b4de8005c73ec8dfcddceb136bef6eca2e0fb1f",
-                "reference": "9b4de8005c73ec8dfcddceb136bef6eca2e0fb1f",
+                "url": "https://api.github.com/repos/wienkit/bol-plaza-php-client/zipball/001ebdbe3c12033d50b2dc363730d64c5b7782c5",
+                "reference": "001ebdbe3c12033d50b2dc363730d64c5b7782c5",
                 "shasum": ""
             },
             "require": {
@@ -51,7 +51,7 @@
                 "php",
                 "plaza"
             ],
-            "time": "2016-09-23T22:39:26+00:00"
+            "time": "2017-04-10T09:33:06+00:00"
         }
     ],
     "packages-dev": [],

@@ -20,6 +20,12 @@ class BolPlazaProduct extends ObjectModel
     const STATUS_STOCK_UPDATE = 2;
     const STATUS_INFO_UPDATE = 3;
 
+    const CONDITION_NEW = 0;
+    const CONDITION_AS_NEW = 1;
+    const CONDITION_GOOD = 2;
+    const CONDITION_REASONABLE = 3;
+    const CONDITION_MODERATE = 4;
+
     /** @var int */
     public $id_bolplaza_product;
 
@@ -31,6 +37,9 @@ class BolPlazaProduct extends ObjectModel
 
     /** @var string */
     public $ean;
+
+    /** @var int */
+    public $condition = 0;
 
     /** @var string */
     public $delivery_time;
@@ -67,6 +76,10 @@ class BolPlazaProduct extends ObjectModel
                 'shop' => true,
                 'validate' => 'isEan13'
             ),
+            'condition' => array(
+                'type' => self::TYPE_INT,
+                'validate' => 'isUnsignedId'
+            ),
             'delivery_time' => array(
                 'type' => self::TYPE_STRING,
                 'shop' => true,
@@ -89,6 +102,58 @@ class BolPlazaProduct extends ObjectModel
             )
         )
     );
+
+    /**
+     * Returns the condition for the product
+     * @return array
+     */
+    public function getCondition()
+    {
+        $conditions = self::getConditions();
+        return $conditions[$this->condition]['code'];
+    }
+
+    /**
+     * Parse the Product to a Bol processable entity
+     * @param $context Context
+     * @return \Wienkit\BolPlazaClient\Entities\BolPlazaRetailerOffer
+     */
+    public function toRetailerOffer($context)
+    {
+        $id_product_attribute = $this->id_product_attribute ? $this->id_product_attribute : null;
+        $offer = new \Wienkit\BolPlazaClient\Entities\BolPlazaRetailerOffer();
+        $offer->EAN = $this->ean;
+        $offer->Condition = $this->getCondition();
+        $price = Product::getPriceStatic($this->id_product, true, $id_product_attribute);
+        $offer->Price = $price + $this->price;
+        if ($this->delivery_time != null) {
+            $offer->DeliveryCode = $this->delivery_time;
+        } else {
+            $offer->DeliveryCode = Configuration::get('BOL_PLAZA_ORDERS_DELIVERY_CODE');
+        }
+        $stock = StockAvailable::getQuantityAvailableByProduct(
+            $this->id_product,
+            $id_product_attribute
+        );
+        if ($stock < 0) {
+            $stock = 0;
+        } elseif ($stock > 999) {
+            $stock = 999;
+        }
+        $product = new Product($this->id_product, false, $context->language->id, $context->shop->id);
+        $offer->Title = $product->name;
+        if (!empty($product->description)) {
+            $offer->Description = Tools::substr(html_entity_decode($product->description), 0, 2000);
+        } elseif (!empty($product->description_short)) {
+            $offer->Description = Tools::substr(html_entity_decode($product->description_short), 0, 2000);
+        } else {
+            $offer->Description = Tools::substr(html_entity_decode($product->name), 0, 2000);
+        }
+        $offer->QuantityInStock = $stock;
+        $offer->Publish = $this->published == 1 ? 'true' : 'false';
+        $offer->ReferenceCode = $this->id_bolplaza_product;
+        return $offer;
+    }
 
     /**
      * Returns the BolProduct data for a product ID
@@ -128,7 +193,7 @@ class BolPlazaProduct extends ObjectModel
 			SELECT `id_bolplaza_product`
 			FROM `'._DB_PREFIX_.'bolplaza_product`
 			WHERE `id_product` = '.(int)$id_product.'
-      AND `id_product_attribute` = '.(int)$id_product_attribute);
+            AND `id_product_attribute` = '.(int)$id_product_attribute);
     }
 
     /**
@@ -146,6 +211,20 @@ class BolPlazaProduct extends ObjectModel
 
     /**
      * Returns a list of BolProduct objects that need an update
+     * @return BolPlazaProduct[]
+     */
+    public static function getAll()
+    {
+        return ObjectModel::hydrateCollection(
+            'BolPlazaProduct',
+            Db::getInstance()->executeS('
+                SELECT *
+                FROM `'._DB_PREFIX_.'bolplaza_product`')
+        );
+    }
+
+    /**
+     * Returns a list of BolProduct objects that need an update
      * @return array
      */
     public static function getUpdatedProducts()
@@ -157,6 +236,41 @@ class BolPlazaProduct extends ObjectModel
                 FROM `'._DB_PREFIX_.'bolplaza_product`
                 WHERE `status` > 0
                 LIMIT 1000')
+        );
+    }
+
+    /**
+     * Returns a list of the possible conditions
+     * @return array
+     */
+    public static function getConditions()
+    {
+        return array(
+            self::CONDITION_NEW => array(
+                'value' => self::CONDITION_NEW,
+                'code' => 'NEW',
+                'description' => 'New'
+            ),
+            self::CONDITION_AS_NEW => array(
+                'value' => self::CONDITION_AS_NEW,
+                'code' => 'AS_NEW',
+                'description' => 'As new'
+            ),
+            self::CONDITION_GOOD => array(
+                'value' => self::CONDITION_GOOD,
+                'code' => 'GOOD',
+                'description' => 'Good'
+            ),
+            self::CONDITION_REASONABLE => array(
+                'value' => self::CONDITION_REASONABLE,
+                'code' => 'REASONABLE',
+                'description' => 'Reasonable'
+            ),
+            self::CONDITION_MODERATE => array(
+                'value' => self::CONDITION_MODERATE,
+                'code' => 'MODERATE',
+                'description' => 'Moderate'
+            ),
         );
     }
 
