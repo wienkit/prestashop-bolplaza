@@ -352,7 +352,11 @@ class BolPlaza extends Module
                         }
                     }
                     if (!isset($product->ean) || $product->ean == '' || $product->ean == '0') {
-                        $combination = $id_product_attribute ? new Combination($id_product_attribute) : new Product($id_product);
+                        if (isset($id_product_attribute) && $id_product_attribute > 0) {
+                            $combination = new Combination($id_product_attribute)
+                        } else {
+                            $combination = new Product($id_product);
+                        }
                         $product->ean = $combination->ean13;
                         $changed = true;
                     }
