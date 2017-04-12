@@ -267,6 +267,10 @@ class AdminBolPlazaProductsController extends ModuleAdminController
         if (Tools::getIsset('published'.$this->table)) {
             $this->action = 'published';
         }
+        if (Tools::getIsset('bol_published'.$this->table)) {
+            $this->display = 'view';
+            $this->action = 'view';
+        }
         if (!$this->action) {
             parent::initProcess();
         }
