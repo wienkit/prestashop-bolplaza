@@ -201,7 +201,6 @@ class AdminBolPlazaOrdersController extends AdminController
 
         foreach ($Plaza->getOrders() as $order) {
             if (!self::getTransactionExists($order->OrderId)) {
-
                 $cart = self::parse($order);
 
                 if (!$cart) {
@@ -310,14 +309,25 @@ class AdminBolPlazaOrdersController extends AdminController
         $address->firstname = $details->Firstname;
         $address->lastname = $details->Surname;
         $address->address1 = $details->Streetname;
-        $address->address1.= ' ' . $details->Housenumber;
+
+        $houseNumber = $details->Housenumber;
+        $address2 = "";
         if ($details->HousenumberExtended != '') {
-            $address->address1.= ' ' . $details->HousenumberExtended;
+            $houseNumber .= ' ' . $details->HousenumberExtended;
         }
-        $address->address2.= $details->AddressSupplement;
-        if ($details->HousenumberExtended != '') {
-            $address->address2.= ' (' . $details->ExtraAddressInformation . ')';
+        if (Configuration::get('BOL_PLAZA_ORDERS_USE_ADDRESS2')) {
+            $address2 = $houseNumber;
+        } else {
+            $address->address1 .= ' ' . $houseNumber;
         }
+
+        if ($details->AddressSupplement) {
+            $address2 .= ' ' . $details->AddressSupplement;
+        }
+        if ($details->ExtraAddressInformation != '') {
+            $address2 .= ' (' . $details->ExtraAddressInformation . ')';
+        }
+        $address->address2 = trim($address2);
         $address->postcode = $details->ZipCode;
         $address->city = $details->City;
         $address->id_country = Country::getByIso($details->CountryCode);
@@ -358,7 +368,10 @@ class AdminBolPlazaOrdersController extends AdminController
         $hasProducts = false;
         if (!empty($items)) {
             foreach ($items as $item) {
-                $productIds = self::getProductIdByEan($item->EAN);
+                $productIds = self::getProductIdFromReference($item->OfferReference);
+                if (empty($productIds)) {
+                    $productIds = self::getProductIdByEan($item->EAN);
+                }
                 if (empty($productIds) || !array_key_exists('id_product', $productIds)) {
                     $context->controller->errors[] = Translate::getAdminTranslation(
                         'Couldn\'t find product for EAN: ',
@@ -505,6 +518,26 @@ class AdminBolPlazaOrdersController extends AdminController
     }
 
     /**
+     * Split the saved reference and check if a product exists
+     *
+     * @param $reference
+     * @return array|bool
+     */
+    public static function getProductIdFromReference($reference)
+    {
+        $bolProduct = new BolPlazaProduct($reference);
+        if ($bolProduct != null) {
+            $result = array();
+            $result['id_product'] = $bolProduct->id_product;
+            if ($bolProduct->id_product_attribute) {
+                $result['id_product_attribute'] = $bolProduct->id_product_attribute;
+            }
+            return $result;
+        }
+        return false;
+    }
+
+    /**
      * Return the product ID for an EAN number
      * @param string $ean
      * @return array the product (and attribute)
@@ -527,6 +560,7 @@ class AdminBolPlazaOrdersController extends AdminController
         if ($product) {
             return array('id_product' => $product, 'id_product_attribute' => 0);
         }
+        return null;
     }
 
     /**

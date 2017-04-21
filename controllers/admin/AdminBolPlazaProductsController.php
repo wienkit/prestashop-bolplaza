@@ -67,21 +67,25 @@ class AdminBolPlazaProductsController extends ModuleAdminController
                 'align' => 'text-left',
             ),
             'price' => array(
-                'title' => $this->l('Bol specific price'),
+                'title' => $this->l('Bol.com price addition'),
                 'type' => 'price',
-                'align' => 'text-right',
+                'filter' => false,
+                'search' => false,
+                'align' => 'text-right'
             ),
             'published' => array(
                 'title' => $this->l('Published'),
                 'type' => 'bool',
                 'active' => 'published',
                 'align' => 'text-center',
+                'filter_key' => 'a!published',
                 'class' => 'fixed-width-sm'
             ),
             'bol_published' => array(
                 'title' => $this->l('Published on Bol'),
                 'type' => 'bool',
                 'active' => 'bol_published',
+                'filter_key' => 'bo!published',
                 'align' => 'text-center',
                 'class' => 'fixed-width-sm'
             ),
@@ -107,6 +111,12 @@ class AdminBolPlazaProductsController extends ModuleAdminController
         $this->addRowAction('resetUpdated');
         $this->addRowAction('resetStock');
         $this->addRowAction('resetOk');
+    }
+
+    public function setMedia()
+    {
+        parent::setMedia();
+        $this->addJS(__PS_BASE_URI__ . 'modules/bolplaza/views/js/bolplaza.js');
     }
 
     /**
@@ -254,6 +264,81 @@ class AdminBolPlazaProductsController extends ModuleAdminController
         );
     }
 
+    public function initProcess()
+    {
+        if (Tools::getIsset('published'.$this->table)) {
+            $this->action = 'published';
+        }
+        if (Tools::getIsset('bol_published'.$this->table)) {
+            $this->display = 'view';
+            $this->action = 'view';
+        }
+        if (!$this->action) {
+            parent::initProcess();
+        }
+    }
+
+    /**
+     * Process the price updater widget
+     */
+    public function ajaxProcessUpdateBolPrice()
+    {
+        $id_bolplaza_product = Tools::getValue("id_bolplaza_product");
+        $price = Tools::getValue("price");
+        if ($id_bolplaza_product && $price) {
+            $price = str_replace(',', '.', $price);
+            $bolProduct = new BolPlazaProduct($id_bolplaza_product);
+            $bolProduct->price = $price;
+            $bolProduct->save();
+            return die(Tools::jsonEncode(array(
+                'error' => false,
+                'message' => sprintf($this->l('Updated Bol.com ID: %s'), $bolProduct->id_bolplaza_product),
+                'price' => $bolProduct->price
+            )));
+        } else {
+            return die(Tools::jsonEncode(array('error' => $this->l('You did not send the right parameters'))));
+        }
+    }
+
+    /**
+     * Process the commission calculation
+     */
+    public function ajaxProcessCalculateCommission()
+    {
+        $ean = Tools::getValue("ean");
+        $condition = Tools::getValue("condition");
+        $price = Tools::getValue("price");
+
+        try {
+            $Plaza = BolPlaza::getClient();
+            $commission = $Plaza->getCommission($ean, $condition, $price);
+            $reductions = array();
+            foreach ($commission->Reductions as $reduction) {
+                $reductions[] = array(
+                    'max' => $reduction->MaximumPrice,
+                    'reduction' => $reduction->CostReduction,
+                    'start' => $reduction->StartDate,
+                    'end' => $reduction->EndDate
+                );
+            }
+            return die(Tools::jsonEncode(array(
+                'error' => false,
+                'cost' => array(
+                    'fixed' => $commission->FixedAmount,
+                    'percentage' => $commission->Percentage,
+                    'total' => $commission->TotalCost,
+                    'totalWithoutReduction' => $commission->TotalCostWithoutReduction,
+                ),
+                'reductions' => $reductions
+            )));
+        } catch (Exception $e) {
+            return die(Tools::jsonEncode(array(
+                'error' => true,
+                'message' => sprintf($e->getMessage())
+            )));
+        }
+    }
+
     /**
      * Processes the request
      */
@@ -270,28 +355,7 @@ class AdminBolPlazaProductsController extends ModuleAdminController
                 'The sync wil request a new file on the next run.'
             );
         } elseif ((bool)Tools::getValue('sync_products')) {
-            $bolplaza = BolPlaza::getClient();
-            $url = Configuration::get('BOL_PLAZA_ORDERS_OWNOFFERS');
-            if (!$url) {
-                $ownOffers = $bolplaza->getOwnOffers();
-                $url = $ownOffers->Url;
-            }
-            try {
-                $ownOffersResult = $bolplaza->getOwnOffersResult($url);
-                Configuration::deleteByName('BOL_PLAZA_ORDERS_OWNOFFERS');
-                $this->handleOwnOffers($ownOffersResult);
-                $this->updateOwnOffersStock();
-                $this->updateOwnOffersInfo();
-                $this->updateOwnOffersNew();
-                $this->confirmations[] = $this->l(
-                    'The file has been processed.'
-                ) . $url;
-            } catch (Wienkit\BolPlazaClient\Exceptions\BolPlazaClientException $e) {
-                Configuration::set('BOL_PLAZA_ORDERS_OWNOFFERS', $url);
-                $this->confirmations[] = $this->l(
-                    'The file will be generated by Bol.com. Click this button again in a few minutes.'
-                );
-            }
+            self::synchronizeFromBol($this->context);
         } elseif ((bool)Tools::getValue('update_products')) {
             self::synchronize($this->context);
             $this->confirmations[] = $this->l('Bol products fully synchronized.');
@@ -324,24 +388,24 @@ class AdminBolPlazaProductsController extends ModuleAdminController
         return parent::postProcess();
     }
 
+    public function processPublished()
+    {
+        /** @var BolPlazaProduct $bolProduct */
+        if (Validate::isLoadedObject($bolProduct = $this->loadObject())) {
+            $bolProduct->published = $bolProduct->published ? 0 : 1;
+            $bolProduct->save();
+        }
+    }
+
     /**
      * Synchronize changed products
+     * @param Context $context
      */
     public static function synchronize($context)
     {
         $bolProducts = BolPlazaProduct::getUpdatedProducts();
         foreach ($bolProducts as $bolProduct) {
-            switch ($bolProduct->status) {
-                case BolPlazaProduct::STATUS_NEW:
-                    self::processBolProductCreate($bolProduct, $context);
-                    break;
-                case BolPlazaProduct::STATUS_INFO_UPDATE:
-                    self::processBolProductUpdate($bolProduct, $context);
-                    break;
-                case BolPlazaProduct::STATUS_STOCK_UPDATE:
-                    self::processBolStockUpdate($bolProduct, $context);
-                    break;
-            }
+            self::processBolProductUpdate($bolProduct, $context);
         }
     }
 
@@ -349,19 +413,20 @@ class AdminBolPlazaProductsController extends ModuleAdminController
      * Handle the own offers returned result from Bol.com
      * @param string $ownOffers
      */
-    public function handleOwnOffers($ownOffers)
+    public static function handleOwnOffers($ownOffers)
     {
         DB::getInstance()->delete('bolplaza_ownoffers');
         $keys = array(
-            'OfferId' => 'id_bolplaza_product',
-            'Reference' => 'reference',
             'EAN' => 'ean',
             'Condition' => 'condition',
-            'Stock' => 'stock',
             'Price' => 'price',
-            'Description' => 'description',
             'Deliverycode' => 'delivery_code',
+            'Stock' => 'stock',
             'Publish' => 'publish',
+            'Reference' => 'id_bolplaza_product',
+            'Description' => 'description',
+            'Title' => 'title',
+            'FulfillmentMethod' => 'fulfillment',
             'Published' => 'published',
             'ReasonCode' => 'reasoncode',
             'Reason' => 'reason',
@@ -375,6 +440,7 @@ class AdminBolPlazaProductsController extends ModuleAdminController
         $data = array_filter($data, 'AdminBolPlazaProductsController::filterCsvRow');
         DB::getInstance()->insert('bolplaza_ownoffers', $data);
     }
+
 
     /**
      * @param $row
@@ -404,13 +470,13 @@ class AdminBolPlazaProductsController extends ModuleAdminController
      */
     public static function filterCsvRow($row)
     {
-        return ((int) $row['id_bolplaza_product']) != 0;
+        return array_key_exists('id_bolplaza_product', $row) && (((int) $row['id_bolplaza_product']) != 0);
     }
 
     /**
      * Updates the BolPlazaProduct status with the stock status from Bol.com
      */
-    protected function updateOwnOffersStock()
+    private static function updateOwnOffersStock()
     {
         // Update stock status
         $sql = "SELECT bo.id_bolplaza_product
@@ -420,7 +486,8 @@ class AdminBolPlazaProductsController extends ModuleAdminController
                 INNER JOIN "._DB_PREFIX_."stock_available sa 
                     ON sa.id_product = bp.id_product
                     AND sa.id_product_attribute = bp.id_product_attribute
-                WHERE sa.quantity <> bo.stock";
+                WHERE (sa.quantity <> bo.stock)
+                    AND (bo.stock <> 999 OR (sa.quantity > 0 AND sa.quantity < 1000))";
         $results = Db::getInstance()->executeS($sql);
         $ids = array();
         foreach ($results as $row) {
@@ -440,15 +507,14 @@ class AdminBolPlazaProductsController extends ModuleAdminController
     /**
      * Updates the BolPlazaProduct status to new if there is changed data
      */
-    protected function updateOwnOffersInfo()
+    private static function updateOwnOffersInfo()
     {
         // Update stock status
         $sql = "SELECT bo.id_bolplaza_product
                 FROM "._DB_PREFIX_."bolplaza_ownoffers bo 
                 INNER JOIN "._DB_PREFIX_."bolplaza_product bp 
                     ON bo.id_bolplaza_product = bp.id_bolplaza_product
-                WHERE bo.price <> bp.price
-                    OR bo.publish <> bp.published";
+                WHERE bo.publish <> bp.published";
         $results = Db::getInstance()->executeS($sql);
         $ids = array();
         foreach ($results as $row) {
@@ -468,7 +534,7 @@ class AdminBolPlazaProductsController extends ModuleAdminController
     /**
      * Updates the BolPlazaProduct status if the product isn't available at Bol.com
      */
-    protected function updateOwnOffersNew()
+    private static function updateOwnOffersNew()
     {
         // Update stock status
         $sql = "SELECT bp.id_bolplaza_product
@@ -514,46 +580,10 @@ class AdminBolPlazaProductsController extends ModuleAdminController
     {
         $Plaza = BolPlaza::getClient();
         try {
-            $Plaza->deleteOffer($bolProduct->id);
+            $Plaza->deleteOffer($bolProduct->ean, $bolProduct->getCondition());
         } catch (Exception $e) {
             $context->controller->errors[] = Tools::displayError(
                 'Couldn\'t send update to Bol.com, error: ' . $e->getMessage() . 'You have to correct this manually.'
-            );
-        }
-    }
-
-    /**
-     * Update the stock on Bol.com
-     * @param BolPlazaProduct $bolProduct
-     * @param Context $context
-     */
-    public static function processBolStockUpdate($bolProduct, $context)
-    {
-        $product = new Product($bolProduct->id_product, false, $context->language->id, $context->shop->id);
-        $quantity = StockAvailable::getQuantityAvailableByProduct(
-            $product->id,
-            $bolProduct->id_product_attribute
-        );
-        self::processBolQuantityUpdate($bolProduct, $quantity, $context);
-    }
-
-    /**
-     * Update the stock on Bol.com
-     * @param BolPlazaProduct $bolProduct
-     * @param int $quantity
-     * @param Context $context
-     */
-    public static function processBolQuantityUpdate($bolProduct, $quantity, $context)
-    {
-        $Plaza = BolPlaza::getClient();
-        $stockUpdate = new Wienkit\BolPlazaClient\Entities\BolPlazaStockUpdate();
-        $stockUpdate->QuantityInStock = $quantity;
-        try {
-            $Plaza->updateOfferStock($bolProduct->id, $stockUpdate);
-            self::setProductStatus($bolProduct, (int)BolPlazaProduct::STATUS_OK);
-        } catch (Exception $e) {
-            $context->controller->errors[] = Tools::displayError(
-                '[bolplaza] Couldn\'t send update to Bol.com, error: ' . $e->getMessage()
             );
         }
     }
@@ -565,108 +595,12 @@ class AdminBolPlazaProductsController extends ModuleAdminController
      */
     public static function processBolProductUpdate($bolProduct, $context)
     {
-        $offerUpdate = new Wienkit\BolPlazaClient\Entities\BolPlazaOfferUpdate();
-        if ($bolProduct->delivery_time != null) {
-            $offerUpdate->DeliveryCode = $bolProduct->delivery_time;
-        } else {
-            $offerUpdate->DeliveryCode = Configuration::get('BOL_PLAZA_ORDERS_DELIVERY_CODE');
-        }
-        $offerUpdate->Publish = $bolProduct->published == 1 ? 'true' : 'false';
-
-        $product = new Product($bolProduct->id_product, false, $context->language->id, $context->shop->id);
-        if ($bolProduct->id_product_attribute) {
-            $combination = new Combination($bolProduct->id_product_attribute);
-            $offerUpdate->ReferenceCode = $combination->reference;
-        } else {
-            $offerUpdate->ReferenceCode = $product->reference;
-        }
-
-        if (!empty($product->description)) {
-            $offerUpdate->Description = html_entity_decode($product->description);
-        } else {
-            $offerUpdate->Description = html_entity_decode($product->name);
-        }
-
-        $price = $bolProduct->price;
-        if ($price == 0) {
-            $price = Product::getPriceStatic(
-                (int)$bolProduct->id_product,
-                true,
-                (int)$bolProduct->id_product_attribute
-            );
-        }
-        $offerUpdate->Price = $price;
-
+        $offerUpdate = $bolProduct->toRetailerOffer($context);
         $Plaza = BolPlaza::getClient();
         try {
-            $Plaza->updateOffer($bolProduct->id, $offerUpdate);
-            self::setProductStatus($bolProduct, (int)BolPlazaProduct::STATUS_OK);
-        } catch (Exception $e) {
-            $context->controller->errors[] = Tools::displayError(
-                '[bolplaza] Couldn\'t send update to Bol.com, error: ' . $e->getMessage()
-            );
-        }
-    }
-
-    /**
-     * Add a product from Bol.com
-     * @param BolPlazaProduct $bolProduct
-     * @param Context $context
-     */
-    public static function processBolProductCreate($bolProduct, $context)
-    {
-        $offerCreate = new Wienkit\BolPlazaClient\Entities\BolPlazaOfferCreate();
-        if ($bolProduct->delivery_time != null) {
-            $offerCreate->DeliveryCode = $bolProduct->delivery_time;
-        } else {
-            $offerCreate->DeliveryCode = Configuration::get('BOL_PLAZA_ORDERS_DELIVERY_CODE');
-        }
-        $offerCreate->Publish = $bolProduct->published == 1 ? 'true' : 'false';
-
-        $product = new Product($bolProduct->id_product, false, $context->language->id, $context->shop->id);
-        if ($bolProduct->id_product_attribute) {
-            $combination = new Combination($bolProduct->id_product_attribute);
-            $offerCreate->EAN = $bolProduct->ean != null? $bolProduct->ean : $combination->ean13;
-            $offerCreate->QuantityInStock = StockAvailable::getQuantityAvailableByProduct(
-                $product->id,
-                $bolProduct->id_product_attribute
-            );
-            $offerCreate->ReferenceCode = $combination->reference;
-        } else {
-            $offerCreate->EAN = $bolProduct->ean != null ? $bolProduct->ean : $product->ean13;
-            $offerCreate->QuantityInStock = StockAvailable::getQuantityAvailableByProduct($bolProduct->id_product);
-            $offerCreate->ReferenceCode = $product->reference;
-        }
-        switch($product->condition) {
-            case 'refurbished':
-                $offerCreate->Condition = 'AS_NEW';
-                break;
-            case 'used':
-                $offerCreate->Condition = 'GOOD';
-                break;
-            default:
-                $offerCreate->Condition = 'NEW';
-                break;
-        }
-        if (!empty($product->description)) {
-            $offerCreate->Description = html_entity_decode($product->description);
-        } else {
-            $offerCreate->Description = html_entity_decode($product->name);
-        }
-
-        $price = $bolProduct->price;
-        if ($price == 0) {
-            $price = Product::getPriceStatic(
-                (int)$bolProduct->id_product,
-                true,
-                (int)$bolProduct->id_product_attribute
-            );
-        }
-        $offerCreate->Price = $price;
-
-        $Plaza = BolPlaza::getClient();
-        try {
-            $Plaza->createOffer($bolProduct->id, $offerCreate);
+            $request = new Wienkit\BolPlazaClient\Requests\BolPlazaUpsertRequest();
+            $request->RetailerOffer = $offerUpdate;
+            $Plaza->updateOffer($request);
             self::setProductStatus($bolProduct, (int)BolPlazaProduct::STATUS_OK);
         } catch (Exception $e) {
             $context->controller->errors[] = Tools::displayError(
@@ -712,5 +646,31 @@ class AdminBolPlazaProductsController extends ModuleAdminController
             )
         );
         return parent::renderView();
+    }
+
+    /**
+     * @param Context $context
+     */
+    public static function synchronizeFromBol($context)
+    {
+        $bolplaza = BolPlaza::getClient();
+        $url = Configuration::get('BOL_PLAZA_ORDERS_OWNOFFERS');
+        if (!$url) {
+            $ownOffers = $bolplaza->getOwnOffers();
+            $url = $ownOffers->Url;
+        }
+        try {
+            $ownOffersResult = $bolplaza->getOwnOffersResult($url);
+            Configuration::deleteByName('BOL_PLAZA_ORDERS_OWNOFFERS');
+            self::handleOwnOffers($ownOffersResult);
+            self::updateOwnOffersStock();
+            self::updateOwnOffersInfo();
+            self::updateOwnOffersNew();
+            $context->controller->confirmations[] = 'This file has been processed: ' . $url;
+        } catch (Wienkit\BolPlazaClient\Exceptions\BolPlazaClientException $e) {
+            Configuration::set('BOL_PLAZA_ORDERS_OWNOFFERS', $url);
+            $context->controller->confirmations[] =  'The file will be generated by Bol.com. Click this' .
+                ' button again in a few minutes.';
+        }
     }
 }

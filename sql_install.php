@@ -33,6 +33,7 @@ $sql[_DB_PREFIX_.'bolplaza_product'] = 'CREATE TABLE IF NOT EXISTS `'._DB_PREFIX
               `id_product_attribute` INT(10) unsigned NOT NULL,
               `id_shop` INT(11) UNSIGNED NOT NULL DEFAULT \'1\',
               `ean` VARCHAR(13),
+              `condition` tinyint(1) NOT NULL DEFAULT \'0\',
               `delivery_time` VARCHAR(10),
               `published` tinyint(1) NOT NULL DEFAULT \'0\',
               `price` DECIMAL(20, 6) NOT NULL DEFAULT \'0.000000\',
@@ -43,12 +44,13 @@ $sql[_DB_PREFIX_.'bolplaza_product'] = 'CREATE TABLE IF NOT EXISTS `'._DB_PREFIX
 
 $sql[_DB_PREFIX_.'bolplaza_ownoffers'] = 'CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'bolplaza_ownoffers` (
               `id_bolplaza_product` INT(11) NOT NULL,
-              `reference` VARCHAR(255),
               `ean` VARCHAR(13),
               `condition` VARCHAR(10),
               `stock` INT(10),
               `price` DECIMAL(20, 6) NOT NULL DEFAULT \'0.000000\',
               `description` VARCHAR(255),
+              `title` VARCHAR(255),
+              `fulfillment` VARCHAR(10),
               `delivery_code` VARCHAR(10),
               `publish` tinyint(1) NOT NULL DEFAULT \'0\',
               `published` tinyint(1) NOT NULL DEFAULT \'0\',
