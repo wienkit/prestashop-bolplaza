@@ -741,6 +741,8 @@ class BolPlaza extends Module
             );
         }
 
+//        die(var_dump($attributes));
+
         $product_designation = array();
         $product_calculatedprice = array();
         $product_baseprice = array();

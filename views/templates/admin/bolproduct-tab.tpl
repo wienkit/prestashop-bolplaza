@@ -177,7 +177,7 @@
         <div class="row">
             <div class="col-lg-1"></div>
             <div class="col-lg-4">
-                <div class="form-group">
+                <div class="row form-group">
                     <label class="control-label col-lg-6" for="calculator_selected_ean">
                         {l s='Currently selected EAN' mod='bolplaza'}
                     </label>
@@ -185,7 +185,7 @@
                         <input type="text" disabled class="form-control" name="calculator_selected_ean" id="calculator_selected_ean" />
                     </div>
                 </div>
-                <div class="form-group">
+                <div class="row form-group">
                     <label class="control-label col-lg-6" for="calculator_selected_condition">
                         {l s='Currently selected condition' mod='bolplaza'}
                     </label>
@@ -193,7 +193,7 @@
                         <input type="text" disabled class="form-control" name="calculator_selected_condition" id="calculator_selected_condition" />
                     </div>
                 </div>
-                <div class="form-group">
+                <div class="row form-group">
                     <label class="control-label col-lg-6" for="calculator_price">
                         {l s='Final price' mod='bolplaza'}
                     </label>
@@ -206,7 +206,7 @@
                 </div>
             </div>
             <div class="col-lg-4">
-                <div class="form-group">
+                <div class="row form-group">
                     <label class="control-label col-lg-6" for="calculator_fixed_amount">
                         {l s='Fixed amount' mod='bolplaza'}
                     </label>
@@ -214,7 +214,7 @@
                         <input type="text" disabled class="form-control" name="calculator_fixed_amount" id="calculator_fixed_amount" />
                     </div>
                 </div>
-                <div class="form-group">
+                <div class="row form-group">
                     <label class="control-label col-lg-6" for="calculator_percentage">
                         {l s='Percentage' mod='bolplaza'}
                     </label>
@@ -222,7 +222,7 @@
                         <input type="text" disabled class="form-control" name="calculator_percentage" id="calculator_percentage" />
                     </div>
                 </div>
-                <div class="form-group">
+                <div class="row form-group">
                     <label class="control-label col-lg-6" for="calculator_total">
                         {l s='Total' mod='bolplaza'}
                     </label>
@@ -230,7 +230,7 @@
                         <input type="text" disabled class="form-control" name="calculator_total" id="calculator_total" />
                     </div>
                 </div>
-                <div class="form-group">
+                <div class="row form-group">
                     <label class="control-label col-lg-6" for="calculator_total_without_reduction">
                         {l s='Total (without reductions)' mod='bolplaza'}
                     </label>
@@ -240,8 +240,9 @@
                 </div>
             </div>
         </div>
-        <div class="row">
-            <label class="control-label col-lg-3">
+        <div class="row form-group">
+            <div class="col-lg-1"></div>
+            <label class="control-label col-lg-2">
                 {l s='Reductions' mod='bolplaza'}
             </label>
             <div class="col-lg-6">

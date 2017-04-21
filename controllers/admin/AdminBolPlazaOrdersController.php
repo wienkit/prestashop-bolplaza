@@ -199,6 +199,8 @@ class AdminBolPlazaOrdersController extends AdminController
             $payment_module = new BolPlazaTestPayment();
         }
 
+//        die(var_dump($Plaza->getOrders()));
+
         foreach ($Plaza->getOrders() as $order) {
             if (!self::getTransactionExists($order->OrderId)) {
                 $cart = self::parse($order);
@@ -369,7 +371,7 @@ class AdminBolPlazaOrdersController extends AdminController
         if (!empty($items)) {
             foreach ($items as $item) {
                 $productIds = self::getProductIdFromReference($item->OfferReference);
-                if (empty($productIds)) {
+                if (!array_key_exists('id_product', $productIds) || empty($productIds['id_product'])) {
                     $productIds = self::getProductIdByEan($item->EAN);
                 }
                 if (empty($productIds) || !array_key_exists('id_product', $productIds)) {

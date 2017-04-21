@@ -4,13 +4,17 @@ stages:
 build:
   image: mwienk/docker-bolt-builder
   stage: build
+  only:
+  - master
+  - develop
+  - release/*
   script:
-     - composer install --no-dev
-     - echo $CI_COMMIT_SHA > VERSION
-     - rm -rf .git*
-     - mkdir ../bolplaza
-     - mv * ../bolplaza
-     - mv ../bolplaza .
+  - composer install --no-dev
+  - echo $CI_COMMIT_SHA > VERSION
+  - rm -rf .git*
+  - mkdir ../bolplaza
+  - mv * ../bolplaza
+  - mv ../bolplaza .
   artifacts:
     paths:
-      - .
+    - .
