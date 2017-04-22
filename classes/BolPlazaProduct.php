@@ -199,12 +199,12 @@ class BolPlazaProduct extends ObjectModel
     /**
      * Returns the bolproduct data for an ean
      * @param $ean13
-     * @return false|null|string
+     * @return array|false|mysqli_result|null|PDOStatement|resource
      */
     public static function getByEan13($ean13)
     {
-        return Db::getInstance(_PS_USE_SQL_SLAVE_)->getValue('
-			SELECT `id_bolplaza_product`
+        return Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS('
+			SELECT *
 			FROM `'._DB_PREFIX_.'bolplaza_product`
 			WHERE `ean` = '.(int)$ean13);
     }

@@ -199,8 +199,6 @@ class AdminBolPlazaOrdersController extends AdminController
             $payment_module = new BolPlazaTestPayment();
         }
 
-//        die(var_dump($Plaza->getOrders()));
-
         foreach ($Plaza->getOrders() as $order) {
             if (!self::getTransactionExists($order->OrderId)) {
                 $cart = self::parse($order);
@@ -547,10 +545,10 @@ class AdminBolPlazaOrdersController extends AdminController
     public static function getProductIdByEan($ean)
     {
         $data = BolPlazaProduct::getByEan13($ean);
-        if ($data) {
+        if (count($data) > 0) {
             return array(
-                'id_product' => $data['id_product'],
-                'id_product_attribute' => $data['id_product_attribute']
+                'id_product' => $data[0]['id_product'],
+                'id_product_attribute' => $data[0]['id_product_attribute']
             );
         }
         $attribute = self::getAttributeByEan($ean);
