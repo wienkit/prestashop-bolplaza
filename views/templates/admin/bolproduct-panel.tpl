@@ -95,7 +95,7 @@
                                 <i class="icon-caret-up pull-right"></i>
                             </td>
                             <td>
-                                € {$base_price[$attribute['id_product_attribute']]|string_format:"%.2f"}
+                                € {$base_price[$attribute['id_product_attribute']]|escape:'htmlall':'UTF-8'|string_format:"%.2f"}
                             </td>
                             <td>
                                 <div class="input-group money-type">
@@ -104,15 +104,15 @@
                                            id="bolplaza_price_{$key}"
                                            type="text"
                                            class="bolplaza-price form-control"
-                                           value="{if $price}{$price|string_format:"%.2f"}{/if}"
+                                           value="{if $price}{$price|escape:'htmlall':'UTF-8'|string_format:"%.2f"}{/if}"
                                            maxlength="14">
                                 </div>
                             </td>
                             <td>
                                 <a class="use_calculated_price"
-                                   data-val="{$calculated_price[$attribute['id_product_attribute']]|string_format:"%.2f"}"
+                                   data-val="{$calculated_price[$attribute['id_product_attribute']]|escape:'htmlall':'UTF-8'|string_format:"%.2f"}"
                                    title="{l s='Select this proposed price for each row' mod='bolplaza'}"
-                                >&euro; {$calculated_price[$attribute['id_product_attribute']]|string_format:"%.2f"}</a>
+                                >&euro; {$calculated_price[$attribute['id_product_attribute']]|escape:'htmlall':'UTF-8'|string_format:"%.2f"}</a>
                             </td>
                             <td>
                                 <div class="input-group money-type">
@@ -120,9 +120,9 @@
                                     <input name="bolplaza_final_price_{$key}"
                                            id="bolplaza_final_price_{$key}"
                                            type="text"
-                                           data-base-price="{$base_price[$attribute['id_product_attribute']]|string_format:"%.2f"}"
+                                           data-base-price="{$base_price[$attribute['id_product_attribute']]|escape:'htmlall':'UTF-8'|string_format:"%.2f"}"
                                            class="form-control bolplaza-price-final"
-                                           value="{($price + $base_price[$attribute['id_product_attribute']])|string_format:"%.2f"}"
+                                           value="{($price + $base_price[$attribute['id_product_attribute']])|escape:'htmlall':'UTF-8'|string_format:"%.2f"}"
                                            maxlength="14">
                                 </div>
                             </td>
