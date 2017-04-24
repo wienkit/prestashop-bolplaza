@@ -560,6 +560,10 @@ class AdminBolPlazaOrdersController extends AdminController
         if ($product) {
             return array('id_product' => $product, 'id_product_attribute' => 0);
         }
+
+        if($ean !== intval($ean)) {
+            return self::getProductIdByEan(intval($ean));
+        }
         return null;
     }
 
