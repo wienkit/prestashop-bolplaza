@@ -50,6 +50,8 @@ class AdminBolPlazaOrdersController extends AdminController
                           IF(STRCMP(status,\'shipped\'), 1, 0) as badge_danger,
                           IF (STRCMP(status,\'shipped\'), 0, 1) as badge_success';
 
+        parent::__construct();
+
         $this->fields_list = array(
             'id_order' => array(
                 'title' => $this->l('Order ID'),
@@ -87,8 +89,6 @@ class AdminBolPlazaOrdersController extends AdminController
         );
 
         $this->shopLinkType = 'shop';
-
-        parent::__construct();
     }
 
     /**
@@ -369,7 +369,7 @@ class AdminBolPlazaOrdersController extends AdminController
         if (!empty($items)) {
             foreach ($items as $item) {
                 $productIds = self::getProductIdFromReference($item->OfferReference);
-                if (empty($productIds)) {
+                if (!array_key_exists('id_product', $productIds) || empty($productIds['id_product'])) {
                     $productIds = self::getProductIdByEan($item->EAN);
                 }
                 if (empty($productIds) || !array_key_exists('id_product', $productIds)) {
@@ -545,10 +545,10 @@ class AdminBolPlazaOrdersController extends AdminController
     public static function getProductIdByEan($ean)
     {
         $data = BolPlazaProduct::getByEan13($ean);
-        if ($data) {
+        if (count($data) > 0) {
             return array(
-                'id_product' => $data['id_product'],
-                'id_product_attribute' => $data['id_product_attribute']
+                'id_product' => $data[0]['id_product'],
+                'id_product_attribute' => $data[0]['id_product_attribute']
             );
         }
         $attribute = self::getAttributeByEan($ean);
@@ -559,6 +559,10 @@ class AdminBolPlazaOrdersController extends AdminController
         $product = Product::getIdByEan13($ean);
         if ($product) {
             return array('id_product' => $product, 'id_product_attribute' => 0);
+        }
+
+        if ($ean !== (int) $ean) {
+            return self::getProductIdByEan((int) $ean);
         }
         return null;
     }
