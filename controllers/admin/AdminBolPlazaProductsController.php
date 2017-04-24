@@ -24,6 +24,7 @@ class AdminBolPlazaProductsController extends ModuleAdminController
 
     public function __construct()
     {
+
         $this->bootstrap = true;
         $this->table = 'bolplaza_product';
         $this->className = 'BolPlazaProduct';
@@ -40,6 +41,8 @@ class AdminBolPlazaProductsController extends ModuleAdminController
                             IF(status = 0, 1, 0) as badge_success,
                             IF(status > 0, 1, 0) as badge_danger,
                             bo.`published` as `bol_published`';
+
+        parent::__construct();
 
         $this->statuses_array = array(
             BolPlazaProduct::STATUS_OK => $this->l('OK'),
@@ -108,7 +111,6 @@ class AdminBolPlazaProductsController extends ModuleAdminController
         $this->addRowAction('resetUpdated');
         $this->addRowAction('resetStock');
         $this->addRowAction('resetOk');
-        parent::__construct();
     }
 
     public function setMedia()

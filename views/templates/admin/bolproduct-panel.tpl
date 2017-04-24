@@ -19,49 +19,56 @@
     .collapsed.clickable i {
         transform: rotate(180deg);
     }
+    .input-group-addon.btn {
+        color: #fff;
+    }
 </style>
 <input type="hidden" name="bolplaza_loaded" value="1">
 {if isset($product->id)}
-    <div class="panel product-tab" id="product-ModuleBolplaza">
-        <input type="hidden" name="submitted_tabs[]" value="Bolplaza" />
-        <h3 class="tab">{l s='Bol.com settings' mod='bolplaza'}</h3>
-        <div class="row">
-            <div class="alert alert-info" style="display:block; position:'static';">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="alert alert-info" role="alert">
+                <i class="material-icons">help</i>
                 <p>{l s='This interface allows you to edit the Bol.com data.' mod='bolplaza'}</p>
                 <p>{l s='You can also specify product/product combinations.' mod='bolplaza'}</p>
             </div>
         </div>
-        <div class="row">
-            <div class="col-lg-12">
-                <table class="table">
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading"><strong>{l s='Bol.com settings' mod='bolplaza'}</strong></div>
+        <div class="panel-body" id="bolplaza_combinations">
+            <div>
+                <table class="table table-striped table-no-bordered">
                     <thead>
-                    <tr>
+                    <tr class="text-uppercase">
                         <th class="width: 10%; min-width: 50px;" align="center"><span class="title_box">{l s='Published' mod='bolplaza'}</span></th>
-                        <th style="width: 30%"><span class="title_box">{l s='Product' mod='bolplaza'}</span></th>
+                        <th style="width: 25%"><span class="title_box">{l s='Product' mod='bolplaza'}</span></th>
                         <th style="width: 10%"><span class="title_box">{l s='Base price' mod='bolplaza'}</span></th>
                         <th style="width: 20%"><span class="title_box">{l s='Price change' mod='bolplaza'}</span></th>
                         <th style="width: 10%"><span class="title_box">{l s='Proposed price' mod='bolplaza'}</span></th>
                         <th style="width: 20%"><span class="title_box">{l s='Final price' mod='bolplaza'}</span></th>
+                        <th style="width: 5%"><span class="title_box">{l s='Edit' mod='bolplaza'}</span></th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr class="alt_row">
+                    <tr>
                         <td class="fixed-width-xs" align="center"><input type="checkbox" id="toggle_bolplaza_check"  /> </td>
                         <td colspan="2">-- {l s='All products' mod='bolplaza'} -- </td>
                         <td>
-                            <div class="input-group">
+                            <div class="input-group money-type">
                                 <span class="input-group-addon">+ &euro;</span>
-                                <input id="toggle_bolplaza_price" type="text" onchange="noComma('toggle_bolplaza_price');" maxlength="27" />
+                                <input id="toggle_bolplaza_price" class="form-control" type="text" onchange="noComma('toggle_bolplaza_price');" maxlength="27" />
                             </div>
                         </td>
                         <td>
                             <a class="use_calculated_prices" title="{l s='Select each proposed price' mod='bolplaza'}">-- {l s='Select' mod='bolplaza'} --</a></td>
                         <td>
-                            <div class="input-group">
+                            <div class="input-group money-type">
                                 <span class="input-group-addon"> &euro;</span>
-                                <input id="toggle_bolplaza_final_price" type="text" onchange="noComma('toggle_bolplaza_final_price');" maxlength="27" />
+                                <input id="toggle_bolplaza_final_price" class="form-control" type="text" onchange="noComma('toggle_bolplaza_final_price');" maxlength="27" />
                             </div>
                         </td>
+                        <td></td>
                     </tr>
                     {foreach $attributes AS $index => $attribute}
                         {assign var=price value=''}
@@ -77,27 +84,27 @@
                             {assign var=prod_condition value=$bol_products[$attribute['id_product_attribute']]['condition']}
                             {assign var=ean value=$bol_products[$attribute['id_product_attribute']]['ean']}
                         {/if}
-                        <tr class="bol-plaza-item" data-key="{$key|escape:'htmlall':'UTF-8'}">
+                        <tr class="bol-plaza-item" data-key="{$key}">
                             <td class="fixed-width-xs" align="center"><input type="checkbox"
-                                                                             name="bolplaza_published_{$key|escape:'htmlall':'UTF-8'}"
+                                                                             name="bolplaza_published_{$key}"
                                                                              {if $selected == true}checked="checked"{/if}
                                                                              value="1" />
                             </td>
-                            <td class="clickable collapsed" data-toggle="collapse" data-target=".{$index|escape:'htmlall':'UTF-8'}collapsed">
-                                {$product_designation[$attribute['id_product_attribute']]|escape:'htmlall':'UTF-8'}
+                            <td class="clickable collapsed" data-toggle="collapse" data-target=".{$index}collapsed">
+                                {$product_designation[$attribute['id_product_attribute']]}
                                 <i class="icon-caret-up pull-right"></i>
                             </td>
                             <td>
                                 € {$base_price[$attribute['id_product_attribute']]|escape:'htmlall':'UTF-8'|string_format:"%.2f"}
                             </td>
                             <td>
-                                <div class="input-group">
+                                <div class="input-group money-type">
                                     <span class="input-group-addon">+ &euro;</span>
-                                    <input name="bolplaza_price_{$key|escape:'htmlall':'UTF-8'}"
-                                           id="bolplaza_price_{$key|escape:'htmlall':'UTF-8'}"
+                                    <input name="bolplaza_price_{$key}"
+                                           id="bolplaza_price_{$key}"
                                            type="text"
-                                           class="bolplaza-price"
-                                           value="{if $price}{$price|escape:'html':'UTF-8'|string_format:"%.2f"}{/if}"
+                                           class="bolplaza-price form-control"
+                                           value="{if $price}{$price|escape:'htmlall':'UTF-8'|string_format:"%.2f"}{/if}"
                                            maxlength="14">
                                 </div>
                             </td>
@@ -108,158 +115,168 @@
                                 >&euro; {$calculated_price[$attribute['id_product_attribute']]|escape:'htmlall':'UTF-8'|string_format:"%.2f"}</a>
                             </td>
                             <td>
-                                <div class="input-group">
-                                    <span class="input-group-addon"> &euro;</span>
-                                    <input name="bolplaza_final_price_{$key|escape:'htmlall':'UTF-8'}"
-                                           id="bolplaza_final_price_{$key|escape:'htmlall':'UTF-8'}"
+                                <div class="input-group money-type">
+                                    <span class="input-group-addon">€ </span>
+                                    <input name="bolplaza_final_price_{$key}"
+                                           id="bolplaza_final_price_{$key}"
                                            type="text"
-                                           data-base-price="{$base_price[$attribute['id_product_attribute']]|escape:'html':'UTF-8'|string_format:"%.2f"}"
-                                           class="bolplaza-price-final"
-                                           value="{($price + $base_price[$attribute['id_product_attribute']])|escape:'html':'UTF-8'|string_format:"%.2f"}"
+                                           data-base-price="{$base_price[$attribute['id_product_attribute']]|escape:'htmlall':'UTF-8'|string_format:"%.2f"}"
+                                           class="form-control bolplaza-price-final"
+                                           value="{($price + $base_price[$attribute['id_product_attribute']])|escape:'htmlall':'UTF-8'|string_format:"%.2f"}"
                                            maxlength="14">
                                 </div>
                             </td>
-                        </tr>
-                        <tr class="collapse out {$index|escape:'htmlall':'UTF-8'}collapsed">
-                            <td>&nbsp;</td>
-                            <td colspan="2">
-                                {l s='Condition' mod='bolplaza'}
-                            </td>
                             <td>
-                                <select name="bolplaza_condition_{$key|escape:'htmlall':'UTF-8'}" id="bolplaza_condition_{$key|escape:'htmlall':'UTF-8'}">
-                                    {foreach $conditions AS $condition}
-                                        <option value="{$condition['value']|escape:'htmlall':'UTF-8'}"{if $prod_condition == $condition['value']} selected="selected"{/if} data-code="{$condition['code']|escape:'htmlall':'UTF-8'}">
-                                            {$condition['description']|escape:'htmlall':'UTF-8'}
-                                        </option>
-                                    {/foreach}
-                                </select>
+                                <div>
+                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#bol-modal-{$index}">
+                                        <i class="material-icons">edit</i>
+                                    </button>
+                                    <div class="modal fade" id="bol-modal-{$index}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                    <h4 class="modal-title" id="myModalLabel">{$product_designation[$attribute['id_product_attribute']]}</h4>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="row form-group">
+                                                        <div class="col-sm-4">{l s='Condition' mod='bolplaza'}</div>
+                                                        <div class="col-sm-8">
+                                                            <select name="bolplaza_condition_{$key}" id="bolplaza_condition_{$key}" data-toggle="select2">
+                                                                {foreach $conditions AS $condition}
+                                                                    <option value="{$condition['value']}"{if $prod_condition == $condition['value']} selected="selected"{/if} data-code="{$condition['code']}">
+                                                                        {$condition['description']}
+                                                                    </option>
+                                                                {/foreach}
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row form-group">
+                                                        <div class="col-sm-4">{l s='EAN' mod='bolplaza'}</div>
+                                                        <div class="col-sm-8">
+                                                            <input name="bolplaza_ean_{$key}" id="bolplaza_ean_{$key}" type="text" value="{if isset($ean)}{$ean}{/if}" maxlength="27" class="form-control">
+                                                        </div>
+                                                    </div>
+                                                    <div class="row form-group">
+                                                        <div class="col-sm-4">{l s='Custom Delivery time (optional)' mod='bolplaza'}</div>
+                                                        <div class="col-sm-8">
+                                                            <select name="bolplaza_delivery_time_{$key}" id="bolplaza_delivery_time_{$key}" data-toggle="select2">
+                                                                <option value="default" {if $delivery_time == 'default'} selected="selected"{/if}>-- {l s='Use default' mod='bolplaza'} --</option>
+                                                                {foreach $delivery_codes AS $code}
+                                                                    <option value="{$code['deliverycode']}"{if isset($delivery_time) && $delivery_time == $code['deliverycode']} selected="selected"{/if}>{$code['description']}</option>
+                                                                {/foreach}
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-primary btn-lg" data-dismiss="modal">{l s='Close' mod='bolplaza'}</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </td>
-                            <td colspan="2"></td>
-                        </tr>
-                        <tr class="collapse out {$index|escape:'htmlall':'UTF-8'}collapsed">
-                            <td>&nbsp;</td>
-                            <td colspan="2">
-                                {l s='EAN' mod='bolplaza'}
-                            </td>
-                            <td>
-                                <input name="bolplaza_ean_{$key|escape:'htmlall':'UTF-8'}" id="bolplaza_ean_{$key|escape:'htmlall':'UTF-8'}" type="text" value="{if isset($ean)}{$ean|escape:'html':'UTF-8'}{/if}" maxlength="27">
-                            </td>
-                            <td colspan="2"></td>
-                        </tr>
-                        <tr class="collapse out {$index|escape:'htmlall':'UTF-8'}collapsed">
-                            <td>&nbsp;</td>
-                            <td colspan="2">
-                                {l s='Custom Delivery time (optional)' mod='bolplaza'}
-                            </td>
-                            <td>
-                                <select name="bolplaza_delivery_time_{$key|escape:'htmlall':'UTF-8'}" id="bolplaza_delivery_time_{$key|escape:'htmlall':'UTF-8'}">
-                                    <option value="default" {if $delivery_time == 'default'} selected="selected"{/if}>-- {l s='Use default' mod='bolplaza'} --</option>
-                                    {foreach $delivery_codes AS $code}
-                                        <option value="{$code['deliverycode']|escape:'htmlall':'UTF-8'}"{if isset($delivery_time) && $delivery_time == $code['deliverycode']} selected="selected"{/if}>{$code['description']|escape:'htmlall':'UTF-8'}</option>
-                                    {/foreach}
-                                </select>
-                            </td>
-                            <td colspan="2"></td>
                         </tr>
                     {/foreach}
                     </tbody>
                 </table>
             </div>
         </div>
-        <div class="panel-footer">
-            <a href="{$link->getAdminLink('AdminProducts')|escape:'htmlall':'UTF-8'}" class="btn btn-default"><i class="process-icon-cancel"></i> {l s='Cancel' mod='bolplaza'}</a>
-            <button type="submit" name="submitAddproduct" class="btn btn-default pull-right"><i class="process-icon-save"></i> {l s='Save' mod='bolplaza'}</button>
-            <button type="submit" name="submitAddproductAndStay" class="btn btn-default pull-right"><i class="process-icon-save"></i> {l s='Save and stay' mod='bolplaza'}</button>
-        </div>
     </div>
-    <div class="panel calculator-tab" id="product-ModuleBeslistcartCalculator">
-        <h3 class="tab">{l s='Bol.com commission calculator' mod='bolplaza'}</h3>
-        <div class="row">
-            <div class="col-lg-1"></div>
-            <div class="col-lg-4">
-                <div class="form-group">
-                    <label class="control-label col-lg-6" for="calculator_selected_ean">
-                        {l s='Currently selected EAN' mod='bolplaza'}
-                    </label>
-                    <div class="col-lg-6">
-                        <input type="text" disabled class="form-control" name="calculator_selected_ean" id="calculator_selected_ean" />
+    <div class="panel panel-default">
+        <div class="panel-heading"><strong>{l s='Bol.com commission calculator' mod='bolplaza'}</strong></div>
+        <div class="panel-body" id="bolplaza_combinations">
+            <div class="row">
+                <div class="col-lg-1"></div>
+                <div class="col-lg-4">
+                    <div class="row form-group">
+                        <label class="control-label col-lg-6" for="calculator_selected_ean">
+                            {l s='Currently selected EAN' mod='bolplaza'}
+                        </label>
+                        <div class="col-lg-6">
+                            <input type="text" disabled class="form-control" name="calculator_selected_ean" id="calculator_selected_ean" />
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <label class="control-label col-lg-6" for="calculator_selected_condition">
+                            {l s='Currently selected condition' mod='bolplaza'}
+                        </label>
+                        <div class="col-lg-6">
+                            <input type="text" disabled class="form-control" name="calculator_selected_condition" id="calculator_selected_condition" />
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <label class="control-label col-lg-6" for="calculator_price">
+                            {l s='Final price' mod='bolplaza'}
+                        </label>
+                        <div class="col-lg-6">
+                            <div class="input-group">
+                                <input type="text" class="form-control" name="calculator_price" id="calculator_price" />
+                                <div class="input-group-addon btn btn-primary" id="calculator_price_btn"><i class="material-icons">refresh</i></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label class="control-label col-lg-6" for="calculator_selected_condition">
-                        {l s='Currently selected condition' mod='bolplaza'}
-                    </label>
-                    <div class="col-lg-6">
-                        <input type="text" disabled class="form-control" name="calculator_selected_condition" id="calculator_selected_condition" />
+                <div class="col-lg-4">
+                    <div class="row form-group">
+                        <label class="control-label col-lg-6" for="calculator_fixed_amount">
+                            {l s='Fixed amount' mod='bolplaza'}
+                        </label>
+                        <div class="col-lg-6">
+                            <input type="text" disabled class="form-control" name="calculator_fixed_amount" id="calculator_fixed_amount" />
+                        </div>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label class="control-label col-lg-6" for="calculator_price">
-                        {l s='Final price' mod='bolplaza'}
-                    </label>
-                    <div class="col-lg-6">
-                        <div class="input-group">
-                            <input type="text" class="form-control" name="calculator_price" id="calculator_price" />
-                            <div class="input-group-addon btn-success" id="calculator_price_btn"><i class="icon-refresh"></i></div>
+                    <div class="row form-group">
+                        <label class="control-label col-lg-6" for="calculator_percentage">
+                            {l s='Percentage' mod='bolplaza'}
+                        </label>
+                        <div class="col-lg-6">
+                            <input type="text" disabled class="form-control" name="calculator_percentage" id="calculator_percentage" />
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <label class="control-label col-lg-6" for="calculator_total">
+                            {l s='Total' mod='bolplaza'}
+                        </label>
+                        <div class="col-lg-6">
+                            <input type="text" disabled class="form-control" name="calculator_total" id="calculator_total" />
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <label class="control-label col-lg-6" for="calculator_total_without_reduction">
+                            {l s='Total (without reductions)' mod='bolplaza'}
+                        </label>
+                        <div class="col-lg-6">
+                            <input type="text" disabled class="form-control" name="calculator_total_without_reduction" id="calculator_total_without_reduction" />
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-lg-4">
-                <div class="form-group">
-                    <label class="control-label col-lg-6" for="calculator_fixed_amount">
-                        {l s='Fixed amount' mod='bolplaza'}
-                    </label>
-                    <div class="col-lg-6">
-                        <input type="text" disabled class="form-control" name="calculator_fixed_amount" id="calculator_fixed_amount" />
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="control-label col-lg-6" for="calculator_percentage">
-                        {l s='Percentage' mod='bolplaza'}
-                    </label>
-                    <div class="col-lg-6">
-                        <input type="text" disabled class="form-control" name="calculator_percentage" id="calculator_percentage" />
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="control-label col-lg-6" for="calculator_total">
-                        {l s='Total' mod='bolplaza'}
-                    </label>
-                    <div class="col-lg-6">
-                        <input type="text" disabled class="form-control" name="calculator_total" id="calculator_total" />
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="control-label col-lg-6" for="calculator_total_without_reduction">
-                        {l s='Total (without reductions)' mod='bolplaza'}
-                    </label>
-                    <div class="col-lg-6">
-                        <input type="text" disabled class="form-control" name="calculator_total_without_reduction" id="calculator_total_without_reduction" />
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <label class="control-label col-lg-3">
-                {l s='Reductions' mod='bolplaza'}
-            </label>
-            <div class="col-lg-6">
-                <table class="table" id="calculator_reductions">
-                    <thead>
+            <div class="row form-group">
+                <div class="col-lg-1"></div>
+                <label class="control-label col-lg-2">
+                    {l s='Reductions' mod='bolplaza'}
+                </label>
+                <div class="col-lg-6">
+                    <table class="table" id="calculator_reductions">
+                        <thead>
                         <tr>
                             <th>{l s='MaximumPrice' mod='bolplaza'}</th>
                             <th>{l s='CostReduction' mod='bolplaza'}</th>
                             <th>{l s='StartDate' mod='bolplaza'}</th>
                             <th>{l s='EndDate' mod='bolplaza'}</th>
                         </tr>
-                    </thead>
-                    <tbody>
+                        </thead>
+                        <tbody>
                         <tr>
                             <td colspan="4">{l s='None' mod='bolplaza'}</td>
                         </tr>
-                    </tbody>
-                </table>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -341,7 +358,7 @@
             calculateCommission: function(ean, condition, price) {
                 $.post('ajax-tab.php', {
                     controller:'AdminBolPlazaProducts',
-                    token:'{$token|escape:'htmlall':'UTF-8'}',
+                    token:'{$token}',
                     action:'calculateCommission',
                     ean: ean,
                     price: price,
