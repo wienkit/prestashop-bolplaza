@@ -4,10 +4,6 @@ stages:
 build:
   image: mwienk/docker-bolt-builder
   stage: build
-  only:
-  - master
-  - develop
-  - release/*
   script:
   - composer install --no-dev
   - echo $CI_COMMIT_SHA > VERSION
