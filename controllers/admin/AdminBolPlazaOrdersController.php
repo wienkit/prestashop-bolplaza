@@ -390,6 +390,7 @@ class AdminBolPlazaOrdersController extends AdminController
                 $hasProducts = true;
                 self::addSpecificPrice(
                     $cart,
+                    $shipping,
                     $customer,
                     $product,
                     $productIds['id_product_attribute'],
@@ -443,6 +444,7 @@ class AdminBolPlazaOrdersController extends AdminController
     /**
      * Adds a specific price for a product
      * @param Cart $cart
+     * @param Address $shipping
      * @param Customer $customer
      * @param Product $product
      * @param string $id_product_attribute
@@ -450,6 +452,7 @@ class AdminBolPlazaOrdersController extends AdminController
      */
     private static function addSpecificPrice(
         Cart $cart,
+        Address $shipping,
         Customer $customer,
         Product $product,
         $id_product_attribute,
@@ -460,7 +463,7 @@ class AdminBolPlazaOrdersController extends AdminController
         $specific_price->id_shop = $cart->id_shop;
         $specific_price->id_shop_group = $cart->id_shop_group;
         $specific_price->id_currency = $cart->id_currency;
-        $specific_price->id_country = Context::getContext()->country->id;
+        $specific_price->id_country = $shipping->id_country;
         $specific_price->id_group = (int)$customer->id_default_group;
         $specific_price->id_customer = (int)$customer->id;
         $specific_price->id_product = $product->id;
