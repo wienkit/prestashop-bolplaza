@@ -736,12 +736,10 @@ class BolPlaza extends Module
             $attributes[] = array(
                 'id_product' => $product->id,
                 'id_product_attribute' => 0,
-                'attribute_designation' => '',
+                'attribute_designation' => $product->name,
                 'ean13' => $product->ean13
             );
         }
-
-//        die(var_dump($attributes));
 
         $product_designation = array();
         $product_calculatedprice = array();

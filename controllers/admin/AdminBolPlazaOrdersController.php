@@ -279,8 +279,16 @@ class AdminBolPlazaOrdersController extends AdminController
             return new Customer($customer['id_customer']);
         }
         $customer = new Customer();
-        $customer->lastname = $order->CustomerDetails->BillingDetails->Surname;
-        $customer->firstname = $order->CustomerDetails->BillingDetails->Firstname;
+        $customer->firstname = preg_replace(
+            "/[0-9!<>,;?=+()@#\"°{}_$%:]*/",
+            '',
+            $order->CustomerDetails->BillingDetails->Firstname
+        );
+        $customer->lastname = preg_replace(
+            "/[0-9!<>,;?=+()@#\"°{}_$%:]*/",
+            '',
+            $order->CustomerDetails->BillingDetails->Surname
+        );
         $customer->email = $order->CustomerDetails->BillingDetails->Email;
         $customer->passwd = Tools::passwdGen(8, 'RANDOM');
         $customer->id_default_group = Configuration::get('BOL_PLAZA_ORDERS_CUSTOMER_GROUP');
@@ -304,10 +312,22 @@ class AdminBolPlazaOrdersController extends AdminController
         $address = new Address();
         $address->id_customer = $customer->id;
         if ($details->Company != '') {
-            $address->company = $details->Company;
+            $address->company = preg_replace(
+                "/[<>={}]*/",
+                '',
+                $details->Company
+            );
         }
-        $address->firstname = $details->Firstname;
-        $address->lastname = $details->Surname;
+        $address->firstname = preg_replace(
+            "/[0-9!<>,;?=+()@#\"°{}_$%:]*/",
+            '',
+            $details->Firstname
+        );
+        $address->lastname = preg_replace(
+            "/[0-9!<>,;?=+()@#\"°{}_$%:]*/",
+            '',
+            $details->Surname
+        );
         $address->address1 = $details->Streetname;
 
         $houseNumber = $details->Housenumber;
@@ -390,6 +410,7 @@ class AdminBolPlazaOrdersController extends AdminController
                 $hasProducts = true;
                 self::addSpecificPrice(
                     $cart,
+                    $shipping,
                     $customer,
                     $product,
                     $productIds['id_product_attribute'],
@@ -443,6 +464,7 @@ class AdminBolPlazaOrdersController extends AdminController
     /**
      * Adds a specific price for a product
      * @param Cart $cart
+     * @param Address $shipping
      * @param Customer $customer
      * @param Product $product
      * @param string $id_product_attribute
@@ -450,6 +472,7 @@ class AdminBolPlazaOrdersController extends AdminController
      */
     private static function addSpecificPrice(
         Cart $cart,
+        Address $shipping,
         Customer $customer,
         Product $product,
         $id_product_attribute,
@@ -460,7 +483,7 @@ class AdminBolPlazaOrdersController extends AdminController
         $specific_price->id_shop = $cart->id_shop;
         $specific_price->id_shop_group = $cart->id_shop_group;
         $specific_price->id_currency = $cart->id_currency;
-        $specific_price->id_country = Context::getContext()->country->id;
+        $specific_price->id_country = $shipping->id_country;
         $specific_price->id_group = (int)$customer->id_default_group;
         $specific_price->id_customer = (int)$customer->id;
         $specific_price->id_product = $product->id;
