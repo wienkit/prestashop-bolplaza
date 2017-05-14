@@ -27,7 +27,7 @@ function upgrade_module_1_3_4()
         if (isset($product->price) && $product->price > 0) {
             $price = Product::getPriceStatic($id_product, true, $id_product_attribute);
             if ($product->price > $price) {
-                $product->price = $product->price - $price;
+                $product->price = round($product->price - $price, 6);
                 $changed = true;
             }
         }
