@@ -444,7 +444,7 @@ class AdminBolPlazaProductsController extends ModuleAdminController
         $header = array_shift($data);
         array_walk($data, 'AdminBolPlazaProductsController::parseCsvRow', array('header' => $header, 'keys' => $keys));
         $data = array_filter($data, 'AdminBolPlazaProductsController::filterCsvRow');
-        Db::getInstance()->insert('bolplaza_ownoffers', $data);
+        Db::getInstance()->insert('bolplaza_ownoffers', $data, false, false, Db::REPLACE);
     }
 
 
