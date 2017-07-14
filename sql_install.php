@@ -54,7 +54,7 @@ $sql[_DB_PREFIX_.'bolplaza_ownoffers'] = 'CREATE TABLE IF NOT EXISTS `'._DB_PREF
               `delivery_code` VARCHAR(10),
               `publish` tinyint(1) NOT NULL DEFAULT \'0\',
               `published` tinyint(1) NOT NULL DEFAULT \'0\',
-              `reasoncode` VARCHAR(20),
+              `reasoncode` VARCHAR(50),
               `reason` VARCHAR(255),
               PRIMARY KEY (`id_bolplaza_product`)
             ) ENGINE='._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8;';

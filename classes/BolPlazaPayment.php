@@ -16,7 +16,7 @@
 class BolPlazaPayment extends PaymentModule
 {
     public $active = 1;
-    public $name = 'bolplaza';
+    public $name = 'bolplaza_payment';
 
     const CARTRULE_CODE_PREFIX = 'BOLPLAZA_';
 
