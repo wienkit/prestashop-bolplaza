@@ -93,7 +93,7 @@ class BolPlazaProduct extends ObjectModel
             'price' => array(
                 'type' => self::TYPE_FLOAT,
                 'shop' => true,
-                'validate' => 'isPrice'
+                'validate' => 'isNegativePrice'
             ),
             'status' => array(
                 'type' => self::TYPE_INT,
@@ -236,6 +236,22 @@ class BolPlazaProduct extends ObjectModel
                 FROM `'._DB_PREFIX_.'bolplaza_product`
                 WHERE `status` > 0
                 LIMIT 1000')
+        );
+    }
+
+    /**
+     * Returns a list of BolProduct objects that need an update
+     * @param int $id_product
+     * @return BolPlazaProduct[]
+     */
+    public static function getHydratedByProductId($id_product)
+    {
+        return ObjectModel::hydrateCollection(
+            'BolPlazaProduct',
+            Db::getInstance()->executeS('
+                SELECT *
+                FROM `'._DB_PREFIX_.'bolplaza_product`
+                WHERE `id_product` = '.(int)$id_product)
         );
     }
 

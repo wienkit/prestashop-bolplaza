@@ -24,7 +24,7 @@ class BolPlaza extends Module
     {
         $this->name = 'bolplaza';
         $this->tab = 'market_place';
-        $this->version = '1.3.7';
+        $this->version = '1.3.8';
         $this->author = 'Wienk IT';
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
@@ -53,6 +53,8 @@ class BolPlaza extends Module
                 && $this->installOrdersTab()
                 && $this->installProductsTab()
                 && $this->registerHook('actionProductUpdate')
+                && $this->registerHook('actionProductDelete')
+                && $this->registerHook('actionProductAttributeDelete')
                 && $this->registerHook('actionUpdateQuantity')
                 && $this->registerHook('displayAdminProductsExtra')
                 && $this->registerHook('actionObjectOrderCarrierUpdateAfter')
@@ -347,7 +349,7 @@ class BolPlaza extends Module
                     if (isset($product->price) && $product->price > 0) {
                         $price = Product::getPriceStatic($id_product, true, $id_product_attribute);
                         if ($product->price > $price) {
-                            $product->price = $product->price - $price;
+                            $product->price = round($product->price - $price, 6);
                             $changed = true;
                         }
                     }
@@ -952,6 +954,36 @@ class BolPlaza extends Module
     {
         if (!empty($param['object'])) {
             AdminBolPlazaProductsController::processBolProductDelete($param['object'], $this->context);
+        }
+    }
+
+    /**
+     * On delete product, delete Bol.com Product
+     * @param $param
+     */
+    public function hookActionProductDelete($param)
+    {
+        if (!empty($param['id_product'])) {
+            $bolProducts = BolPlazaProduct::getHydratedByProductId($param['id_product']);
+            foreach ($bolProducts as $bolProduct) {
+                $bolProduct->delete();
+            }
+        }
+    }
+
+    /**
+     * On delete attribute, delete Bol.com Product
+     * @param $param
+     */
+    public function hookActionProductAttributeDelete($param)
+    {
+        $bolProductId = BolPlazaProduct::getIdByProductAndAttributeId(
+            $param['id_product'],
+            $param['id_product_attribute']
+        );
+        if (!empty($bolProductId)) {
+            $bolProduct = new BolPlazaProduct($bolProductId);
+            $bolProduct->delete();
         }
     }
 

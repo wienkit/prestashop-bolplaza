@@ -136,6 +136,13 @@ class AdminBolPlazaOrdersController extends AdminController
         }
     }
 
+    public function initToolbar()
+    {
+        $this->allow_export = true;
+        parent::initToolbar();
+        unset($this->toolbar_btn['new']);
+    }
+
     /**
      * Processes the request
      * @return bool
