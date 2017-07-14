@@ -421,7 +421,7 @@ class AdminBolPlazaProductsController extends ModuleAdminController
      */
     public static function handleOwnOffers($ownOffers)
     {
-        DB::getInstance()->delete('bolplaza_ownoffers');
+        Db::getInstance()->delete('bolplaza_ownoffers');
         $keys = array(
             'EAN' => 'ean',
             'Condition' => 'condition',
@@ -444,7 +444,7 @@ class AdminBolPlazaProductsController extends ModuleAdminController
         $header = array_shift($data);
         array_walk($data, 'AdminBolPlazaProductsController::parseCsvRow', array('header' => $header, 'keys' => $keys));
         $data = array_filter($data, 'AdminBolPlazaProductsController::filterCsvRow');
-        DB::getInstance()->insert('bolplaza_ownoffers', $data);
+        Db::getInstance()->insert('bolplaza_ownoffers', $data);
     }
 
 
@@ -572,7 +572,7 @@ class AdminBolPlazaProductsController extends ModuleAdminController
      */
     public static function setProductStatus($bolProduct, $status)
     {
-        DB::getInstance()->update('bolplaza_product', array(
+        Db::getInstance()->update('bolplaza_product', array(
             'status' => (int)$status
         ), 'id_bolplaza_product = ' . (int)$bolProduct->id);
     }
