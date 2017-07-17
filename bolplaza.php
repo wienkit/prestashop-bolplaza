@@ -24,7 +24,7 @@ class BolPlaza extends Module
     {
         $this->name = 'bolplaza';
         $this->tab = 'market_place';
-        $this->version = '1.3.8';
+        $this->version = '1.3.9';
         $this->author = 'Wienk IT';
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
@@ -690,7 +690,7 @@ class BolPlaza extends Module
         $orderCarrier = $params['object'];
         if ($orderCarrier->tracking_number) {
             $order = new Order($orderCarrier->id_order);
-            if ($order->module == 'bolplaza' || $order->module == 'bolplazatest') {
+            if ($order->module == 'bolplaza_payment' || $order->module == 'bolplazatest') {
                 $Plaza = self::getClient();
                 $itemsShipped = array();
                 $items = BolPlazaOrderItem::getByOrderId($order->id);
