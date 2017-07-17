@@ -690,7 +690,7 @@ class BolPlaza extends Module
         $orderCarrier = $params['object'];
         if ($orderCarrier->tracking_number) {
             $order = new Order($orderCarrier->id_order);
-            if ($order->module == 'bolplaza' || $order->module == 'bolplazatest') {
+            if ($order->module == 'bolplaza_payment' || $order->module == 'bolplazatest') {
                 $Plaza = self::getClient();
                 $itemsShipped = array();
                 $items = BolPlazaOrderItem::getByOrderId($order->id);
