@@ -725,10 +725,11 @@ class BolPlaza extends Module
         if (!Configuration::get('BOL_PLAZA_ORDERS_ENABLED')) {
             return $this->display(__FILE__, 'views/templates/admin/disabled.tpl');
         }
-        if ($id_product = (int)Tools::getValue('id_product', $params['id_product'])) {
+        $id_product = isset($params['id_product']) ? $params['id_product'] : false;
+        if ($id_product = (int)Tools::getValue('id_product', $id_product)) {
             $product = new Product($id_product, true, $this->context->language->id, $this->context->shop->id);
         }
-        if (!Validate:: isLoadedObject($product)) {
+        if (!Validate::isLoadedObject($product)) {
             return "";
         }
 
