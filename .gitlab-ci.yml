@@ -23,7 +23,7 @@ stages:
 
 
 test:web16:
-  image: prestashop/prestashop:1.6
+  image: prestashop/prestashop:1.6-7.0
   before_script:
   - sed -i "s/exec apache2-foreground/service apache2 start/g" /tmp/docker_run.sh
   script:
