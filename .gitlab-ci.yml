@@ -31,7 +31,7 @@ test:web16:
   script:
   - /tmp/docker_run.sh
   - composer install
-  - ln -s . /var/www/html/modules/bolplaza
+  - ln -s $PWD /var/www/html/modules/bolplaza
   - ./libraries/bin/phpunit --exclude-group=17
   artifacts:
     when: on_failure
@@ -50,7 +50,7 @@ test:web17:
   script:
   - /tmp/docker_run.sh
   - composer install
-  - ln -s . /var/www/html/modules/bolplaza
+  - ln -s $PWD /var/www/html/modules/bolplaza
   - ./libraries/bin/phpunit --exclude-group=16
   artifacts:
     when: on_failure

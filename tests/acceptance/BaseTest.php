@@ -31,7 +31,7 @@ abstract class BaseTest extends TestCase
 
     public function doAdminLogin()
     {
-        $this->goToPath('index.php', false);
+        $this->goToPath('index.php');
         $this->driver->findElement(\WebDriverBy::name('email'))->click();
         $this->driver->getKeyboard()->sendKeys('admin@example.com');
         $this->driver->findElement(\WebDriverBy::name('passwd'))->click();
@@ -49,10 +49,7 @@ abstract class BaseTest extends TestCase
     public function tearDown()
     {
         if ($this->hasFailed()) {
-            echo "FAILED";
-            echo $this->driver->takeScreenshot('results/' . time() . '_' . $this->getName() . '.png');
-        } else {
-            echo "NOT FAILED";
+            $this->driver->takeScreenshot('results/' . time() . '_' . $this->getName() . '.png');
         }
         $this->driver->close();
     }
