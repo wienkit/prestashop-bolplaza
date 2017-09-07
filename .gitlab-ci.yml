@@ -13,6 +13,6 @@ build:
   - mv ../bolplaza .
   artifacts:
     expire_in: 2 weeks
-    name: "bolplaza-$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHA"
+    name: "bolplaza-$CI_COMMIT_REF_SLUG-$CI_JOB_ID"
     paths:
     - .
