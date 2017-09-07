@@ -26,7 +26,7 @@ test:web16:
   image: prestashop/prestashop:1.6-7.0
   before_script:
   - sed -i "s/exec apache2-foreground/service apache2 start/g" /tmp/docker_run.sh
-  - apt-get install git
+  - apt-get update && apt-get install git
   - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer && \
   script:
   - /tmp/docker_run.sh
