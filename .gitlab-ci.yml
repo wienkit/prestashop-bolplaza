@@ -32,26 +32,30 @@ test:web16:
   - /tmp/docker_run.sh
   - composer install
   - ./libraries/bin/phpunit
-#  before_script:
-#    - "./prestashop-beslistcart:/var/www/html/modules/beslistcart"
-#    - "./prestashop-bolplaza:/var/www/html/modules/bolplaza"
-#    - "./config_files/run.sh:/tmp/run.sh"
-#  script:
-#    - /tmp/run.sh
 
+test:web17:
+  image: prestashop/prestashop:1.7-7.0
+  before_script:
+  - sed -i "s/exec apache2-foreground/service apache2 start/g" /tmp/docker_run.sh
+  - apt-get update && apt-get install -y git
+  - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer && \
+  script:
+  - /tmp/docker_run.sh
+  - composer install
+  - ./libraries/bin/phpunit
 
-#package:
-#  image: mwienk/docker-bolt-builder
-#  stage: release
-#  script:
-#  - composer install --no-dev
-#  - echo $CI_COMMIT_SHA > VERSION
-#  - rm -rf .git*
-#  - mkdir ../bolplaza
-#  - mv * ../bolplaza
-#  - mv ../bolplaza .
-#  artifacts:
-#    expire_in: 2 weeks
-#    name: "bolplaza-$CI_COMMIT_REF_SLUG-$CI_JOB_ID"
-#    paths:
-#    - .
+package:
+  image: mwienk/gitlab-ci-magento2
+  stage: release
+  script:
+  - composer install --no-dev
+  - echo $CI_COMMIT_SHA > VERSION
+  - rm -rf .git*
+  - mkdir ../bolplaza
+  - mv * ../bolplaza
+  - mv ../bolplaza .
+  artifacts:
+    expire_in: 2 weeks
+    name: "bolplaza-$CI_COMMIT_REF_SLUG-$CI_JOB_ID"
+    paths:
+    - .
