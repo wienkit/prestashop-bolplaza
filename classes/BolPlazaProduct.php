@@ -122,7 +122,6 @@ class BolPlazaProduct extends ObjectModel
     {
         $id_product_attribute = $this->id_product_attribute ? $this->id_product_attribute : null;
         $offer = new \Wienkit\BolPlazaClient\Entities\BolPlazaRetailerOffer();
-        $offer->EAN = $this->ean;
         $offer->Condition = $this->getCondition();
         $price = Product::getPriceStatic($this->id_product, true, $id_product_attribute);
         $offer->Price = $price + $this->price;
@@ -141,6 +140,14 @@ class BolPlazaProduct extends ObjectModel
             $stock = 999;
         }
         $product = new Product($this->id_product, false, $context->language->id, $context->shop->id);
+        if($this->ean != null) {
+            $offer->EAN = $this->ean;
+        } elseif ($id_product_attribute != null) {
+            $product_attribute = new Combination($this->id_product_attribute);
+            $offer->EAN = $product_attribute->ean13;
+        } else {
+            $offer->EAN = $product->ean13;
+        }
         $offer->Title = $product->name;
         if (!empty($product->description)) {
             $offer->Description = Tools::substr(html_entity_decode($product->description), 0, 2000);
