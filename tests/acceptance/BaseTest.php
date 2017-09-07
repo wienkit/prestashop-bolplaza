@@ -49,7 +49,7 @@ abstract class BaseTest extends TestCase
     {
         if ($this->hasFailed()) {
             echo "FAILED";
-            echo $this->driver->takeScreenshot('/tmp/artifacts/FailedTestScreenshots/' . time() . '_' . $this->getName() . '.jpg');
+            echo $this->driver->takeScreenshot('results/' . time() . '_' . $this->getName() . '.jpg');
         } else {
             echo "NOT FAILED";
         }

@@ -25,3 +25,5 @@ composer.lock
 .Trash-*
 config*.xml
 .idea
+phpunit.xml
+results

@@ -35,7 +35,7 @@ test:web16:
   artifacts:
     when: on_failure
     paths:
-      - /tmp/artifacts/*
+      - results/*
     expire_in: 1 week
 
 
@@ -53,7 +53,7 @@ test:web17:
   artifacts:
     when: on_failure
     paths:
-      - /tmp/artifacts/*
+      - results/*
     expire_in: 1 week
 
 package:
@@ -62,7 +62,7 @@ package:
   script:
   - composer install --no-dev
   - echo $CI_COMMIT_SHA > VERSION
-  - rm -rf .git*
+  - rm -rf .git* results tests
   - mkdir ../bolplaza
   - mv * ../bolplaza
   - mv ../bolplaza .
