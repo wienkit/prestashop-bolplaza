@@ -1,4 +1,4 @@
-<phpunit colors="true" strict="true" bootstrap="tests/vendor/autoload.php">
+<phpunit colors="true" strict="true" bootstrap="tests/autoload.php">
     <php>
         <env name="PHP_PUBKEY" value="-- ENTER YOUR PUBLIC KEY --"/>
         <env name="PHP_PRIVKEY" value="-- ENTER YOUR PRIVATE KEY --"/>
