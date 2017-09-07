@@ -14,10 +14,10 @@ abstract class BaseTest extends TestCase
 
     public function setUp()
     {
-        echo getenv('SITE_HOST');
+        echo "http://" . getenv('SITE_HOST');
         $host = getenv('SELENIUM_HOST');
         $this->driver = \RemoteWebDriver::create($host, \DesiredCapabilities::chrome());
-        $this->host = getenv('SITE_HOST');
+        $this->host = "http://" . getenv('SITE_HOST');
     }
 
     public function goToPath($path)
