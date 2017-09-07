@@ -1,18 +1,50 @@
-stages:
-- build
+services:
+  - percona:5.6.26
 
-build:
-  image: mwienk/docker-bolt-builder
-  stage: build
+variables:
+  MYSQL_ROOT_PASSWORD: admin
+  MYSQL_DATABASE: prestashop
+  PS_DEV_MODE: 1
+  DB_SERVER: percona
+  DB_NAME: prestashop
+  PS_INSTALL_AUTO: 1
+  PS_ERASE_DB: 1
+  PS_LANGUAGE: nl
+  PS_COUNTRY: nl
+  PS_FOLDER_ADMIN: admin-dev
+  PS_FOLDER_INSTALL: install-dev
+  ADMIN_MAIL: mark@wienkit.nl
+  ADMIN_PASSWD: password
+
+stages:
+  - test
+  - release
+
+
+test:web16:
+  image: prestashop/prestashop:1.6
   script:
-  - composer install --no-dev
-  - echo $CI_COMMIT_SHA > VERSION
-  - rm -rf .git*
-  - mkdir ../bolplaza
-  - mv * ../bolplaza
-  - mv ../bolplaza .
-  artifacts:
-    expire_in: 2 weeks
-    name: "bolplaza-$CI_COMMIT_REF_SLUG-$CI_JOB_ID"
-    paths:
-    - .
+  - /tmp/docker_run.sh
+#  before_script:
+#    - "./prestashop-beslistcart:/var/www/html/modules/beslistcart"
+#    - "./prestashop-bolplaza:/var/www/html/modules/bolplaza"
+#    - "./config_files/run.sh:/tmp/run.sh"
+#  script:
+#    - /tmp/run.sh
+
+
+#package:
+#  image: mwienk/docker-bolt-builder
+#  stage: release
+#  script:
+#  - composer install --no-dev
+#  - echo $CI_COMMIT_SHA > VERSION
+#  - rm -rf .git*
+#  - mkdir ../bolplaza
+#  - mv * ../bolplaza
+#  - mv ../bolplaza .
+#  artifacts:
+#    expire_in: 2 weeks
+#    name: "bolplaza-$CI_COMMIT_REF_SLUG-$CI_JOB_ID"
+#    paths:
+#    - .
