@@ -1,7 +1,7 @@
 <phpunit colors="true" strict="true" bootstrap="tests/autoload.php">
     <php>
-        <env name="PHP_PUBKEY" value="-- ENTER YOUR PUBLIC KEY --"/>
-        <env name="PHP_PRIVKEY" value="-- ENTER YOUR PRIVATE KEY --"/>
+        <env name="SITE_HOST" value="http://localhost"/>
+        <env name="SELENIUM_HOST" value="http://selenium-standalone-chrome:4444/wd/hub"/>
     </php>
     <testsuites>
         <testsuite name="The project's test suite">

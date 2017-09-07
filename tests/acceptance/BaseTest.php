@@ -2,7 +2,6 @@
 namespace Wienkit\Prestashop\Bolplaza;
 
 use PHPUnit\Framework\TestCase;
-use Throwable;
 
 abstract class BaseTest extends TestCase
 {
@@ -11,16 +10,18 @@ abstract class BaseTest extends TestCase
 
     /** @var string */
     private $token;
+    private $host;
 
     public function setUp()
     {
-        $host = 'http://selenium-standalone-chrome:4444/wd/hub';
+        $host = getenv('SELENIUM_HOST');
         $this->driver = \RemoteWebDriver::create($host, \DesiredCapabilities::chrome());
+        $this->host = getenv('SITE_HOST');
     }
 
     public function goToPath($path)
     {
-        $this->driver->get('http://localhost/admin-dev/' . $path);
+        $this->driver->get($this->host . '/admin-dev/' . $path);
         try {
             $this->driver->findElement(\WebDriverBy::linkText("Ik begrijp het risico maar wil de pagina toch bekijken"))->click();
         } catch (\NoSuchElementException $e) {
