@@ -320,13 +320,15 @@ class AdminBolPlazaProductsController extends ModuleAdminController
             $Plaza = BolPlaza::getClient();
             $commission = $Plaza->getCommission($ean, $condition, $price);
             $reductions = array();
-            foreach ($commission->Reductions as $reduction) {
-                $reductions[] = array(
-                    'max' => $reduction->MaximumPrice,
-                    'reduction' => $reduction->CostReduction,
-                    'start' => $reduction->StartDate,
-                    'end' => $reduction->EndDate
-                );
+            if($commission->Reductions != NULL) {
+                foreach ($commission->Reductions as $reduction) {
+                    $reductions[] = array(
+                        'max' => $reduction->MaximumPrice,
+                        'reduction' => $reduction->CostReduction,
+                        'start' => $reduction->StartDate,
+                        'end' => $reduction->EndDate
+                    );
+                }
             }
             return die(Tools::jsonEncode(array(
                 'error' => false,
