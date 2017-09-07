@@ -16,6 +16,9 @@ class SetupModuleTest extends BaseTest
         $this->assertEquals('Dashboard', $title);
     }
 
+    /**
+     * @group 16
+     */
     public function testEnableModule()
     {
         $this->doAdminLogin();
@@ -26,6 +29,7 @@ class SetupModuleTest extends BaseTest
     }
 
     /**
+     * @group 16
      * @depends testEnableModule
      */
     public function testConfigureModule()

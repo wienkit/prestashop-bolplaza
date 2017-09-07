@@ -31,7 +31,7 @@ test:web16:
   - /tmp/docker_run.sh
   - composer install
   - ln -s . /var/www/html/modules/bolplaza
-  - ./libraries/bin/phpunit
+  - ./libraries/bin/phpunit --exclude-group=17
 
 test:web17:
   image: prestashop/prestashop:1.7-7.0
@@ -43,7 +43,7 @@ test:web17:
   - /tmp/docker_run.sh
   - composer install
   - ln -s . /var/www/html/modules/bolplaza
-  - ./libraries/bin/phpunit
+  - ./libraries/bin/phpunit --exclude-group=16
 
 package:
   image: mwienk/gitlab-ci-magento2
