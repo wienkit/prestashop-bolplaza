@@ -13,7 +13,7 @@ abstract class BaseTest extends TestCase
 
     public function setUp()
     {
-        $host = 'http://selenium-standalone-firefox:4444/wd/hub';
+        $host = 'http://selenium-standalone-chrome:4444/wd/hub';
         $this->driver = \RemoteWebDriver::create($host, \DesiredCapabilities::chrome());
     }
 
