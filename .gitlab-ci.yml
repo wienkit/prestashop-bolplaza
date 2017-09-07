@@ -27,6 +27,7 @@ test:web16:
   - sed -i "s/exec apache2-foreground/service apache2 start/g" /tmp/docker_run.sh
   - apt-get update && apt-get install -y git
   - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer && \
+  - export SITE_HOST=$(getent hosts $HOSTNAME | awk '{ print $1 }')
   script:
   - /tmp/docker_run.sh
   - composer install
@@ -45,6 +46,7 @@ test:web17:
   - sed -i "s/exec apache2-foreground/service apache2 start/g" /tmp/docker_run.sh
   - apt-get update && apt-get install -y git
   - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer && \
+  - export SITE_HOST=$(getent hosts $HOSTNAME | awk '{ print $1 }')
   script:
   - /tmp/docker_run.sh
   - composer install

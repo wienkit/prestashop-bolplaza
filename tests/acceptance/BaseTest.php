@@ -14,6 +14,7 @@ abstract class BaseTest extends TestCase
 
     public function setUp()
     {
+        echo getenv('SITE_HOST');
         $host = getenv('SELENIUM_HOST');
         $this->driver = \RemoteWebDriver::create($host, \DesiredCapabilities::chrome());
         $this->host = getenv('SITE_HOST');
@@ -49,7 +50,7 @@ abstract class BaseTest extends TestCase
     {
         if ($this->hasFailed()) {
             echo "FAILED";
-            echo $this->driver->takeScreenshot('results/' . time() . '_' . $this->getName() . '.jpg');
+            echo $this->driver->takeScreenshot('results/' . time() . '_' . $this->getName() . '.png');
         } else {
             echo "NOT FAILED";
         }
