@@ -38,7 +38,20 @@
             </a></p>
             <div class="collapse" id="collapseAdvanced">
                 <div class="well">
-                    <p><strong>Cron URL:</strong> {$cron_url|escape:'htmlall':'UTF-8'}</p>
+                    <div class="form-horizontal">
+                        <div class="form-group">
+                            <label for="cron_url" class="col-md-2 control-label"><strong>Cron URL</strong></label>
+                            <div class="col-md-10">
+                                <input id="cron_url" readonly class="form-control" type="text" value="{$cron_url|escape:'htmlall':'UTF-8'}" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="cron_cmd" class="col-md-2 control-label"><strong>Cron command</strong></label>
+                            <div class="col-md-10">
+                                <input id="cron_cmd" readonly class="form-control" type="text" value="*/10 * * * * curl --silent {$cron_url|escape:'htmlall':'UTF-8'} &>/dev/null" />
+                            </div>
+                        </div>
+                    </div>
                     <p><strong>{l s='Note:' mod='bolplaza'}</strong> {l s='If you use multistore, setup a cron task for each shop (look at the module settings page for each shop, because the secret key differs per shop)'  mod='bolplaza'}</p>
                 </div>
             </div>
