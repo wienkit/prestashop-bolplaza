@@ -148,7 +148,7 @@ class BolPlazaProduct extends ObjectModel
             $stock = 999;
         }
         $product = new Product($this->id_product, false, $context->language->id, $context->shop->id);
-        if($this->ean != null) {
+        if ($this->ean != null) {
             $offer->EAN = $this->ean;
         } elseif ($id_product_attribute != null) {
             $product_attribute = new Combination($this->id_product_attribute);
