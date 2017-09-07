@@ -31,7 +31,7 @@ test:web16:
   script:
   - /tmp/docker_run.sh
   - composer install
-  - ./tests/vendor/bin/phpunit
+  - ./libraries/bin/phpunit
 #  before_script:
 #    - "./prestashop-beslistcart:/var/www/html/modules/beslistcart"
 #    - "./prestashop-bolplaza:/var/www/html/modules/bolplaza"
