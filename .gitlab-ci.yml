@@ -31,8 +31,6 @@ test:web16:
   script:
   - /tmp/docker_run.sh
   - composer install
-  - composer install -d tests
-  - echo $PWD; ls
   - ./tests/vendor/bin/phpunit
 #  before_script:
 #    - "./prestashop-beslistcart:/var/www/html/modules/beslistcart"
