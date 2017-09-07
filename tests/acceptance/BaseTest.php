@@ -47,7 +47,10 @@ abstract class BaseTest extends TestCase
     public function tearDown()
     {
         if ($this->hasFailed()) {
-            $this->driver->takeScreenshot('/tmp/artifacts/FailedTestScreenshots/' . time() . '_' . $this->getName() . '.jpg');
+            echo "FAILED";
+            echo $this->driver->takeScreenshot('/tmp/artifacts/FailedTestScreenshots/' . time() . '_' . $this->getName() . '.jpg');
+        } else {
+            echo "NOT FAILED";
         }
         $this->driver->close();
     }
