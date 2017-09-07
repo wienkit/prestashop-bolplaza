@@ -32,6 +32,12 @@ test:web16:
   - composer install
   - ln -s . /var/www/html/modules/bolplaza
   - ./libraries/bin/phpunit --exclude-group=17
+  artifacts:
+    when: on_failure
+    paths:
+      - /tmp/artifacts/*
+    expire_in: 1 week
+
 
 test:web17:
   image: prestashop/prestashop:1.7-7.0
@@ -44,6 +50,11 @@ test:web17:
   - composer install
   - ln -s . /var/www/html/modules/bolplaza
   - ./libraries/bin/phpunit --exclude-group=16
+  artifacts:
+    when: on_failure
+    paths:
+      - /tmp/artifacts/*
+    expire_in: 1 week
 
 package:
   image: mwienk/gitlab-ci-magento2

@@ -2,6 +2,7 @@
 namespace Wienkit\Prestashop\Bolplaza;
 
 use PHPUnit\Framework\TestCase;
+use Throwable;
 
 abstract class BaseTest extends TestCase
 {
@@ -45,6 +46,9 @@ abstract class BaseTest extends TestCase
 
     public function tearDown()
     {
+        if ($this->hasFailed()) {
+            $this->driver->takeScreenshot('/tmp/artifacts/FailedTestScreenshots/' . time() . '_' . $this->getName() . '.jpg');
+        }
         $this->driver->close();
     }
 }
