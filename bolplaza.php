@@ -24,7 +24,7 @@ class BolPlaza extends Module
     {
         $this->name = 'bolplaza';
         $this->tab = 'market_place';
-        $this->version = '1.3.9';
+        $this->version = '1.3.10';
         $this->author = 'Wienk IT';
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
@@ -244,7 +244,7 @@ class BolPlaza extends Module
      */
     public function getContent()
     {
-        $cron_url = Tools::getShopDomain(true, true).__PS_BASE_URI__.basename(_PS_MODULE_DIR_);
+        $cron_url = Tools::getShopDomainSsl(true, true).__PS_BASE_URI__.basename(_PS_MODULE_DIR_);
         $cron_url.= '/bolplaza/cron.php?secure_key='.md5(_COOKIE_KEY_.Configuration::get('PS_SHOP_NAME').'BOLPLAZA');
 
         $errors = array();
@@ -725,10 +725,11 @@ class BolPlaza extends Module
         if (!Configuration::get('BOL_PLAZA_ORDERS_ENABLED')) {
             return $this->display(__FILE__, 'views/templates/admin/disabled.tpl');
         }
-        if ($id_product = (int)Tools::getValue('id_product', $params['id_product'])) {
+        $id_product = isset($params['id_product']) ? $params['id_product'] : false;
+        if ($id_product = (int)Tools::getValue('id_product', $id_product)) {
             $product = new Product($id_product, true, $this->context->language->id, $this->context->shop->id);
         }
-        if (!Validate:: isLoadedObject($product)) {
+        if (!Validate::isLoadedObject($product)) {
             return "";
         }
 
