@@ -15,4 +15,5 @@ build:
     name:
       - "bolplaza-$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHA"
     paths:
-    - .
+      - .
+    expire_in: 2 weeks
