@@ -33,7 +33,7 @@ test:web16:
   - composer install
   - composer install -d tests
   - echo $PWD; ls
-  - ./libraries/bin/phpunit
+  - ./tests/vendor/bin/phpunit
 #  before_script:
 #    - "./prestashop-beslistcart:/var/www/html/modules/beslistcart"
 #    - "./prestashop-bolplaza:/var/www/html/modules/bolplaza"
