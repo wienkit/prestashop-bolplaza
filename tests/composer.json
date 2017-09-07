@@ -4,7 +4,8 @@
     },
     "require-dev": {
         "phpunit/phpunit": "*",
-        "phpunit/phpunit-selenium": "*"
+        "phpunit/phpunit-selenium": "*",
+        "phpunit/php-code-coverage": "*"
     },
     "authors": [
         {
