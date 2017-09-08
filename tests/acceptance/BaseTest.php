@@ -14,7 +14,6 @@ abstract class BaseTest extends TestCase
 
     public function setUp()
     {
-        echo "http://" . getenv('SITE_HOST');
         $host = getenv('SELENIUM_HOST');
         $this->driver = \RemoteWebDriver::create($host, \DesiredCapabilities::chrome());
         $this->host = "http://" . getenv('SITE_HOST');
@@ -44,6 +43,16 @@ abstract class BaseTest extends TestCase
         $parts = parse_url($url);
         parse_str($parts['query'], $query);
         $this->token = $query['token'];
+    }
+
+    public function getStatusMessageText()
+    {
+        try {
+            $text = $this->driver->findElement(\WebDriverBy::cssSelector(".bootstrap .alert-success"))->getText();
+            return $text;
+        } catch (\NoSuchElementException $e) {
+            return "";
+        }
     }
 
     public function tearDown()
