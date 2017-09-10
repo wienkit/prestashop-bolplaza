@@ -23,7 +23,7 @@ class SetupModule17Test extends AbstractAdmin17TestBase
     {
         $this->doAdminLogin();
         $this->goToMenu(['Modules', 'Modules & Services']);
-        $this->driver->findElement(\WebDriverBy::className('module-tags-input'))->sendKeys('beslist');
+        $this->driver->findElement(\WebDriverBy::className('module-tags-input'))->sendKeys('bol.com');
         $this->driver->findElement(\WebDriverBy::className('search-button'))->click();
         $this->driver->wait()->until(
             \WebDriverExpectedCondition::elementToBeClickable(\WebDriverBy::cssSelector('button[data-confirm_modal="module-modal-confirm-bolplaza-install"]'))

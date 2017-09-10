@@ -38,6 +38,11 @@ abstract class ATestBase extends TestCase
         $this->driver->wait()->until(
             \WebDriverExpectedCondition::titleContains('Dashboard')
         );
+
+        try {
+            $this->driver->findElement(\WebDriverBy::className('onboarding-button-shut-down'))->click();
+        } catch (\Exception $e) {
+        }
     }
 
     public function getStatusMessageText()
@@ -56,5 +61,21 @@ abstract class ATestBase extends TestCase
             $this->driver->takeScreenshot('results/' . time() . '_' . $this->getName() . '.png');
         }
         $this->driver->close();
+    }
+
+    /**
+     * Select an option in a select element
+     * @param $selectId
+     * @param $optionValue
+     */
+    public function selectOption($selectId, $optionValue)
+    {
+        $select = $this->driver->findElement(\WebDriverBy::id($selectId));
+        $options = $select->findElements(\WebDriverBy::tagName('option'));
+        foreach ($options as $option) {
+            if($option->getAttribute('value') == $optionValue) {
+                $option->click();
+            }
+        }
     }
 }
