@@ -1,15 +1,14 @@
 <?php
-namespace Wienkit\Prestashop\Bolplaza;
+namespace Wienkit\Prestashop\Bolplaza\Base;
 
 use PHPUnit\Framework\TestCase;
 
-abstract class BaseTest extends TestCase
+abstract class ATestBase extends TestCase
 {
     /** @var \RemoteWebDriver */
     protected $driver;
 
     /** @var string */
-    private $token;
     private $host;
 
     public function setUp()
@@ -39,10 +38,6 @@ abstract class BaseTest extends TestCase
         $this->driver->wait()->until(
             \WebDriverExpectedCondition::titleContains('Dashboard')
         );
-        $url = $this->driver->getCurrentURL();
-        $parts = parse_url($url);
-        parse_str($parts['query'], $query);
-        $this->token = $query['token'];
     }
 
     public function getStatusMessageText()

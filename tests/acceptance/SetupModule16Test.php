@@ -1,12 +1,15 @@
 <?php
 namespace Wienkit\Prestashop\Bolplaza;
 
+use Wienkit\Prestashop\Bolplaza\Base\ATestBase;
+
 /**
  * Class SetupModuleTest
  *
+ * @group 16
  * @package Wienkit\Prestashop\Bolplaza
  */
-class SetupModuleTest extends BaseTest
+class SetupModule16Test extends ATestBase
 {
 
     public function testAdminLogin()
@@ -16,9 +19,6 @@ class SetupModuleTest extends BaseTest
         $this->assertEquals('Dashboard', $title);
     }
 
-    /**
-     * @group 16
-     */
     public function testEnableModule()
     {
         $this->doAdminLogin();
@@ -28,7 +28,6 @@ class SetupModuleTest extends BaseTest
     }
 
     /**
-     * @group 16
      * @depends testEnableModule
      */
     public function testConfigureModule()
