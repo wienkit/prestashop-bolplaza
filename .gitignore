@@ -3,6 +3,7 @@
 
 ### Composer ###
 composer.phar
+composer.lock
 /vendor/
 /libraries/
 
@@ -24,3 +25,5 @@ composer.phar
 .Trash-*
 config*.xml
 .idea
+phpunit.xml
+results

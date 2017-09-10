@@ -628,7 +628,12 @@ class BolPlaza extends Module
         $helper->fields_value['bolplaza_orders_carrier'] = Configuration::get('BOL_PLAZA_ORDERS_CARRIER');
         $helper->fields_value['bolplaza_orders_carrier_code'] = Configuration::get('BOL_PLAZA_ORDERS_CARRIER_CODE');
         $helper->fields_value['bolplaza_orders_delivery_code'] = Configuration::get('BOL_PLAZA_ORDERS_DELIVERY_CODE');
-        $helper->fields_value['bolplaza_orders_free_shipping'] = Configuration::get('BOL_PLAZA_ORDERS_FREE_SHIPPING');
+
+        $freeShipping = Configuration::get('BOL_PLAZA_ORDERS_FREE_SHIPPING');
+        if (empty($freeShipping)) {
+            $freeShipping = true;
+        }
+        $helper->fields_value['bolplaza_orders_free_shipping'] = $freeShipping;
         $helper->fields_value['bolplaza_orders_use_address2'] = Configuration::get('BOL_PLAZA_ORDERS_USE_ADDRESS2');
         $customerGroup = Configuration::get('BOL_PLAZA_ORDERS_CUSTOMER_GROUP');
         if (empty($customerGroup)) {

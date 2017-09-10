@@ -1,0 +1,13 @@
+<phpunit colors="true" strict="true" bootstrap="tests/autoload.php">
+    <php>
+        <env name="SITE_HOST" value="localhost"/>
+        <env name="SELENIUM_HOST" value="http://selenium-standalone-chrome:4444/wd/hub"/>
+        <env name="PUBLIC_KEY" value="KNFpPqgaedIerAQmpuVQxCyYSXcdteOh"/>
+        <env name="PRIVATE_KEY" value="XhGdDwGLrddFkTrJlntizwAckiSJVuIBKOHvwWxhYyViVqiDKWLtbOJIQZnZqONCslAhqpqJmORVnjfvEeDxJRKanuUnkLjQkVQLgZMxkdOPxpEVDqXAfXdfgUVbAaZWkhgTIsspHRNHHOwrlsoQiNvRqlmhAmTVKvjGixKLIkInlZWRNJsjnVnaTTBIeMKSNwOpLGCtdwEUmSiDueRnHHwePkPMJVdVgWdxgZKqFwEaoWeOySwmTGwdgdCUcgPK"/>
+    </php>
+    <testsuites>
+        <testsuite name="The project's test suite">
+            <directory>./tests</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>
