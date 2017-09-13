@@ -523,7 +523,7 @@ class AdminBolPlazaProductsController extends ModuleAdminController
                 FROM "._DB_PREFIX_."bolplaza_ownoffers bo 
                 INNER JOIN "._DB_PREFIX_."bolplaza_product bp 
                     ON bo.id_bolplaza_product = bp.id_bolplaza_product
-                INNER JOIN "._DB_PREFIX__."product_shop ps
+                INNER JOIN "._DB_PREFIX_."product_shop ps
                     ON ps.id_product = bp.id_product
                     AND ps.id_shop = bp.id_shop
                 WHERE 
