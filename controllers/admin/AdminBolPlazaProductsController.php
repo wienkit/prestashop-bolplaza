@@ -523,7 +523,13 @@ class AdminBolPlazaProductsController extends ModuleAdminController
                 FROM "._DB_PREFIX_."bolplaza_ownoffers bo 
                 INNER JOIN "._DB_PREFIX_."bolplaza_product bp 
                     ON bo.id_bolplaza_product = bp.id_bolplaza_product
-                WHERE bo.publish <> bp.published";
+                INNER JOIN "._DB_PREFIX__."product_shop ps
+                    ON ps.id_product = bp.id_product
+                    AND ps.id_shop = bp.id_shop
+                WHERE 
+                    bo.publish <> bp.published
+                AND
+                    (bp.published = 0 OR ps.active = 1)";
         $results = Db::getInstance()->executeS($sql);
         $ids = array();
         foreach ($results as $row) {
