@@ -760,14 +760,9 @@ class BolPlaza extends Module
         foreach ($attributes as $attribute) {
             $product_designation[$attribute['id_product_attribute']] = $attribute['attribute_designation'];
 
-            $price = 0;
-            if ($attribute['id_product_attribute'] != 0) {
-                $price = $product->getPrice(true, $attribute['id_product_attribute']);
-                $product_baseprice[$attribute['id_product_attribute']] = $price;
-            } else {
-                $price = $product->getPrice();
-                $product_baseprice[$attribute['id_product_attribute']] = $price;
-            }
+            $price = BolPlazaProduct::getPriceStatic($product->id, $attribute['id_product_attribute']);
+            $product_baseprice[$attribute['id_product_attribute']] = $price;
+
             if ($addition > 0) {
                 $price += $addition;
             }

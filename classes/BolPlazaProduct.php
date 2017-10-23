@@ -123,14 +123,10 @@ class BolPlazaProduct extends ObjectModel
         $id_product_attribute = $this->id_product_attribute ? $this->id_product_attribute : null;
         $offer = new \Wienkit\BolPlazaClient\Entities\BolPlazaRetailerOffer();
         $offer->Condition = $this->getCondition();
-        $price = Product::getPriceStatic(
-            $this->id_product,
-            true,
-            $id_product_attribute,
-            2,
-            null,
-            false,
-            false
+        $price = self::getPriceStatic(
+          $this->id_product,
+          $this->id_product_attribute,
+          $context
         );
         $offer->Price = $price + $this->price;
         if ($this->delivery_time != null) {
@@ -414,6 +410,56 @@ class BolPlazaProduct extends ObjectModel
                 'shipsuntil' => 12,
                 'addtime' => 8
             )
+        );
+    }
+
+    /**
+     * Helper function to get the price
+     *
+     * @param $id_product
+     * @param $id_product_attribute
+     * @param Context|null $context
+     * @param bool $usereduc
+     * @param null $specific_price_output
+     * @return float
+     */
+    public static function getPriceStatic(
+        $id_product,
+        $id_product_attribute,
+        Context $context = null,
+        $usereduc = true,
+        &$specific_price_output = null
+    ) {
+        if (!$context) {
+            $context = Context::getContext();
+        }
+
+        $id_currency = Validate::isLoadedObject($context->currency)
+            ? (int)$context->currency->id
+            : (int)Configuration::get('PS_CURRENCY_DEFAULT');
+        $id_group = Configuration::get('BOL_PLAZA_ORDERS_CUSTOMER_GROUP');
+
+        return Product::priceCalculation(
+            $context->shop->id,
+            $id_product,
+            $id_product_attribute,
+            $context->country->id,
+            0,
+            0,
+            $id_currency,
+            $id_group,
+            1,
+            true,
+            2,
+            false,
+            $usereduc,
+            true,
+            $specific_price_output,
+            true,
+            null,
+            false,
+            null,
+            0
         );
     }
 }
