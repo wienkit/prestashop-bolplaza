@@ -34,6 +34,7 @@ class SetupModule16Test extends ATestBase
     {
         $this->doAdminLogin();
         $this->goToPath('index.php?controller=AdminModules&configure=bolplaza&tab_module=market_place&module_name=bolplaza');
+        $this->driver->findElement(\WebDriverBy::cssSelector("label[for='bolplaza_orders_enabled_on']"))->click();
         $this->driver->findElement(\WebDriverBy::cssSelector("label[for='bolplaza_orders_testmode_on']"))->click();
         $this->driver->findElement(\WebDriverBy::id('bolplaza_orders_pubkey'))->sendKeys(getenv('PUBLIC_KEY'));
         $this->driver->findElement(\WebDriverBy::id('bolplaza_orders_privkey'))->sendKeys(getenv('PRIVATE_KEY'));
@@ -44,4 +45,34 @@ class SetupModule16Test extends ATestBase
         $this->driver->findElement(\WebDriverBy::id('configuration_form'))->submit();
         $this->assertContains("Instellingen opgeslagen", $this->getStatusMessageText());
     }
+
+    public function testSetProductPrice()
+    {
+        $this->doAdminLogin();
+        $this->goToPath('index.php?controller=AdminProducts&id_product=1&updateproduct');
+        sleep(10);
+        $this->driver->findElement(\WebDriverBy::name('ean13'))->clear()->sendKeys('9789062387410');
+        $this->driver->findElement(\WebDriverBy::id('link-ModuleBolplaza'))->click();
+        $this->driver->findElement(\WebDriverBy::id('toggle_bolplaza_check'))->click();
+        $button = $this->driver->findElement(\WebDriverBy::cssSelector('#product-tab-content-ModuleBolplaza [name="submitAddproduct"]'));
+        $button->getLocationOnScreenOnceScrolledIntoView();
+        $button->click();
+        $this->assertContains('Succesvolle wijziging', $this->getStatusMessageText());
+    }
+
+
+    /**
+     * @depends testConfigureModule
+     */
+    public function testSyncOrders()
+    {
+        $this->doAdminLogin();
+        $this->goToPath('index.php?controller=AdminBolPlazaOrders');
+        $this->driver->findElement(\WebDriverBy::id('page-header-desc-bolplaza_item-sync_orders'))->click();
+        $this->assertContains('Bol.com order synchronisatie compleet', $this->getStatusMessageText());
+        $tableText = $this->driver->findElement(\WebDriverBy::id('form-order'))->getText();
+        $this->assertContains('T. van TestAchternaam', $tableText);
+        $this->assertContains('Beslist order imported', $tableText);
+    }
+
 }
