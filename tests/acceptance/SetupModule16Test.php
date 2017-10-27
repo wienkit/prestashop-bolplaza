@@ -46,31 +46,38 @@ class SetupModule16Test extends ATestBase
         $this->assertContains("Instellingen opgeslagen", $this->getStatusMessageText());
     }
 
-    /**
-     * @depends testConfigureModule
-     */
+//    /**
+//     * @depends testConfigureModule
+//     */
     public function testSetProductPrice()
     {
         $this->doAdminLogin();
         $this->goToPath('index.php?controller=AdminProducts&id_product=1&updateproduct');
-        sleep(10);
 
         // Set EAN13 on product
         $this->driver->findElement(\WebDriverBy::name('ean13'))->clear()->sendKeys('9789062387410');
-        $button = $this->driver->findElement(\WebDriverBy::cssSelector('#product-tab-content-Informations [name="submitAddproductAndStay"]'));
-        $button->getLocationOnScreenOnceScrolledIntoView();
-        $button->click();
+
+        $selector = \WebDriverBy::cssSelector('#product-tab-content-Informations [name="submitAddproductAndStay"]');
+        $this->driver->wait()->until(\WebDriverExpectedCondition::elementToBeClickable($selector));
+        $this->driver->findElement($selector)->getLocationOnScreenOnceScrolledIntoView();
+        $this->driver->findElement($selector)->click();
 
         // Set EAN13 on combination
         $this->driver->findElement(\WebDriverBy::id('link-Combinations'))->click();
-        sleep(2);
-        $button = $this->driver->findElement(\WebDriverBy::cssSelector('#table-combinations-list [title="Wijzig"]'));
-        $button->getLocationOnScreenOnceScrolledIntoView();
-        $button->click();
-        $this->driver->findElement(\WebDriverBy::name('attribute_ean13'))->clear()->sendKeys('9789062387410');
-        $button = $this->driver->findElement(\WebDriverBy::cssSelector('#product-tab-content-Combinations [name="submitAddproductAndStay"]'));
-        $button->getLocationOnScreenOnceScrolledIntoView();
-        $button->click();
+
+        $selector = \WebDriverBy::cssSelector('#table-combinations-list [title="Wijzig"]');
+        $this->driver->wait()->until(\WebDriverExpectedCondition::elementToBeClickable($selector));
+        $this->driver->findElement($selector)->getLocationOnScreenOnceScrolledIntoView();
+        $this->driver->findElement($selector)->click();
+
+        $selector = \WebDriverBy::name('attribute_ean13');
+        $this->driver->wait()->until(\WebDriverExpectedCondition::elementToBeClickable($selector));
+        $this->driver->findElement($selector)->clear()->sendKeys('9789062387410');
+        $selector = \WebDriverBy::cssSelector('#product-tab-content-Combinations [name="submitAddproductAndStay"]');
+        $this->driver->wait()->until(\WebDriverExpectedCondition::elementToBeClickable($selector));
+        $this->driver->findElement($selector)->getLocationOnScreenOnceScrolledIntoView();
+        $this->driver->findElement($selector)->click();
+
         $this->assertContains('Succesvolle wijziging', $this->getStatusMessageText());
 
         // Add products to Bol.com
