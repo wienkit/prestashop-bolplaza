@@ -320,7 +320,7 @@ class AdminBolPlazaProductsController extends ModuleAdminController
             $Plaza = BolPlaza::getClient();
             $commission = $Plaza->getCommission($ean, $condition, $price);
             $reductions = array();
-            if($commission->Reductions != NULL) {
+            if ($commission->Reductions != null) {
                 foreach ($commission->Reductions as $reduction) {
                     $reductions[] = array(
                         'max' => $reduction->MaximumPrice,
@@ -604,7 +604,8 @@ class AdminBolPlazaProductsController extends ModuleAdminController
                 $client->deleteOffer($bolProduct->ean, $bolProduct->getCondition());
             } catch (Exception $e) {
                 $context->controller->errors[] = Tools::displayError(
-                    'Couldn\'t send update to Bol.com, error: ' . $e->getMessage() . 'You have to correct this manually.'
+                    'Couldn\'t send update to Bol.com, error: ' . $e->getMessage() .
+                    'You have to correct this manually.'
                 );
             }
         }

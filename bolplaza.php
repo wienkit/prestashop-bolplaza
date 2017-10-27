@@ -109,7 +109,7 @@ class BolPlaza extends Module
     {
         $sql = array();
         include(dirname(__FILE__).'/sql_install.php');
-        foreach ($sql as $name => $v) {
+        foreach (array_keys($sql) as $name) {
             Db::getInstance()->execute('DROP TABLE IF EXISTS '.pSQL($name));
         }
         return true;
@@ -344,7 +344,7 @@ class BolPlaza extends Module
             $customerGroup2 = (int) Tools::getValue(self::PREFIX_SECONDARY_ACCOUNT . 'bolplaza_orders_customer_group');
             $freeShipping2 = (bool) Tools::getValue(self::PREFIX_SECONDARY_ACCOUNT . 'bolplaza_orders_free_shipping');
 
-            if($useSplitted) {
+            if ($useSplitted) {
                 if (!$privkey2
                     || !$pubkey2
                     || empty($privkey2)
@@ -652,7 +652,8 @@ class BolPlaza extends Module
         $helper->fields_value['bolplaza_orders_enabled'] = Configuration::get('BOL_PLAZA_ORDERS_ENABLED');
         $helper->fields_value['bolplaza_orders_testmode'] = Configuration::get('BOL_PLAZA_ORDERS_TESTMODE');
         $helper->fields_value['bolplaza_orders_use_address2'] = Configuration::get('BOL_PLAZA_ORDERS_USE_ADDRESS2');
-        $helper->fields_value['bolplaza_orders_enable_splitted'] = Configuration::get('BOL_PLAZA_ORDERS_ENABLE_SPLITTED');
+        $helper->fields_value['bolplaza_orders_enable_splitted'] =
+            Configuration::get('BOL_PLAZA_ORDERS_ENABLE_SPLITTED');
 
         // Primary account values
         $helper->fields_value['bolplaza_orders_privkey'] = Configuration::get('BOL_PLAZA_ORDERS_PRIVKEY');

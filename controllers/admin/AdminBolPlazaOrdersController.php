@@ -214,9 +214,9 @@ class AdminBolPlazaOrdersController extends AdminController
 
                     if (!$cart) {
                         $context->controller->errors[] = Translate::getAdminTranslation(
-                                'Couldn\'t create a cart for order ',
-                                'AdminBolPlazaOrders'
-                            ) . $order->OrderId;
+                            'Couldn\'t create a cart for order ',
+                            'AdminBolPlazaOrders'
+                        ) . $order->OrderId;
                         continue;
                     }
 
@@ -240,7 +240,7 @@ class AdminBolPlazaOrdersController extends AdminController
                         $cart->secure_key
                     );
                     if ($verified) {
-                        self::persistBolItems($clientID, $payment_module->currentOrder, $order);
+                        self::persistBolItems($payment_module->currentOrder, $order, $clientID);
                     }
                 }
             }
@@ -450,14 +450,14 @@ class AdminBolPlazaOrdersController extends AdminController
 
     /**
      * Persist the BolItems to the database
-     * @param int $clientID
      * @param string $orderId
      * @param Wienkit\BolPlazaClient\Entities\BolPlazaOrder $order
+     * @param int $clientID
      */
     public static function persistBolItems(
-        $clientID = 0,
         $orderId,
-        Wienkit\BolPlazaClient\Entities\BolPlazaOrder $order
+        Wienkit\BolPlazaClient\Entities\BolPlazaOrder $order,
+        $clientID = 0
     ) {
         $items = $order->OrderItems;
         if (!empty($items)) {

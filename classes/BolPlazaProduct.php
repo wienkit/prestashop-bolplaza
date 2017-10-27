@@ -125,9 +125,9 @@ class BolPlazaProduct extends ObjectModel
         $offer = new \Wienkit\BolPlazaClient\Entities\BolPlazaRetailerOffer();
         $offer->Condition = $this->getCondition();
         $price = self::getPriceStatic(
-          $this->id_product,
-          $this->id_product_attribute,
-          $context
+            $this->id_product,
+            $this->id_product_attribute,
+            $context
         );
         $offer->Price = $price + $this->price;
         if ($this->delivery_time != null) {

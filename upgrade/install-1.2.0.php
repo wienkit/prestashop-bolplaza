@@ -17,7 +17,7 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-function upgrade_module_1_2_0($object)
+function upgrade_module_1_2_0()
 {
     // ALTER TABLE `PREFIX_product` ADD quantity_discount BOOL NULL DEFAULT 0 AFTER out_of_stock;
     return (
