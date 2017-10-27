@@ -46,19 +46,37 @@ class SetupModule16Test extends ATestBase
         $this->assertContains("Instellingen opgeslagen", $this->getStatusMessageText());
     }
 
+    /**
+     * @depends testConfigureModule
+     */
     public function testSetProductPrice()
     {
         $this->doAdminLogin();
         $this->goToPath('index.php?controller=AdminProducts&id_product=1&updateproduct');
         sleep(10);
+
+        // Set EAN13 on product
         $this->driver->findElement(\WebDriverBy::name('ean13'))->clear()->sendKeys('9789062387410');
         $button = $this->driver->findElement(\WebDriverBy::cssSelector('#product-tab-content-Informations [name="submitAddproductAndStay"]'));
         $button->getLocationOnScreenOnceScrolledIntoView();
         $button->click();
+
+        // Set EAN13 on combination
+        $this->driver->findElement(\WebDriverBy::id('link-Combinations'))->click();
+        sleep(2);
+        $button = $this->driver->findElement(\WebDriverBy::cssSelector('#table-combinations-list [title="Wijzig"]'));
+        $button->getLocationOnScreenOnceScrolledIntoView();
+        $button->click();
+        $this->driver->findElement(\WebDriverBy::name('attribute_ean13'))->clear()->sendKeys('9789062387410');
+        $button = $this->driver->findElement(\WebDriverBy::cssSelector('#product-tab-content-Combinations [name="submitAddproductAndStay"]'));
+        $button->getLocationOnScreenOnceScrolledIntoView();
+        $button->click();
         $this->assertContains('Succesvolle wijziging', $this->getStatusMessageText());
+
+        // Add products to Bol.com
         $this->driver->findElement(\WebDriverBy::id('link-ModuleBolplaza'))->click();
         sleep(2);
-        $this->driver->findElement(\WebDriverBy::id('toggle_bolplaza_check'))->click();
+        $this->driver->findElement(\WebDriverBy::name('bolplaza_published_1_1'))->click();
         $button = $this->driver->findElement(\WebDriverBy::cssSelector('#product-tab-content-ModuleBolplaza [name="submitAddproduct"]'));
         $button->getLocationOnScreenOnceScrolledIntoView();
         $button->click();
@@ -67,7 +85,7 @@ class SetupModule16Test extends ATestBase
 
 
     /**
-     * @depends testConfigureModule
+     * @depends testSetProductPrice
      */
     public function testSyncOrders()
     {
