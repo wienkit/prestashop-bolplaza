@@ -52,12 +52,18 @@ class SetupModule16Test extends ATestBase
         $this->goToPath('index.php?controller=AdminProducts&id_product=1&updateproduct');
         sleep(10);
         $this->driver->findElement(\WebDriverBy::name('ean13'))->clear()->sendKeys('9789062387410');
+        $button = $this->driver->findElement(\WebDriverBy::cssSelector('#product-tab-content-Informations [name="submitAddproductAndStay"]'));
+        $button->getLocationOnScreenOnceScrolledIntoView();
+        $button->click();
+        $this->assertContains('Succesvolle wijziging', $this->getStatusMessageText());
+
         $this->driver->findElement(\WebDriverBy::id('link-ModuleBolplaza'))->click();
         $this->driver->findElement(\WebDriverBy::id('toggle_bolplaza_check'))->click();
         $button = $this->driver->findElement(\WebDriverBy::cssSelector('#product-tab-content-ModuleBolplaza [name="submitAddproduct"]'));
         $button->getLocationOnScreenOnceScrolledIntoView();
         $button->click();
         $this->assertContains('Succesvolle wijziging', $this->getStatusMessageText());
+
     }
 
 
@@ -69,7 +75,7 @@ class SetupModule16Test extends ATestBase
         $this->doAdminLogin();
         $this->goToPath('index.php?controller=AdminBolPlazaOrders');
         $this->driver->findElement(\WebDriverBy::id('page-header-desc-bolplaza_item-sync_orders'))->click();
-        $this->assertContains('Bol.com order synchronisatie compleet', $this->getStatusMessageText());
+        $this->assertContains('Bol.com order sync completed', $this->getStatusMessageText());
         $tableText = $this->driver->findElement(\WebDriverBy::id('form-order'))->getText();
         $this->assertContains('T. van TestAchternaam', $tableText);
         $this->assertContains('Beslist order imported', $tableText);
