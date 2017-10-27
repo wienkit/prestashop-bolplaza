@@ -20,11 +20,14 @@ require_once _PS_MODULE_DIR_.'bolplaza/controllers/admin/AdminBolPlazaProductsCo
 
 class BolPlaza extends Module
 {
+    const PREFIX_SECONDARY_ACCOUNT = "2_";
+    const DB_SUFFIX_SECONDARY_ACCOUNT = "_2";
+
     public function __construct()
     {
         $this->name = 'bolplaza';
         $this->tab = 'market_place';
-        $this->version = '1.3.10';
+        $this->version = '1.4.0';
         $this->author = 'Wienk IT';
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
@@ -292,14 +295,22 @@ class BolPlaza extends Module
         if (Tools::isSubmit('submit'.$this->name)) {
             $enabled = (bool) Tools::getValue('bolplaza_orders_enabled');
             $testmode = (bool) Tools::getValue('bolplaza_orders_testmode');
+            $useAddress2 = (bool) Tools::getValue('bolplaza_orders_use_address2');
+            $useSplitted = (bool) Tools::getValue('bolplaza_orders_enable_splitted');
+
+            Configuration::updateValue('BOL_PLAZA_ORDERS_ENABLED', $enabled);
+            Configuration::updateValue('BOL_PLAZA_ORDERS_TESTMODE', $testmode);
+            Configuration::updateValue('BOL_PLAZA_ORDERS_USE_ADDRESS2', $useAddress2);
+            Configuration::updateValue('BOL_PLAZA_ORDERS_ENABLE_SPLITTED', $useSplitted);
+
+            // Primary account settings
             $privkey = (string) Tools::getValue('bolplaza_orders_privkey');
             $pubkey = (string) Tools::getValue('bolplaza_orders_pubkey');
             $carrier = (int) Tools::getValue('bolplaza_orders_carrier');
             $carrierCode = (string) Tools::getValue('bolplaza_orders_carrier_code');
             $deliveryCode = (string) Tools::getValue('bolplaza_orders_delivery_code');
-            $freeShipping = (bool) Tools::getValue('bolplaza_orders_free_shipping');
             $customerGroup = (int) Tools::getValue('bolplaza_orders_customer_group');
-            $useAddress2 = (bool) Tools::getValue('bolplaza_orders_use_address2');
+            $freeShipping = (bool) Tools::getValue('bolplaza_orders_free_shipping');
             $updatePrices = (bool) Tools::getValue('bolplaza_orders_update_prices');
 
             if (!$privkey
@@ -310,21 +321,74 @@ class BolPlaza extends Module
                 || empty($deliveryCode)
                 || empty($carrierCode)
                 || empty($customerGroup)) {
-                $output .= $this->displayError($this->l('Invalid Configuration value'));
+                $output .= $this->displayError(
+                    $this->l('Invalid Configuration value in primary account settings')
+                );
             } else {
-                Configuration::updateValue('BOL_PLAZA_ORDERS_ENABLED', $enabled);
-                Configuration::updateValue('BOL_PLAZA_ORDERS_TESTMODE', $testmode);
                 Configuration::updateValue('BOL_PLAZA_ORDERS_PRIVKEY', $privkey);
                 Configuration::updateValue('BOL_PLAZA_ORDERS_PUBKEY', $pubkey);
                 Configuration::updateValue('BOL_PLAZA_ORDERS_CARRIER', $carrier);
                 Configuration::updateValue('BOL_PLAZA_ORDERS_CARRIER_CODE', $carrierCode);
                 Configuration::updateValue('BOL_PLAZA_ORDERS_DELIVERY_CODE', $deliveryCode);
-                Configuration::updateValue('BOL_PLAZA_ORDERS_FREE_SHIPPING', $freeShipping);
                 Configuration::updateValue('BOL_PLAZA_ORDERS_CUSTOMER_GROUP', $customerGroup);
-                Configuration::updateValue('BOL_PLAZA_ORDERS_USE_ADDRESS2', $useAddress2);
+                Configuration::updateValue('BOL_PLAZA_ORDERS_FREE_SHIPPING', $freeShipping);
                 $output .= $this->displayConfirmation($this->l('Settings updated'));
             }
 
+            // Secondary account settings
+            $privkey2 = (string) Tools::getValue(self::PREFIX_SECONDARY_ACCOUNT . 'bolplaza_orders_privkey');
+            $pubkey2 = (string) Tools::getValue(self::PREFIX_SECONDARY_ACCOUNT . 'bolplaza_orders_pubkey');
+            $carrier2 = (int) Tools::getValue(self::PREFIX_SECONDARY_ACCOUNT . 'bolplaza_orders_carrier');
+            $carrierCode2 = (string) Tools::getValue(self::PREFIX_SECONDARY_ACCOUNT . 'bolplaza_orders_carrier_code');
+            $delivCode2 = (string) Tools::getValue(self::PREFIX_SECONDARY_ACCOUNT . 'bolplaza_orders_delivery_code');
+            $customerGroup2 = (int) Tools::getValue(self::PREFIX_SECONDARY_ACCOUNT . 'bolplaza_orders_customer_group');
+            $freeShipping2 = (bool) Tools::getValue(self::PREFIX_SECONDARY_ACCOUNT . 'bolplaza_orders_free_shipping');
+
+            if($useSplitted) {
+                if (!$privkey2
+                    || !$pubkey2
+                    || empty($privkey2)
+                    || empty($pubkey2)
+                    || empty($carrier2)
+                    || empty($delivCode2)
+                    || empty($carrierCode2)
+                    || empty($customerGroup2)) {
+                    $output .= $this->displayError(
+                        $this->l('Invalid Configuration value in secondary account settings')
+                    );
+                } else {
+                    Configuration::updateValue(
+                        self::PREFIX_SECONDARY_ACCOUNT . 'BOL_PLAZA_ORDERS_PRIVKEY',
+                        $privkey2
+                    );
+                    Configuration::updateValue(
+                        self::PREFIX_SECONDARY_ACCOUNT . 'BOL_PLAZA_ORDERS_PUBKEY',
+                        $pubkey2
+                    );
+                    Configuration::updateValue(
+                        self::PREFIX_SECONDARY_ACCOUNT . 'BOL_PLAZA_ORDERS_CARRIER',
+                        $carrier2
+                    );
+                    Configuration::updateValue(
+                        self::PREFIX_SECONDARY_ACCOUNT . 'BOL_PLAZA_ORDERS_CARRIER_CODE',
+                        $carrierCode2
+                    );
+                    Configuration::updateValue(
+                        self::PREFIX_SECONDARY_ACCOUNT . 'BOL_PLAZA_ORDERS_DELIVERY_CODE',
+                        $delivCode2
+                    );
+                    Configuration::updateValue(
+                        self::PREFIX_SECONDARY_ACCOUNT . 'BOL_PLAZA_ORDERS_CUSTOMER_GROUP',
+                        $customerGroup2
+                    );
+                    Configuration::updateValue(
+                        self::PREFIX_SECONDARY_ACCOUNT . 'BOL_PLAZA_ORDERS_FREE_SHIPPING',
+                        $freeShipping2
+                    );
+                }
+            }
+
+            // Pricing rules settings
             $multiplication = (double) Tools::getValue('bolplaza_price_multiplication');
             if (!empty($multiplication)) {
                 Configuration::updateValue('BOL_PLAZA_PRICE_MULTIPLICATION', $multiplication);
@@ -379,16 +443,6 @@ class BolPlaza extends Module
     {
         // Get default language
         $default_lang = (int)Configuration::get('PS_LANG_DEFAULT');
-        $carriers = Carrier::getCarriers(
-            Context::getContext()->language->id,
-            false,
-            false,
-            false,
-            null,
-            Carrier::ALL_CARRIERS
-        );
-        $delivery_codes = BolPlazaProduct::getDeliveryCodes();
-        $customer_groups = Group::getGroups(Context::getContext()->language->id);
 
         // Init Fields form array
         $fields_form = array();
@@ -436,76 +490,6 @@ class BolPlaza extends Module
                     'hint' => $this->l('Enables the testing connection.')
                 ),
                 array(
-                    'type' => 'textarea',
-                    'label' => $this->l('Bol.com Plaza API Public key'),
-                    'name' => 'bolplaza_orders_pubkey',
-                    'size' => 20
-                ),
-                array(
-                    'type' => 'textarea',
-                    'label' => $this->l('Bol.com Plaza API Private key'),
-                    'name' => 'bolplaza_orders_privkey',
-                    'size' => 20
-                ),
-                array(
-                    'type' => 'select',
-                    'label' => $this->l('Carrier'),
-                    'desc' => $this->l('Choose a carrier for your Bol.com orders'),
-                    'name' => 'bolplaza_orders_carrier',
-                    'options' => array(
-                        'query' => $carriers,
-                        'id' => 'id_carrier',
-                        'name' => 'name'
-                    )
-                ),
-                array(
-                    'type' => 'text',
-                    'label' => $this->l('Carrier code'),
-                    'desc' => $this->l('Bol.com code for the carrier'),
-                    'name' => 'bolplaza_orders_carrier_code'
-                ),
-                array(
-                    'type' => 'select',
-                    'label' => $this->l('Delivery code'),
-                    'desc' => $this->l('Choose a delivery code for your Bol.com products'),
-                    'name' => 'bolplaza_orders_delivery_code',
-                    'options' => array(
-                        'query' => $delivery_codes,
-                        'id' => 'deliverycode',
-                        'name' => 'description'
-                    )
-                ),
-                array(
-                    'type' => 'select',
-                    'label' => $this->l('Customer group'),
-                    'desc' => $this->l('Choose a customer group for your Bol.com customers'),
-                    'name' => 'bolplaza_orders_customer_group',
-                    'options' => array(
-                        'query' => $customer_groups,
-                        'id' => 'id_group',
-                        'name' => 'name'
-                    )
-                ),
-                array(
-                    'type' => 'switch',
-                    'label' => $this->l('Use free shipping'),
-                    'name' => 'bolplaza_orders_free_shipping',
-                    'is_bool' => true,
-                    'values' => array(
-                        array(
-                            'id' => 'bolplaza_orders_free_shipping_1',
-                            'value' => 1,
-                            'label' => $this->l('Yes'),
-                        ),
-                        array(
-                            'id' => 'bolplaza_orders_free_shipping_0',
-                            'value' => 0,
-                            'label' => $this->l('No')
-                        )
-                    ),
-                    'hint' => $this->l('Don\'t calculate shipping costs.')
-                ),
-                array(
                     'type' => 'switch',
                     'label' => $this->l('Housenumber in address2'),
                     'name' => 'bolplaza_orders_use_address2',
@@ -523,7 +507,27 @@ class BolPlaza extends Module
                         )
                     ),
                     'desc' => $this->l('Won\'t append housenumber to street but uses separate field for housenumber')
-                )
+                ),
+                array(
+                    'type' => 'switch',
+                    'label' => $this->l('Use splitted account (for Belgium/Netherlands)'),
+                    'name' => 'bolplaza_orders_enable_splitted',
+                    'is_bool' => true,
+                    'values' => array(
+                        array(
+                            'id' => 'bolplaza_orders_enable_splitted_1',
+                            'value' => 1,
+                            'label' => $this->l('Yes'),
+                        ),
+                        array(
+                            'id' => 'bolplaza_orders_enable_splitted_0',
+                            'value' => 0,
+                            'label' => $this->l('No')
+                        )
+                    ),
+                    'desc' => $this->l('You can enable the splitted account functionality so you can handle Belgium '.
+                        'and Netherlands separately.')
+                ),
             ),
             'submit' => array(
                 'title' => $this->l('Save'),
@@ -531,7 +535,31 @@ class BolPlaza extends Module
             )
         );
 
+
         $fields_form[1]['form'] = array(
+            'legend' => array(
+                'title' => $this->l('Settings primary account'),
+            ),
+            'input' => $this->getAccountFields(),
+            'submit' => array(
+                'title' => $this->l('Save'),
+                'class' => 'btn btn-default pull-right'
+            )
+        );
+
+        $fields_form[2]['form'] = array(
+            'legend' => array(
+                'title' => $this->l('Settings secondary account'),
+            ),
+            'input' => $this->getAccountFields(self::PREFIX_SECONDARY_ACCOUNT),
+            'submit' => array(
+                'title' => $this->l('Save'),
+                'class' => 'btn btn-default pull-right'
+            )
+        );
+
+
+        $fields_form[3]['form'] = array(
             'legend' => array(
                 'title' => $this->l('Pricing settings'),
             ),
@@ -623,46 +651,170 @@ class BolPlaza extends Module
         // Load current value
         $helper->fields_value['bolplaza_orders_enabled'] = Configuration::get('BOL_PLAZA_ORDERS_ENABLED');
         $helper->fields_value['bolplaza_orders_testmode'] = Configuration::get('BOL_PLAZA_ORDERS_TESTMODE');
+        $helper->fields_value['bolplaza_orders_use_address2'] = Configuration::get('BOL_PLAZA_ORDERS_USE_ADDRESS2');
+        $helper->fields_value['bolplaza_orders_enable_splitted'] = Configuration::get('BOL_PLAZA_ORDERS_ENABLE_SPLITTED');
+
+        // Primary account values
         $helper->fields_value['bolplaza_orders_privkey'] = Configuration::get('BOL_PLAZA_ORDERS_PRIVKEY');
         $helper->fields_value['bolplaza_orders_pubkey'] = Configuration::get('BOL_PLAZA_ORDERS_PUBKEY');
         $helper->fields_value['bolplaza_orders_carrier'] = Configuration::get('BOL_PLAZA_ORDERS_CARRIER');
         $helper->fields_value['bolplaza_orders_carrier_code'] = Configuration::get('BOL_PLAZA_ORDERS_CARRIER_CODE');
         $helper->fields_value['bolplaza_orders_delivery_code'] = Configuration::get('BOL_PLAZA_ORDERS_DELIVERY_CODE');
-
-        $freeShipping = Configuration::get('BOL_PLAZA_ORDERS_FREE_SHIPPING');
-        if (empty($freeShipping)) {
-            $freeShipping = true;
-        }
-        $helper->fields_value['bolplaza_orders_free_shipping'] = $freeShipping;
-        $helper->fields_value['bolplaza_orders_use_address2'] = Configuration::get('BOL_PLAZA_ORDERS_USE_ADDRESS2');
         $customerGroup = Configuration::get('BOL_PLAZA_ORDERS_CUSTOMER_GROUP');
         if (empty($customerGroup)) {
             $customerGroup = Configuration::get('PS_CUSTOMER_GROUP');
         }
         $helper->fields_value['bolplaza_orders_customer_group'] = $customerGroup;
+        $freeShipping = Configuration::get('BOL_PLAZA_ORDERS_FREE_SHIPPING');
+        if (empty($freeShipping)) {
+            $freeShipping = true;
+        }
+        $helper->fields_value['bolplaza_orders_free_shipping'] = $freeShipping;
+
+        // Secondary account values
+        $helper->fields_value[self::PREFIX_SECONDARY_ACCOUNT . 'bolplaza_orders_privkey'] =
+            Configuration::get(self::PREFIX_SECONDARY_ACCOUNT . 'BOL_PLAZA_ORDERS_PRIVKEY');
+        $helper->fields_value[self::PREFIX_SECONDARY_ACCOUNT . 'bolplaza_orders_pubkey'] =
+            Configuration::get(self::PREFIX_SECONDARY_ACCOUNT . 'BOL_PLAZA_ORDERS_PUBKEY');
+        $helper->fields_value[self::PREFIX_SECONDARY_ACCOUNT . 'bolplaza_orders_carrier'] =
+            Configuration::get(self::PREFIX_SECONDARY_ACCOUNT . 'BOL_PLAZA_ORDERS_CARRIER');
+        $helper->fields_value[self::PREFIX_SECONDARY_ACCOUNT . 'bolplaza_orders_carrier_code'] =
+            Configuration::get(self::PREFIX_SECONDARY_ACCOUNT . 'BOL_PLAZA_ORDERS_CARRIER_CODE');
+        $helper->fields_value[self::PREFIX_SECONDARY_ACCOUNT . 'bolplaza_orders_delivery_code'] =
+            Configuration::get(self::PREFIX_SECONDARY_ACCOUNT . 'BOL_PLAZA_ORDERS_DELIVERY_CODE');
+        $customerGroup2 = Configuration::get(self::PREFIX_SECONDARY_ACCOUNT . 'BOL_PLAZA_ORDERS_CUSTOMER_GROUP');
+        if (empty($customerGroup2)) {
+            $customerGroup2 = Configuration::get('PS_CUSTOMER_GROUP');
+        }
+        $helper->fields_value[self::PREFIX_SECONDARY_ACCOUNT . 'bolplaza_orders_customer_group'] = $customerGroup2;
+        $freeShipping2 = Configuration::get(self::PREFIX_SECONDARY_ACCOUNT . 'BOL_PLAZA_ORDERS_FREE_SHIPPING');
+        if (empty($freeShipping2)) {
+            $freeShipping2 = true;
+        }
+        $helper->fields_value[self::PREFIX_SECONDARY_ACCOUNT . 'bolplaza_orders_free_shipping'] = $freeShipping2;
+
         $helper->fields_value['bolplaza_price_addition'] = Configuration::get('BOL_PLAZA_PRICE_ADDITION');
         $helper->fields_value['bolplaza_price_multiplication'] = Configuration::get('BOL_PLAZA_PRICE_MULTIPLICATION');
         $helper->fields_value['bolplaza_price_roundup'] = Configuration::get('BOL_PLAZA_PRICE_ROUNDUP');
         $helper->fields_value['bolplaza_orders_update_prices'] = 0;
 
-
         return $helper->generateForm($fields_form);
+    }
+
+    public function getAccountFields($account_prefix = "")
+    {
+        $carriers = Carrier::getCarriers(
+            Context::getContext()->language->id,
+            false,
+            false,
+            false,
+            null,
+            Carrier::ALL_CARRIERS
+        );
+        $delivery_codes = BolPlazaProduct::getDeliveryCodes();
+        $customer_groups = Group::getGroups(Context::getContext()->language->id);
+
+        return array(
+            array(
+                'type' => 'textarea',
+                'label' => $this->l('Bol.com Plaza API Public key'),
+                'name' => $account_prefix . 'bolplaza_orders_pubkey',
+                'size' => 20
+            ),
+            array(
+                'type' => 'textarea',
+                'label' => $this->l('Bol.com Plaza API Private key'),
+                'name' => $account_prefix . 'bolplaza_orders_privkey',
+                'size' => 20
+            ),
+            array(
+                'type' => 'select',
+                'label' => $this->l('Carrier'),
+                'desc' => $this->l('Choose a carrier for your Bol.com orders'),
+                'name' => $account_prefix . 'bolplaza_orders_carrier',
+                'options' => array(
+                    'query' => $carriers,
+                    'id' => 'id_carrier',
+                    'name' => 'name'
+                )
+            ),
+            array(
+                'type' => 'text',
+                'label' => $this->l('Carrier code'),
+                'desc' => $this->l('Bol.com code for the carrier'),
+                'name' => $account_prefix . 'bolplaza_orders_carrier_code'
+            ),
+            array(
+                'type' => 'select',
+                'label' => $this->l('Delivery code'),
+                'desc' => $this->l('Choose a delivery code for your Bol.com products'),
+                'name' => $account_prefix . 'bolplaza_orders_delivery_code',
+                'options' => array(
+                    'query' => $delivery_codes,
+                    'id' => 'deliverycode',
+                    'name' => 'description'
+                )
+            ),
+            array(
+                'type' => 'select',
+                'label' => $this->l('Customer group'),
+                'desc' => $this->l('Choose a customer group for your Bol.com customers'),
+                'name' => $account_prefix . 'bolplaza_orders_customer_group',
+                'options' => array(
+                    'query' => $customer_groups,
+                    'id' => 'id_group',
+                    'name' => 'name'
+                )
+            ),
+            array(
+                'type' => 'switch',
+                'label' => $this->l('Use free shipping'),
+                'name' => $account_prefix . 'bolplaza_orders_free_shipping',
+                'is_bool' => true,
+                'values' => array(
+                    array(
+                        'id' => 'bolplaza_orders_free_shipping_1',
+                        'value' => 1,
+                        'label' => $this->l('Yes'),
+                    ),
+                    array(
+                        'id' => 'bolplaza_orders_free_shipping_0',
+                        'value' => 0,
+                        'label' => $this->l('No')
+                    )
+                ),
+                'hint' => $this->l('Don\'t calculate shipping costs.')
+            )
+        );
     }
 
     /**
      * Retrieve the BolPlaza client
      * @return Wienkit\BolPlazaClient\BolPlazaClient
      */
-    public static function getClient()
+    public static function getClient($prefix = '')
     {
-        $publickey = Configuration::get('BOL_PLAZA_ORDERS_PUBKEY');
-        $privatekey = Configuration::get('BOL_PLAZA_ORDERS_PRIVKEY');
+        $publickey = Configuration::get($prefix . 'BOL_PLAZA_ORDERS_PUBKEY');
+        $privatekey = Configuration::get($prefix . 'BOL_PLAZA_ORDERS_PRIVKEY');
 
         $client = new Wienkit\BolPlazaClient\BolPlazaClient($publickey, $privatekey);
         if ((bool)Configuration::get('BOL_PLAZA_ORDERS_TESTMODE')) {
             $client->setTestMode(true);
         }
         return $client;
+    }
+
+    /**
+     * Returns an array of BolPlaza clients, indexed by id
+     * @return \Wienkit\BolPlazaClient\BolPlazaClient[]
+     */
+    public static function getClients()
+    {
+        $clients = array(0 => self::getClient());
+        if (Configuration::get('BOL_PLAZA_ORDERS_ENABLE_SPLITTED')) {
+            $clients[1] = self::getClient(self::PREFIX_SECONDARY_ACCOUNT);
+        }
+        return $clients;
     }
 
     /**
@@ -696,7 +848,7 @@ class BolPlaza extends Module
         if ($orderCarrier->tracking_number) {
             $order = new Order($orderCarrier->id_order);
             if ($order->module == 'bolplaza_payment' || $order->module == 'bolplazatest') {
-                $Plaza = self::getClient();
+                $clients = self::getClients();
                 $itemsShipped = array();
                 $items = BolPlazaOrderItem::getByOrderId($order->id);
                 foreach ($items as $item) {
@@ -710,7 +862,10 @@ class BolPlaza extends Module
                     $transport->TrackAndTrace = $orderCarrier->tracking_number;
                     $shipment->Transport = $transport;
                     $itemsShipped[] = $item;
-                    $Plaza->processShipment($shipment);
+                    $client = $clients[$item->id_client];
+                    if (isset($client)) {
+                        $client->processShipment($shipment);
+                    }
                 }
                 foreach ($itemsShipped as $item) {
                     $item->setShipped();

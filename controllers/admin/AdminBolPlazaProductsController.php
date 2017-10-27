@@ -421,10 +421,12 @@ class AdminBolPlazaProductsController extends ModuleAdminController
     /**
      * Handle the own offers returned result from Bol.com
      * @param string $ownOffers
+     * @param $dbSuffix string
      */
-    public static function handleOwnOffers($ownOffers)
+    public static function handleOwnOffers($ownOffers, $dbSuffix = '')
     {
-        Db::getInstance()->delete('bolplaza_ownoffers');
+        $table = 'bolplaza_ownoffers' . $dbSuffix;
+        Db::getInstance()->delete($table);
         $keys = array(
             'EAN' => 'ean',
             'Condition' => 'condition',
@@ -447,7 +449,7 @@ class AdminBolPlazaProductsController extends ModuleAdminController
         $header = array_shift($data);
         array_walk($data, 'AdminBolPlazaProductsController::parseCsvRow', array('header' => $header, 'keys' => $keys));
         $data = array_filter($data, 'AdminBolPlazaProductsController::filterCsvRow');
-        Db::getInstance()->insert('bolplaza_ownoffers', $data, false, false, Db::REPLACE);
+        Db::getInstance()->insert($table, $data, false, false, Db::REPLACE);
     }
 
 
@@ -484,12 +486,13 @@ class AdminBolPlazaProductsController extends ModuleAdminController
 
     /**
      * Updates the BolPlazaProduct status with the stock status from Bol.com
+     * @param $dbSuffix
      */
-    private static function updateOwnOffersStock()
+    private static function updateOwnOffersStock($dbSuffix = '')
     {
         // Update stock status
         $sql = "SELECT bo.id_bolplaza_product
-                FROM "._DB_PREFIX_."bolplaza_ownoffers bo 
+                FROM "._DB_PREFIX_."bolplaza_ownoffers".pSQL($dbSuffix)." bo 
                 INNER JOIN "._DB_PREFIX_."bolplaza_product bp 
                     ON bo.id_bolplaza_product = bp.id_bolplaza_product
                 INNER JOIN "._DB_PREFIX_."stock_available sa 
@@ -515,12 +518,13 @@ class AdminBolPlazaProductsController extends ModuleAdminController
 
     /**
      * Updates the BolPlazaProduct status to new if there is changed data
+     * @param string $dbSuffix
      */
-    private static function updateOwnOffersInfo()
+    private static function updateOwnOffersInfo($dbSuffix = '')
     {
         // Update stock status
         $sql = "SELECT bo.id_bolplaza_product
-                FROM "._DB_PREFIX_."bolplaza_ownoffers bo 
+                FROM "._DB_PREFIX_."bolplaza_ownoffers".pSQL($dbSuffix)." bo 
                 INNER JOIN "._DB_PREFIX_."bolplaza_product bp 
                     ON bo.id_bolplaza_product = bp.id_bolplaza_product
                 INNER JOIN "._DB_PREFIX_."product_shop ps
@@ -548,13 +552,14 @@ class AdminBolPlazaProductsController extends ModuleAdminController
 
     /**
      * Updates the BolPlazaProduct status if the product isn't available at Bol.com
+     * @param string $dbSuffix
      */
-    private static function updateOwnOffersNew()
+    private static function updateOwnOffersNew($dbSuffix = '')
     {
         // Update stock status
         $sql = "SELECT bp.id_bolplaza_product
                 FROM "._DB_PREFIX_."bolplaza_product bp
-                LEFT JOIN "._DB_PREFIX_."bolplaza_ownoffers bo
+                LEFT JOIN "._DB_PREFIX_."bolplaza_ownoffers".pSQL($dbSuffix)." bo
                     ON bp.id_bolplaza_product = bo.id_bolplaza_product
                 WHERE bo.id_bolplaza_product IS NULL";
 
@@ -593,13 +598,15 @@ class AdminBolPlazaProductsController extends ModuleAdminController
      */
     public static function processBolProductDelete($bolProduct, $context)
     {
-        $Plaza = BolPlaza::getClient();
-        try {
-            $Plaza->deleteOffer($bolProduct->ean, $bolProduct->getCondition());
-        } catch (Exception $e) {
-            $context->controller->errors[] = Tools::displayError(
-                'Couldn\'t send update to Bol.com, error: ' . $e->getMessage() . 'You have to correct this manually.'
-            );
+        $clients = BolPlaza::getClients();
+        foreach ($clients as $client) {
+            try {
+                $client->deleteOffer($bolProduct->ean, $bolProduct->getCondition());
+            } catch (Exception $e) {
+                $context->controller->errors[] = Tools::displayError(
+                    'Couldn\'t send update to Bol.com, error: ' . $e->getMessage() . 'You have to correct this manually.'
+                );
+            }
         }
     }
 
@@ -610,17 +617,24 @@ class AdminBolPlazaProductsController extends ModuleAdminController
      */
     public static function processBolProductUpdate($bolProduct, $context)
     {
-        $offerUpdate = $bolProduct->toRetailerOffer($context);
-        $Plaza = BolPlaza::getClient();
-        try {
-            $request = new Wienkit\BolPlazaClient\Requests\BolPlazaUpsertRequest();
-            $request->RetailerOffer = $offerUpdate;
-            $Plaza->updateOffer($request);
+        $clients = BolPlaza::getClients();
+        $hasErrors = false;
+        foreach ($clients as $clientID => $client) {
+            $prefix = $clientID == 1 ? BolPlaza::PREFIX_SECONDARY_ACCOUNT : '';
+            $offerUpdate = $bolProduct->toRetailerOffer($context, $prefix);
+            try {
+                $request = new Wienkit\BolPlazaClient\Requests\BolPlazaUpsertRequest();
+                $request->RetailerOffer = $offerUpdate;
+                $client->updateOffer($request);
+            } catch (Exception $e) {
+                $hasErrors = true;
+                $context->controller->errors[] = Tools::displayError(
+                    '[bolplaza] Couldn\'t send update to Bol.com, error: ' . $e->getMessage()
+                );
+            }
+        }
+        if (!$hasErrors) {
             self::setProductStatus($bolProduct, (int)BolPlazaProduct::STATUS_OK);
-        } catch (Exception $e) {
-            $context->controller->errors[] = Tools::displayError(
-                '[bolplaza] Couldn\'t send update to Bol.com, error: ' . $e->getMessage()
-            );
         }
     }
 
@@ -668,24 +682,28 @@ class AdminBolPlazaProductsController extends ModuleAdminController
      */
     public static function synchronizeFromBol($context)
     {
-        $bolplaza = BolPlaza::getClient();
-        $url = Configuration::get('BOL_PLAZA_ORDERS_OWNOFFERS');
-        if (!$url) {
-            $ownOffers = $bolplaza->getOwnOffers();
-            $url = $ownOffers->Url;
-        }
-        try {
-            $ownOffersResult = $bolplaza->getOwnOffersResult($url);
-            Configuration::deleteByName('BOL_PLAZA_ORDERS_OWNOFFERS');
-            self::handleOwnOffers($ownOffersResult);
-            self::updateOwnOffersStock();
-            self::updateOwnOffersInfo();
-            self::updateOwnOffersNew();
-            $context->controller->confirmations[] = 'This file has been processed: ' . $url;
-        } catch (Wienkit\BolPlazaClient\Exceptions\BolPlazaClientException $e) {
-            Configuration::set('BOL_PLAZA_ORDERS_OWNOFFERS', $url);
-            $context->controller->confirmations[] =  'The file will be generated by Bol.com. Click this' .
-                ' button again in a few minutes.';
+        $clients = BolPlaza::getClients();
+        foreach ($clients as $clientID => $client) {
+            $prefix = $clientID == 1 ? BolPlaza::PREFIX_SECONDARY_ACCOUNT : '';
+            $suffix = $clientID == 1 ? BolPlaza::DB_SUFFIX_SECONDARY_ACCOUNT : '';
+            $url = Configuration::get($prefix . 'BOL_PLAZA_ORDERS_OWNOFFERS');
+            if (!$url) {
+                $ownOffers = $client->getOwnOffers();
+                $url = $ownOffers->Url;
+            }
+            try {
+                $ownOffersResult = $client->getOwnOffersResult($url);
+                Configuration::deleteByName($prefix . 'BOL_PLAZA_ORDERS_OWNOFFERS');
+                self::handleOwnOffers($ownOffersResult, $suffix);
+                self::updateOwnOffersStock($suffix);
+                self::updateOwnOffersInfo($suffix);
+                self::updateOwnOffersNew($suffix);
+                $context->controller->confirmations[] = 'This file has been processed: ' . $url;
+            } catch (Wienkit\BolPlazaClient\Exceptions\BolPlazaClientException $e) {
+                Configuration::set($prefix . 'BOL_PLAZA_ORDERS_OWNOFFERS', $url);
+                $context->controller->confirmations[] =  'The file will be generated by Bol.com. Click this' .
+                    ' button again in a few minutes.';
+            }
         }
     }
 }

@@ -116,9 +116,10 @@ class BolPlazaProduct extends ObjectModel
     /**
      * Parse the Product to a Bol processable entity
      * @param $context Context
+     * @param $prefix string
      * @return \Wienkit\BolPlazaClient\Entities\BolPlazaRetailerOffer
      */
-    public function toRetailerOffer($context)
+    public function toRetailerOffer($context, $prefix = '')
     {
         $id_product_attribute = $this->id_product_attribute ? $this->id_product_attribute : null;
         $offer = new \Wienkit\BolPlazaClient\Entities\BolPlazaRetailerOffer();
@@ -132,7 +133,7 @@ class BolPlazaProduct extends ObjectModel
         if ($this->delivery_time != null) {
             $offer->DeliveryCode = $this->delivery_time;
         } else {
-            $offer->DeliveryCode = Configuration::get('BOL_PLAZA_ORDERS_DELIVERY_CODE');
+            $offer->DeliveryCode = Configuration::get($prefix . 'BOL_PLAZA_ORDERS_DELIVERY_CODE');
         }
         $stock = StockAvailable::getQuantityAvailableByProduct(
             $this->id_product,

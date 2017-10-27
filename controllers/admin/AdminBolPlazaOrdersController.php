@@ -200,45 +200,48 @@ class AdminBolPlazaOrdersController extends AdminController
             $context->controller->errors[] = Tools::displayError('Bol Plaza API isn\'t enabled for the current store.');
             return;
         }
-        $Plaza = BolPlaza::getClient();
+
         $payment_module = new BolPlazaPayment();
         if ((bool)Configuration::get('BOL_PLAZA_ORDERS_TESTMODE')) {
             $payment_module = new BolPlazaTestPayment();
         }
 
-        foreach ($Plaza->getOrders() as $order) {
-            if (!self::getTransactionExists($order->OrderId)) {
-                $cart = self::parse($order);
+        $clients = BolPlaza::getClients();
+        foreach ($clients as $clientID => $bolPlazaClient) {
+            foreach ($bolPlazaClient->getOrders() as $order) {
+                if (!self::getTransactionExists($order->OrderId)) {
+                    $cart = self::parse($order);
 
-                if (!$cart) {
-                    $context->controller->errors[] = Translate::getAdminTranslation(
-                        'Couldn\'t create a cart for order ',
-                        'AdminBolPlazaOrders'
-                    ) .$order->OrderId;
-                    continue;
-                }
+                    if (!$cart) {
+                        $context->controller->errors[] = Translate::getAdminTranslation(
+                                'Couldn\'t create a cart for order ',
+                                'AdminBolPlazaOrders'
+                            ) . $order->OrderId;
+                        continue;
+                    }
 
-                Context::getContext()->cart = $cart;
-                Context::getContext()->currency = new Currency((int)$cart->id_currency);
-                Context::getContext()->customer = new Customer((int)$cart->id_customer);
+                    Context::getContext()->cart = $cart;
+                    Context::getContext()->currency = new Currency((int)$cart->id_currency);
+                    Context::getContext()->customer = new Customer((int)$cart->id_customer);
 
-                $id_order_state = Configuration::get('BOL_PLAZA_ORDERS_INITIALSTATE');
-                $amount_paid = self::getBolPaymentTotal($order);
-                $verified = $payment_module->validateOrder(
-                    (int)$cart->id,
-                    (int)$id_order_state,
-                    $amount_paid,
-                    $payment_module->displayName,
-                    null,
-                    array(
-                        'transaction_id' => $order->OrderId
-                    ),
-                    null,
-                    false,
-                    $cart->secure_key
-                );
-                if ($verified) {
-                    self::persistBolItems($payment_module->currentOrder, $order);
+                    $id_order_state = Configuration::get('BOL_PLAZA_ORDERS_INITIALSTATE');
+                    $amount_paid = self::getBolPaymentTotal($order);
+                    $verified = $payment_module->validateOrder(
+                        (int)$cart->id,
+                        (int)$id_order_state,
+                        $amount_paid,
+                        $payment_module->displayName,
+                        null,
+                        array(
+                            'transaction_id' => $order->OrderId
+                        ),
+                        null,
+                        false,
+                        $cart->secure_key
+                    );
+                    if ($verified) {
+                        self::persistBolItems($clientID, $payment_module->currentOrder, $order);
+                    }
                 }
             }
         }
@@ -447,15 +450,20 @@ class AdminBolPlazaOrdersController extends AdminController
 
     /**
      * Persist the BolItems to the database
+     * @param int $clientID
      * @param string $orderId
      * @param Wienkit\BolPlazaClient\Entities\BolPlazaOrder $order
      */
-    public static function persistBolItems($orderId, Wienkit\BolPlazaClient\Entities\BolPlazaOrder $order)
-    {
+    public static function persistBolItems(
+        $clientID = 0,
+        $orderId,
+        Wienkit\BolPlazaClient\Entities\BolPlazaOrder $order
+    ) {
         $items = $order->OrderItems;
         if (!empty($items)) {
             foreach ($items as $orderItem) {
                 $item = new BolPlazaOrderItem();
+                $item->id_client = $clientID;
                 $item->id_shop = (int)Context::getContext()->shop->id;
                 $item->id_shop_group = (int)Context::getContext()->shop->id_shop_group;
                 $item->id_order = $orderId;

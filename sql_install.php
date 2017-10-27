@@ -20,6 +20,7 @@ $sql[_DB_PREFIX_.'bolplaza_item'] = 'CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'
               `id_shop_group` INTEGER DEFAULT \'0\',
               `id_order` INT(11) NOT NULL,
               `id_bol_order_item` VARCHAR(32) NOT NULL,
+              `id_client` INTEGER DEFAULT \'0\',
               `ean` VARCHAR(13),
               `title` VARCHAR(255),
               `quantity` INTEGER DEFAULT \'1\',
