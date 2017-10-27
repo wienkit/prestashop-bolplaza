@@ -16,7 +16,7 @@ abstract class ATestBase extends TestCase
         $host = getenv('SELENIUM_HOST');
         $options = new \ChromeOptions();
         $options->addArguments(array(
-            '--window-size=1920,1080',
+            '--window-size=1280,1024',
         ));
         $caps = \DesiredCapabilities::chrome();
         $caps->setCapability(\ChromeOptions::CAPABILITY, $options);
