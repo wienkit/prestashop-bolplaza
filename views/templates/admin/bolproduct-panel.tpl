@@ -356,14 +356,17 @@
             },
 
             calculateCommission: function(ean, condition, price) {
-                $.post('ajax-tab.php', {
-                    controller:'AdminBolPlazaProducts',
-                    token:'{$token}',
-                    action:'calculateCommission',
-                    ean: ean,
-                    price: price,
-                    condition: condition
-                }).done(function(content) {
+                $.post(
+                    baseAdminDir + "ajax-tab.php",
+                    {
+                        controller:'AdminBolPlazaProducts',
+                        token:'{$token}',
+                        action:'calculateCommission',
+                        ean: ean,
+                        price: price,
+                        condition: condition
+                    }
+                ).done(function(content) {
                     content = JSON.parse(content);
                     if(content.failed) {
                         $.growl.error({ title: "", message: content.message});
