@@ -56,14 +56,13 @@ class SetupModule16Test extends ATestBase
         $button->getLocationOnScreenOnceScrolledIntoView();
         $button->click();
         $this->assertContains('Succesvolle wijziging', $this->getStatusMessageText());
-
         $this->driver->findElement(\WebDriverBy::id('link-ModuleBolplaza'))->click();
+        sleep(2);
         $this->driver->findElement(\WebDriverBy::id('toggle_bolplaza_check'))->click();
         $button = $this->driver->findElement(\WebDriverBy::cssSelector('#product-tab-content-ModuleBolplaza [name="submitAddproduct"]'));
         $button->getLocationOnScreenOnceScrolledIntoView();
         $button->click();
         $this->assertContains('Succesvolle wijziging', $this->getStatusMessageText());
-
     }
 
 
@@ -76,9 +75,10 @@ class SetupModule16Test extends ATestBase
         $this->goToPath('index.php?controller=AdminBolPlazaOrders');
         $this->driver->findElement(\WebDriverBy::id('page-header-desc-bolplaza_item-sync_orders'))->click();
         $this->assertContains('Bol.com order sync completed', $this->getStatusMessageText());
-        $tableText = $this->driver->findElement(\WebDriverBy::id('form-order'))->getText();
-        $this->assertContains('T. van TestAchternaam', $tableText);
-        $this->assertContains('Beslist order imported', $tableText);
+        $tableText = $this->driver->findElement(\WebDriverBy::className('bolplaza_item'))->getText();
+        $this->assertContains('Harry Potter', $tableText);
+        $this->assertContains('123', $tableText);
+        $this->assertContains('321', $tableText);
     }
 
 }
