@@ -426,7 +426,12 @@ class AdminBolPlazaOrdersController extends AdminController
                     $productIds['id_product_attribute'],
                     round(self::getTaxExclusive($product, $item->OfferPrice / $item->Quantity), 6)
                 );
+
+                $oldMinimalQuantity = self::updateMinimalQuantity($product->id, $productIds['id_product_attribute']);
                 $cartResult = $cart->updateQty($item->Quantity, $product->id, $productIds['id_product_attribute']);
+                if ($oldMinimalQuantity > 1) {
+                    self::updateMinimalQuantity($product->id, $productIds['id_product_attribute'], $oldMinimalQuantity);
+                }
                 if (!$cartResult) {
                     $context->controller->errors[] = Tools::displayError(
                         'Couldn\'t add product to cart. The product cannot
@@ -642,5 +647,33 @@ class AdminBolPlazaOrdersController extends AdminController
             }
         }
         return $total;
+    }
+
+    /**
+     * Set the minimal quantity, return the old value
+     *
+     * @param $id
+     * @param null $id_product_attribute
+     * @param int $minimalQuantity
+     * @return int
+     */
+    private static function updateMinimalQuantity($id, $id_product_attribute = null, $minimalQuantity = 1)
+    {
+        if (isset($id_product_attribute) && $id_product_attribute > 0) {
+            $attribute = new Combination($id_product_attribute);
+            $oldMinimalQuantity = $attribute->minimal_quantity;
+            if ($oldMinimalQuantity != $minimalQuantity) {
+                $attribute->minimal_quantity = $minimalQuantity;
+                $attribute->save();
+            }
+        } else {
+            $product = new Product($id);
+            $oldMinimalQuantity = $product->minimal_quantity;
+            if ($oldMinimalQuantity != $minimalQuantity) {
+                $product->minimal_quantity = $minimalQuantity;
+                $product->save();
+            }
+        }
+        return $oldMinimalQuantity;
     }
 }
