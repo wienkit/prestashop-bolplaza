@@ -210,7 +210,7 @@ class AdminBolPlazaOrdersController extends AdminController
         foreach ($clients as $clientID => $bolPlazaClient) {
             foreach ($bolPlazaClient->getOrders() as $order) {
                 if (!self::getTransactionExists($order->OrderId)) {
-                    $cart = self::parse($order);
+                    $cart = self::parse($order, $clientID);
 
                     if (!$cart) {
                         $context->controller->errors[] = Translate::getAdminTranslation(
