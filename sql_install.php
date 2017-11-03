@@ -36,6 +36,7 @@ $sql[_DB_PREFIX_.'bolplaza_product'] = 'CREATE TABLE IF NOT EXISTS `'._DB_PREFIX
               `ean` VARCHAR(13),
               `condition` tinyint(1) NOT NULL DEFAULT \'0\',
               `delivery_time` VARCHAR(10),
+              `delivery_time_2` VARCHAR(10),
               `published` tinyint(1) NOT NULL DEFAULT \'0\',
               `price` DECIMAL(20, 6) NOT NULL DEFAULT \'0.000000\',
               `status` tinyint(1) NOT NULL DEFAULT \'1\',
@@ -44,6 +45,23 @@ $sql[_DB_PREFIX_.'bolplaza_product'] = 'CREATE TABLE IF NOT EXISTS `'._DB_PREFIX
             ) ENGINE='._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8;';
 
 $sql[_DB_PREFIX_.'bolplaza_ownoffers'] = 'CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'bolplaza_ownoffers` (
+              `id_bolplaza_product` INT(11) NOT NULL,
+              `ean` VARCHAR(13),
+              `condition` VARCHAR(10),
+              `stock` INT(10),
+              `price` DECIMAL(20, 6) NOT NULL DEFAULT \'0.000000\',
+              `description` VARCHAR(255),
+              `title` VARCHAR(255),
+              `fulfillment` VARCHAR(10),
+              `delivery_code` VARCHAR(10),
+              `publish` tinyint(1) NOT NULL DEFAULT \'0\',
+              `published` tinyint(1) NOT NULL DEFAULT \'0\',
+              `reasoncode` VARCHAR(50),
+              `reason` VARCHAR(255),
+              PRIMARY KEY (`id_bolplaza_product`)
+            ) ENGINE='._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8;';
+
+$sql[_DB_PREFIX_.'bolplaza_ownoffers_2'] = 'CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'bolplaza_ownoffers_2` (
               `id_bolplaza_product` INT(11) NOT NULL,
               `ean` VARCHAR(13),
               `condition` VARCHAR(10),

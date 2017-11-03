@@ -67,6 +67,7 @@
                         {assign var=price value=''}
                         {assign var=selected value=''}
                         {assign var=delivery_time value='default'}
+                        {assign var=delivery_time_2 value='default'}
                         {assign var=prod_condition value='0'}
                         {assign var=ean value=$attribute['ean13']}
                         {assign var=key value=$attribute['id_product']|cat:'_'|cat:$attribute['id_product_attribute']}
@@ -74,6 +75,7 @@
                             {assign var=price value=$bol_products[$attribute['id_product_attribute']]['price']}
                             {assign var=selected value=$bol_products[$attribute['id_product_attribute']]['published']}
                             {assign var=delivery_time value=$bol_products[$attribute['id_product_attribute']]['delivery_time']}
+                            {assign var=delivery_time_2 value=$bol_products[$attribute['id_product_attribute']]['delivery_time_2']}
                             {assign var=prod_condition value=$bol_products[$attribute['id_product_attribute']]['condition']}
                             {assign var=ean value=$bol_products[$attribute['id_product_attribute']]['ean']}
                         {/if}
@@ -161,6 +163,23 @@
                             </td>
                             <td colspan="2"></td>
                         </tr>
+                        {if $splitted}
+                            <tr class="collapse out {$index|escape:'htmlall':'UTF-8'}collapsed">
+                                <td>&nbsp;</td>
+                                <td colspan="2">
+                                    {l s='Custom Delivery time (optional, secondary)' mod='bolplaza'}
+                                </td>
+                                <td>
+                                    <select name="bolplaza_delivery_time_2_{$key|escape:'htmlall':'UTF-8'}" id="bolplaza_delivery_time_2_{$key|escape:'htmlall':'UTF-8'}">
+                                        <option value="default" {if $delivery_time_2 == 'default'} selected="selected"{/if}>-- {l s='Use default' mod='bolplaza'} --</option>
+                                        {foreach $delivery_codes AS $code}
+                                            <option value="{$code['deliverycode']|escape:'htmlall':'UTF-8'}"{if isset($delivery_time_2) && $delivery_time_2 == $code['deliverycode']} selected="selected"{/if}>{$code['description']|escape:'htmlall':'UTF-8'}</option>
+                                        {/foreach}
+                                    </select>
+                                </td>
+                                <td colspan="2"></td>
+                            </tr>
+                        {/if}
                     {/foreach}
                     </tbody>
                 </table>

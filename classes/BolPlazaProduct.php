@@ -44,6 +44,9 @@ class BolPlazaProduct extends ObjectModel
     /** @var string */
     public $delivery_time;
 
+    /** @var string */
+    public $delivery_time_2;
+
     /** @var bool */
     public $published = false;
 
@@ -81,6 +84,11 @@ class BolPlazaProduct extends ObjectModel
                 'validate' => 'isUnsignedId'
             ),
             'delivery_time' => array(
+                'type' => self::TYPE_STRING,
+                'shop' => true,
+                'validate' => 'isString'
+            ),
+            'delivery_time_2' => array(
                 'type' => self::TYPE_STRING,
                 'shop' => true,
                 'validate' => 'isString'
@@ -190,6 +198,19 @@ class BolPlazaProduct extends ObjectModel
         return Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS('
             SELECT *
             FROM `'._DB_PREFIX_.'bolplaza_ownoffers`
+            WHERE `id_bolplaza_product` = ' . (int)$id_bolplaza_product);
+    }
+
+    /**
+     * Returns the own offer
+     * @param int $id_bolplaza_product
+     * @return array|false|mysqli_result|null|PDOStatement|resource
+     */
+    public static function getOwnOfferSecondaryResult($id_bolplaza_product)
+    {
+        return Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS('
+            SELECT *
+            FROM `'._DB_PREFIX_.'bolplaza_ownoffers'.BolPlaza::DB_SUFFIX_SECONDARY_ACCOUNT.'`
             WHERE `id_bolplaza_product` = ' . (int)$id_bolplaza_product);
     }
 

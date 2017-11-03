@@ -74,6 +74,7 @@
                         {assign var=price value=''}
                         {assign var=selected value=''}
                         {assign var=delivery_time value='default'}
+                        {assign var=delivery_time_2 value='default'}
                         {assign var=prod_condition value='0'}
                         {assign var=ean value=$attribute['ean13']}
                         {assign var=key value=$attribute['id_product']|cat:'_'|cat:$attribute['id_product_attribute']}
@@ -81,6 +82,7 @@
                             {assign var=price value=$bol_products[$attribute['id_product_attribute']]['price']}
                             {assign var=selected value=$bol_products[$attribute['id_product_attribute']]['published']}
                             {assign var=delivery_time value=$bol_products[$attribute['id_product_attribute']]['delivery_time']}
+                            {assign var=delivery_time_2 value=$bol_products[$attribute['id_product_attribute']]['delivery_time_2']}
                             {assign var=prod_condition value=$bol_products[$attribute['id_product_attribute']]['condition']}
                             {assign var=ean value=$bol_products[$attribute['id_product_attribute']]['ean']}
                         {/if}
@@ -170,6 +172,19 @@
                                                             </select>
                                                         </div>
                                                     </div>
+                                                    {if $splitted}
+                                                        <div class="row form-group">
+                                                            <div class="col-sm-4">{l s='Custom Delivery time (optional, secondary account)' mod='bolplaza'}</div>
+                                                            <div class="col-sm-8">
+                                                                <select name="bolplaza_delivery_time_2_{$key}" id="bolplaza_delivery_time_2_{$key}" data-toggle="select2">
+                                                                    <option value="default" {if $delivery_time_2 == 'default'} selected="selected"{/if}>-- {l s='Use default' mod='bolplaza'} --</option>
+                                                                    {foreach $delivery_codes AS $code}
+                                                                        <option value="{$code['deliverycode']}"{if isset($delivery_time_2) && $delivery_time_2 == $code['deliverycode']} selected="selected"{/if}>{$code['description']}</option>
+                                                                    {/foreach}
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                    {/if}
                                                 </div>
                                                 <div class="modal-footer">
                                                     <button type="button" class="btn btn-primary btn-lg" data-dismiss="modal">{l s='Close' mod='bolplaza'}</button>

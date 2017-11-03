@@ -61,6 +61,14 @@
                         {$delivery_code|escape:'htmlall':'UTF-8'}
                     </div>
                 </div>
+                <div class="row">
+                    <div class="col-lg-3">
+                        {l s='Delivery code 2' mod='bolplaza'}
+                    </div>
+                    <div class="col-lg-9">
+                        {$delivery_code_2|escape:'htmlall':'UTF-8'}
+                    </div>
+                </div>
             </div>
 
             <div class="panel">
@@ -149,6 +157,36 @@
                         </div>
                         <div class="col-lg-9">
                             {$ownoffer['reason']|escape:'htmlall':'UTF-8'}
+                        </div>
+                    </div>
+                </div>
+            {/if}
+
+            {if $ownoffer_2}
+                <div class="panel">
+                    <h3>{l s='Bol.com publication status (secondary)' mod='bolplaza'}</h3>
+                    <div class="row">
+                        <div class="col-lg-3">
+                            {l s='Published' mod='bolplaza'}
+                        </div>
+                        <div class="col-lg-9">
+                            {$ownoffer_2['published']|escape:'htmlall':'UTF-8'}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-3">
+                            {l s='Reasoncode' mod='bolplaza'}
+                        </div>
+                        <div class="col-lg-9">
+                            {$ownoffer_2['reasoncode']|escape:'htmlall':'UTF-8'}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-3">
+                            {l s='Reason' mod='bolplaza'}
+                        </div>
+                        <div class="col-lg-9">
+                            {$ownoffer_2['reason']|escape:'htmlall':'UTF-8'}
                         </div>
                     </div>
                 </div>

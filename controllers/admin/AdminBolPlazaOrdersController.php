@@ -264,15 +264,16 @@ class AdminBolPlazaOrdersController extends AdminController
     /**
      * Parse a Bol.com order to a fully prepared Cart object
      * @param Wienkit\BolPlazaClient\Entities\BolPlazaOrder $order
+     * @param int $clientID
      * @return Cart
      */
-    public static function parse(Wienkit\BolPlazaClient\Entities\BolPlazaOrder $order)
+    public static function parse(Wienkit\BolPlazaClient\Entities\BolPlazaOrder $order, $clientID = 0)
     {
         $customer = self::parseCustomer($order);
         Context::getContext()->customer = $customer;
         $shipping = self::parseAddress($order->CustomerDetails->ShipmentDetails, $customer, 'Shipping');
         $billing  = self::parseAddress($order->CustomerDetails->BillingDetails, $customer, 'Billing');
-        $cart     = self::parseCart($order, $customer, $billing, $shipping);
+        $cart     = self::parseCart($order, $customer, $billing, $shipping, $clientID);
         return $cart;
     }
 
@@ -372,13 +373,15 @@ class AdminBolPlazaOrdersController extends AdminController
      * @param Customer $customer
      * @param Address $billing
      * @param Address $shipping
-     * @return Cart|bool
+     * @param int $clientID
+     * @return bool|Cart
      */
     public static function parseCart(
         Wienkit\BolPlazaClient\Entities\BolPlazaOrder $order,
         Customer $customer,
         Address $billing,
-        Address $shipping
+        Address $shipping,
+        $clientID = 0
     ) {
         $context = Context::getContext();
         $cart = new Cart();
@@ -389,7 +392,13 @@ class AdminBolPlazaOrdersController extends AdminController
         $cart->id_shop_group = (int)Context::getContext()->shop->id_shop_group;
         $cart->id_lang = $context->language->id;
         $cart->id_currency = (int)Currency::getIdByIsoCode('EUR');
-        $cart->id_carrier = (int)Configuration::get('BOL_PLAZA_ORDERS_CARRIER');
+        if ($clientID == 0) {
+            $cart->id_carrier = (int)Configuration::get('BOL_PLAZA_ORDERS_CARRIER');
+        } else {
+            $cart->id_carrier = (int)Configuration::get(
+                BolPlaza::PREFIX_SECONDARY_ACCOUNT . 'BOL_PLAZA_ORDERS_CARRIER'
+            );
+        }
         $cart->recyclable = 0;
         $cart->gift = 0;
         $cart->secure_key = md5(uniqid(rand(), true));
@@ -475,7 +484,7 @@ class AdminBolPlazaOrdersController extends AdminController
                 $item->id_bol_order_item = $orderItem->OrderItemId;
                 $item->ean = $orderItem->EAN;
                 $item->title = $orderItem->Title;
-                if(empty($orderItem->Title)) {
+                if(empty($item->title)) {
                     $item->title = Context::getContext()->getTranslator()->trans('No title');
                 }
                 $item->quantity = $orderItem->Quantity;

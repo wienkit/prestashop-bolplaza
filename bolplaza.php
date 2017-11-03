@@ -27,7 +27,7 @@ class BolPlaza extends Module
     {
         $this->name = 'bolplaza';
         $this->tab = 'market_place';
-        $this->version = '1.4.0';
+        $this->version = '1.4.1';
         $this->author = 'Wienk IT';
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
@@ -947,7 +947,8 @@ class BolPlaza extends Module
             'bol_products' => $indexedBolProducts,
             'token' => Tools::getAdminTokenLite('AdminBolPlazaProducts'),
             'delivery_codes' => BolPlazaProduct::getDeliveryCodes(),
-            'conditions' => BolPlazaProduct::getConditions()
+            'conditions' => BolPlazaProduct::getConditions(),
+            'splitted' => Configuration::get('BOL_PLAZA_ORDERS_ENABLE_SPLITTED')
         ));
 
 
@@ -1004,6 +1005,15 @@ class BolPlaza extends Module
             if ($delivery_time == 'default') {
                 $delivery_time = null;
             }
+
+            $delivery_time_2 = null;
+            if (Configuration::get('BOL_PLAZA_ORDERS_ENABLE_SPLITTED')) {
+                $delivery_time_2 = Tools::getValue('bolplaza_delivery_time_2_'.$key);
+                if ($delivery_time_2 == 'default') {
+                    $delivery_time_2 = null;
+                }
+            }
+
             $condition = Tools::getValue('bolplaza_condition_'.$key);
 
             if (array_key_exists($attribute['id_product_attribute'], $indexedBolProducts)) {
@@ -1014,7 +1024,8 @@ class BolPlaza extends Module
                     $bolProduct->published == $published &&
                     $bolProduct->condition == $condition &&
                     $bolProduct->ean == $ean &&
-                    $bolProduct->delivery_time == $delivery_time
+                    $bolProduct->delivery_time == $delivery_time &&
+                    $bolProduct->delivery_time_2 == $delivery_time_2
                 ) {
                     continue;
                 } elseif ($ean != $bolProduct->ean || $condition != $bolProduct->condition) {
@@ -1028,7 +1039,8 @@ class BolPlaza extends Module
                 $price == 0 &&
                 $condition == 0 &&
                 $ean == $attribute['ean13'] &&
-                $delivery_time == null
+                $delivery_time == null &&
+                $delivery_time_2 == null
             ) {
                 continue;
             } else {
@@ -1042,6 +1054,7 @@ class BolPlaza extends Module
             $bolProduct->condition = $condition;
             $bolProduct->ean = $ean;
             $bolProduct->delivery_time = $delivery_time;
+            $bolProduct->delivery_time_2 = $delivery_time_2;
 
             if (!$published &&
                 $price == 0 &&

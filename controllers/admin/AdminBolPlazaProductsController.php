@@ -647,14 +647,23 @@ class AdminBolPlazaProductsController extends ModuleAdminController
     {
         $product = new Product($this->object->id_product, $this->context->language->id);
         $ownOffer = BolPlazaProduct::getOwnOfferResult($this->object->id);
-        if (count($ownOffer) == 1) {
+        if (count($ownOffer) > 0) {
             $ownOffer = $ownOffer[0];
+        }
+
+        $ownOffer_2 = null;
+        if (Configuration::get('BOL_PLAZA_ORDERS_ENABLE_SPLITTED')) {
+            $ownOffer_2 = BolPlazaProduct::getOwnOfferSecondaryResult($this->object->id);
+            if (count($ownOffer_2) > 0) {
+                $ownOffer_2 = $ownOffer_2[0];
+            }
         }
 
         $stock = StockAvailable::getQuantityAvailableByProduct(
             $this->object->id_product,
             $this->object->id_product_attribute
         );
+
         $delivery_code = $this->object->delivery_time;
         if ($delivery_code == '') {
             $delivery_code = Configuration::get('BOL_PLAZA_ORDERS_DELIVERY_CODE');
@@ -664,6 +673,7 @@ class AdminBolPlazaProductsController extends ModuleAdminController
             'title' => $product->name[$this->context->language->id],
             'bolproduct' => $this->object,
             'ownoffer' => $ownOffer,
+            'ownoffer_2' => $ownOffer_2,
             'stock' => $stock,
             'delivery_code' => $delivery_code,
             'links' => array(
