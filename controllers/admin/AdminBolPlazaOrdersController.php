@@ -484,7 +484,7 @@ class AdminBolPlazaOrdersController extends AdminController
                 $item->id_bol_order_item = $orderItem->OrderItemId;
                 $item->ean = $orderItem->EAN;
                 $item->title = $orderItem->Title;
-                if(empty($item->title)) {
+                if (empty($item->title)) {
                     $item->title = Context::getContext()->getTranslator()->trans('No title');
                 }
                 $item->quantity = $orderItem->Quantity;
