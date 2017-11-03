@@ -20,7 +20,7 @@ if (!defined('_PS_VERSION_')) {
 function upgrade_module_1_4_1()
 {
     return Db::getInstance()->execute(
-            'ALTER TABLE `'._DB_PREFIX_.'bolplaza_item` ADD `delivery_time_2` VARCHAR(10) AFTER `delivery_time`;'
+            'ALTER TABLE `'._DB_PREFIX_.'bolplaza_product` ADD `delivery_time_2` VARCHAR(10) AFTER `delivery_time`;'
         ) && Db::getInstance()->execute(
             'CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'bolplaza_ownoffers_2` (
               `id_bolplaza_product` INT(11) NOT NULL,
