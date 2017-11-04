@@ -138,9 +138,9 @@ class BolPlazaProduct extends ObjectModel
             $context
         );
         $offer->Price = $price + $this->price;
-        if ($prefix == BolPlaza::PREFIX_SECONDARY_ACCOUNT && $this->delivery_time_2 != null) {
+        if ($prefix == BolPlaza::PREFIX_SECONDARY_ACCOUNT && !empty($this->delivery_time_2)) {
             $offer->DeliveryCode = $this->delivery_time_2;
-        } elseif ($this->delivery_time != null) {
+        } elseif (!empty($this->delivery_time)) {
             $offer->DeliveryCode = $this->delivery_time;
         } else {
             $offer->DeliveryCode = Configuration::get($prefix . 'BOL_PLAZA_ORDERS_DELIVERY_CODE');
