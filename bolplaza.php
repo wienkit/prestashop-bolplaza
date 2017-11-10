@@ -525,8 +525,7 @@ class BolPlaza extends Module
                             'label' => $this->l('No')
                         )
                     ),
-                    'desc' => $this->l('You can enable the splitted account functionality so you can handle Belgium '.
-                        'and Netherlands separately.')
+                    'desc' => $this->l('You can enable the splitted account functionality so you can handle Belgium and Netherlands separately.')
                 ),
             ),
             'submit' => array(
@@ -578,16 +577,16 @@ class BolPlaza extends Module
                 array(
                     'type' => 'text',
                     'label' => $this->l('Multiplication factor'),
-                    'desc' => $this->l('Multiply the normal price (incl. VAT and addition amount)' .
-                        ' with this factor, for example 1.20 for 20 percent'),
+                    'desc' => $this->l(
+                        'Multiply the normal price (incl. VAT and addition amount) with this factor, for example 1.20 for 20 percent'
+                    ),
                     'name' => 'bolplaza_price_multiplication',
                     'size' => 20
                 ),
                 array(
                     'type' => 'text',
                     'label' => $this->l('Round up amount'),
-                    'desc' => $this->l('Round the amount up to a specific unit. For example,' .
-                        ' use 0.10 to round from 1.52 to 1.60'),
+                    'desc' => $this->l('Round the amount up to a specific unit. For example, use 0.10 to round from 1.52 to 1.60'),
                     'name' => 'bolplaza_price_roundup',
                     'size' => 20
                 ),

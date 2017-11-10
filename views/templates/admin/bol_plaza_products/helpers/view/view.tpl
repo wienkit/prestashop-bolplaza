@@ -125,7 +125,9 @@
                         </div>
                     </div>
                     <div class="row">
-                        <h3>{l s='Bol.com publication status' mod='bolplaza'}</h3>
+                        <div class="col-xs-12">
+                            <strong>{l s='Bol.com publication status' mod='bolplaza'}</strong>
+                        </div>
                     </div>
                     <div class="row">
                         <div class="col-lg-3">
@@ -204,7 +206,9 @@
                     </div>
                 </div>
                 <div class="row">
-                    <h3>{l s='Bol.com publication status' mod='bolplaza'}</h3>
+                    <div class="col-xs-12">
+                        <strong>{l s='Bol.com publication status' mod='bolplaza'}</strong>
+                    </div>
                 </div>
                 <div class="row">
                     <div class="col-lg-3">
@@ -229,10 +233,6 @@
                     <div class="col-lg-9">
                         {$ownoffer_2['reason']|escape:'htmlall':'UTF-8'}
                     </div>
-                </div>
-                <div class="row">
-                    <p class="alert alert-danger">{l s='No Bol.com product found' mod='bolplaza'}</p>
-                    <p>{l s='There is no product found in the Bol.com environment. You can retrieve the Bol.com updates via the Bol.com Products overview page. Try to submit the product again if it still isn\'t visible. You can do this at the same page, by setting the product status to \'new\'.'  mod='bolplaza'}</p>
                 </div>
             </div>
             {/if}
