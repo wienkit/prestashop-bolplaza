@@ -36,11 +36,14 @@ class AdminBolPlazaProductsController extends ModuleAdminController
                           INNER JOIN `'._DB_PREFIX_.'lang` lang
                             ON (pl.`id_lang` = lang.`id_lang` AND lang.`iso_code` = \'nl\')
                           LEFT JOIN `'._DB_PREFIX_.'bolplaza_ownoffers` bo
-                            ON (a.`id_bolplaza_product` = bo.`id_bolplaza_product`) ';
+                            ON (a.`id_bolplaza_product` = bo.`id_bolplaza_product`) 
+                          LEFT JOIN `'._DB_PREFIX_.'bolplaza_ownoffers_2` bo2
+                            ON (a.`id_bolplaza_product` = bo2.`id_bolplaza_product`)';
         $this->_select .= ' pl.`name` as `product_name`,
                             IF(status = 0, 1, 0) as badge_success,
                             IF(status > 0, 1, 0) as badge_danger,
-                            bo.`published` as `bol_published`';
+                            bo.`published` as `bol_published`,
+                            bo2.`published` as `bol2_published`';
 
         parent::__construct();
 
@@ -86,6 +89,14 @@ class AdminBolPlazaProductsController extends ModuleAdminController
                 'type' => 'bool',
                 'active' => 'bol_published',
                 'filter_key' => 'bo!published',
+                'align' => 'text-center',
+                'class' => 'fixed-width-sm'
+            ),
+            'bol_published_2' => array(
+                'title' => $this->l('Published on Bol 2'),
+                'type' => 'bool',
+                'active' => 'bol2_published',
+                'filter_key' => 'bo2!published',
                 'align' => 'text-center',
                 'class' => 'fixed-width-sm'
             ),
@@ -669,6 +680,13 @@ class AdminBolPlazaProductsController extends ModuleAdminController
             $delivery_code = Configuration::get('BOL_PLAZA_ORDERS_DELIVERY_CODE');
         }
 
+        $delivery_code_2 = $this->object->delivery_time_2;
+        if ($delivery_code_2 == '') {
+            $delivery_code_2 = Configuration::get(
+                BolPlaza::PREFIX_SECONDARY_ACCOUNT . 'BOL_PLAZA_ORDERS_DELIVERY_CODE'
+            );
+        }
+
         $this->tpl_view_vars = array(
             'title' => $product->name[$this->context->language->id],
             'bolproduct' => $this->object,
@@ -676,6 +694,7 @@ class AdminBolPlazaProductsController extends ModuleAdminController
             'ownoffer_2' => $ownOffer_2,
             'stock' => $stock,
             'delivery_code' => $delivery_code,
+            'delivery_code_2' => $delivery_code_2,
             'links' => array(
                 array(
                     'title' => 'Go to product',
