@@ -43,7 +43,7 @@ class AdminBolPlazaProductsController extends ModuleAdminController
                             IF(status = 0, 1, 0) as badge_success,
                             IF(status > 0, 1, 0) as badge_danger,
                             bo.`published` as `bol_published`,
-                            bo2.`published` as `bol2_published`';
+                            bo2.`published` as `bol_published_2`';
 
         parent::__construct();
 
@@ -95,7 +95,7 @@ class AdminBolPlazaProductsController extends ModuleAdminController
             'bol_published_2' => array(
                 'title' => $this->l('Published on Bol 2'),
                 'type' => 'bool',
-                'active' => 'bol2_published',
+                'active' => 'bol_published_2',
                 'filter_key' => 'bo2!published',
                 'align' => 'text-center',
                 'class' => 'fixed-width-sm'
