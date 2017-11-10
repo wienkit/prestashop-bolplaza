@@ -44,6 +44,9 @@ class BolPlazaProduct extends ObjectModel
     /** @var string */
     public $delivery_time;
 
+    /** @var string */
+    public $delivery_time_2;
+
     /** @var bool */
     public $published = false;
 
@@ -85,6 +88,11 @@ class BolPlazaProduct extends ObjectModel
                 'shop' => true,
                 'validate' => 'isString'
             ),
+            'delivery_time_2' => array(
+                'type' => self::TYPE_STRING,
+                'shop' => true,
+                'validate' => 'isString'
+            ),
             'published' => array(
                 'type' => self::TYPE_BOOL,
                 'shop' => true,
@@ -116,27 +124,26 @@ class BolPlazaProduct extends ObjectModel
     /**
      * Parse the Product to a Bol processable entity
      * @param $context Context
+     * @param $prefix string
      * @return \Wienkit\BolPlazaClient\Entities\BolPlazaRetailerOffer
      */
-    public function toRetailerOffer($context)
+    public function toRetailerOffer($context, $prefix = '')
     {
         $id_product_attribute = $this->id_product_attribute ? $this->id_product_attribute : null;
         $offer = new \Wienkit\BolPlazaClient\Entities\BolPlazaRetailerOffer();
         $offer->Condition = $this->getCondition();
-        $price = Product::getPriceStatic(
+        $price = self::getPriceStatic(
             $this->id_product,
-            true,
-            $id_product_attribute,
-            2,
-            null,
-            false,
-            false
+            $this->id_product_attribute,
+            $context
         );
         $offer->Price = $price + $this->price;
-        if ($this->delivery_time != null) {
+        if ($prefix == BolPlaza::PREFIX_SECONDARY_ACCOUNT && !empty($this->delivery_time_2)) {
+            $offer->DeliveryCode = $this->delivery_time_2;
+        } elseif (!empty($this->delivery_time)) {
             $offer->DeliveryCode = $this->delivery_time;
         } else {
-            $offer->DeliveryCode = Configuration::get('BOL_PLAZA_ORDERS_DELIVERY_CODE');
+            $offer->DeliveryCode = Configuration::get($prefix . 'BOL_PLAZA_ORDERS_DELIVERY_CODE');
         }
         $stock = StockAvailable::getQuantityAvailableByProduct(
             $this->id_product,
@@ -165,7 +172,7 @@ class BolPlazaProduct extends ObjectModel
             $offer->Description = Tools::substr(html_entity_decode($product->name), 0, 2000);
         }
         $offer->QuantityInStock = $stock;
-        $offer->Publish = $this->published == 1 ? 'true' : 'false';
+        $offer->Publish = $this->published == 1 && $product->active ? 'true' : 'false';
         $offer->ReferenceCode = $this->id;
         return $offer;
     }
@@ -193,6 +200,19 @@ class BolPlazaProduct extends ObjectModel
         return Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS('
             SELECT *
             FROM `'._DB_PREFIX_.'bolplaza_ownoffers`
+            WHERE `id_bolplaza_product` = ' . (int)$id_bolplaza_product);
+    }
+
+    /**
+     * Returns the own offer
+     * @param int $id_bolplaza_product
+     * @return array|false|mysqli_result|null|PDOStatement|resource
+     */
+    public static function getOwnOfferSecondaryResult($id_bolplaza_product)
+    {
+        return Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS('
+            SELECT *
+            FROM `'._DB_PREFIX_.'bolplaza_ownoffers'.BolPlaza::DB_SUFFIX_SECONDARY_ACCOUNT.'`
             WHERE `id_bolplaza_product` = ' . (int)$id_bolplaza_product);
     }
 
@@ -414,6 +434,56 @@ class BolPlazaProduct extends ObjectModel
                 'shipsuntil' => 12,
                 'addtime' => 8
             )
+        );
+    }
+
+    /**
+     * Helper function to get the price
+     *
+     * @param $id_product
+     * @param $id_product_attribute
+     * @param Context|null $context
+     * @param bool $usereduc
+     * @param null $specific_price_output
+     * @return float
+     */
+    public static function getPriceStatic(
+        $id_product,
+        $id_product_attribute,
+        Context $context = null,
+        $usereduc = true,
+        &$specific_price_output = null
+    ) {
+        if (!$context) {
+            $context = Context::getContext();
+        }
+
+        $id_currency = Validate::isLoadedObject($context->currency)
+            ? (int)$context->currency->id
+            : (int)Configuration::get('PS_CURRENCY_DEFAULT');
+        $id_group = Configuration::get('BOL_PLAZA_ORDERS_CUSTOMER_GROUP');
+
+        return Product::priceCalculation(
+            $context->shop->id,
+            $id_product,
+            $id_product_attribute,
+            $context->country->id,
+            0,
+            0,
+            $id_currency,
+            $id_group,
+            1,
+            true,
+            2,
+            false,
+            $usereduc,
+            true,
+            $specific_price_output,
+            true,
+            null,
+            false,
+            null,
+            0
         );
     }
 }

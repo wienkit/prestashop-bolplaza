@@ -23,6 +23,9 @@ class SetupModule17Test extends AbstractAdmin17TestBase
     {
         $this->doAdminLogin();
         $this->goToMenu(['Modules', 'Modules & Services']);
+        $this->driver->wait()->until(
+            \WebDriverExpectedCondition::visibilityOfElementLocated(\WebDriverBy::className('module-search-result-wording'))
+        );
         $this->driver->findElement(\WebDriverBy::className('module-tags-input'))->sendKeys('bol.com');
         $this->driver->findElement(\WebDriverBy::className('search-button'))->click();
         $this->driver->wait()->until(

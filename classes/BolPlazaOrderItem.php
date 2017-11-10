@@ -31,6 +31,9 @@ class BolPlazaOrderItem extends ObjectModel
     /** @var string */
     public $id_bol_order_item;
 
+    /** @var int */
+    public $id_client;
+
     /** @var string */
     public $status = 'init';
 
@@ -56,19 +59,21 @@ class BolPlazaOrderItem extends ObjectModel
             ),
             'id_shop_group' => array(
                 'type' => self::TYPE_INT,
-                'validate' =>
-                'isUnsignedId'
+                'validate' => 'isUnsignedId'
             ),
             'id_order' => array(
                 'type' => self::TYPE_INT,
-                'validate' =>
-                'isUnsignedId',
+                'validate' => 'isUnsignedId',
                 'required' => true
             ),
             'id_bol_order_item' => array(
                 'type' => self::TYPE_STRING,
-                'validate' =>
-                'isGenericName',
+                'validate' => 'isGenericName',
+                'required' => true
+            ),
+            'id_client' => array(
+                'type' => self::TYPE_INT,
+                'validate' => 'isUnsignedId',
                 'required' => true
             ),
             'status' => array(
@@ -105,7 +110,7 @@ class BolPlazaOrderItem extends ObjectModel
     /**
      * Returns the BolPlazaOrderItem data for an order ID
      * @param string $id_order
-     * @return array
+     * @return BolPlazaOrderItem[]
      */
     public static function getByOrderId($id_order)
     {

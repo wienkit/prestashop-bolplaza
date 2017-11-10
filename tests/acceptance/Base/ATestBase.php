@@ -14,7 +14,13 @@ abstract class ATestBase extends TestCase
     public function setUp()
     {
         $host = getenv('SELENIUM_HOST');
-        $this->driver = \RemoteWebDriver::create($host, \DesiredCapabilities::chrome());
+        $options = new \ChromeOptions();
+        $options->addArguments(array(
+            '--window-size=1280,1024',
+        ));
+        $caps = \DesiredCapabilities::chrome();
+        $caps->setCapability(\ChromeOptions::CAPABILITY, $options);
+        $this->driver = \RemoteWebDriver::create($host, $caps);
         $this->host = "http://" . getenv('SITE_HOST');
     }
 

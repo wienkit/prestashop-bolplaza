@@ -200,45 +200,48 @@ class AdminBolPlazaOrdersController extends AdminController
             $context->controller->errors[] = Tools::displayError('Bol Plaza API isn\'t enabled for the current store.');
             return;
         }
-        $Plaza = BolPlaza::getClient();
+
         $payment_module = new BolPlazaPayment();
         if ((bool)Configuration::get('BOL_PLAZA_ORDERS_TESTMODE')) {
             $payment_module = new BolPlazaTestPayment();
         }
 
-        foreach ($Plaza->getOrders() as $order) {
-            if (!self::getTransactionExists($order->OrderId)) {
-                $cart = self::parse($order);
+        $clients = BolPlaza::getClients();
+        foreach ($clients as $clientID => $bolPlazaClient) {
+            foreach ($bolPlazaClient->getOrders() as $order) {
+                if (!self::getTransactionExists($order->OrderId)) {
+                    $cart = self::parse($order, $clientID);
 
-                if (!$cart) {
-                    $context->controller->errors[] = Translate::getAdminTranslation(
-                        'Couldn\'t create a cart for order ',
-                        'AdminBolPlazaOrders'
-                    ) .$order->OrderId;
-                    continue;
-                }
+                    if (!$cart) {
+                        $context->controller->errors[] = Translate::getAdminTranslation(
+                            'Couldn\'t create a cart for order ',
+                            'AdminBolPlazaOrders'
+                        ) . $order->OrderId;
+                        continue;
+                    }
 
-                Context::getContext()->cart = $cart;
-                Context::getContext()->currency = new Currency((int)$cart->id_currency);
-                Context::getContext()->customer = new Customer((int)$cart->id_customer);
+                    Context::getContext()->cart = $cart;
+                    Context::getContext()->currency = new Currency((int)$cart->id_currency);
+                    Context::getContext()->customer = new Customer((int)$cart->id_customer);
 
-                $id_order_state = Configuration::get('BOL_PLAZA_ORDERS_INITIALSTATE');
-                $amount_paid = self::getBolPaymentTotal($order);
-                $verified = $payment_module->validateOrder(
-                    (int)$cart->id,
-                    (int)$id_order_state,
-                    $amount_paid,
-                    $payment_module->displayName,
-                    null,
-                    array(
-                        'transaction_id' => $order->OrderId
-                    ),
-                    null,
-                    false,
-                    $cart->secure_key
-                );
-                if ($verified) {
-                    self::persistBolItems($payment_module->currentOrder, $order);
+                    $id_order_state = Configuration::get('BOL_PLAZA_ORDERS_INITIALSTATE');
+                    $amount_paid = self::getBolPaymentTotal($order);
+                    $verified = $payment_module->validateOrder(
+                        (int)$cart->id,
+                        (int)$id_order_state,
+                        $amount_paid,
+                        $payment_module->displayName,
+                        null,
+                        array(
+                            'transaction_id' => $order->OrderId
+                        ),
+                        null,
+                        false,
+                        $cart->secure_key
+                    );
+                    if ($verified) {
+                        self::persistBolItems($payment_module->currentOrder, $order, $clientID);
+                    }
                 }
             }
         }
@@ -261,15 +264,16 @@ class AdminBolPlazaOrdersController extends AdminController
     /**
      * Parse a Bol.com order to a fully prepared Cart object
      * @param Wienkit\BolPlazaClient\Entities\BolPlazaOrder $order
+     * @param int $clientID
      * @return Cart
      */
-    public static function parse(Wienkit\BolPlazaClient\Entities\BolPlazaOrder $order)
+    public static function parse(Wienkit\BolPlazaClient\Entities\BolPlazaOrder $order, $clientID = 0)
     {
         $customer = self::parseCustomer($order);
         Context::getContext()->customer = $customer;
         $shipping = self::parseAddress($order->CustomerDetails->ShipmentDetails, $customer, 'Shipping');
         $billing  = self::parseAddress($order->CustomerDetails->BillingDetails, $customer, 'Billing');
-        $cart     = self::parseCart($order, $customer, $billing, $shipping);
+        $cart     = self::parseCart($order, $customer, $billing, $shipping, $clientID);
         return $cart;
     }
 
@@ -369,13 +373,15 @@ class AdminBolPlazaOrdersController extends AdminController
      * @param Customer $customer
      * @param Address $billing
      * @param Address $shipping
-     * @return Cart|bool
+     * @param int $clientID
+     * @return bool|Cart
      */
     public static function parseCart(
         Wienkit\BolPlazaClient\Entities\BolPlazaOrder $order,
         Customer $customer,
         Address $billing,
-        Address $shipping
+        Address $shipping,
+        $clientID = 0
     ) {
         $context = Context::getContext();
         $cart = new Cart();
@@ -386,7 +392,13 @@ class AdminBolPlazaOrdersController extends AdminController
         $cart->id_shop_group = (int)Context::getContext()->shop->id_shop_group;
         $cart->id_lang = $context->language->id;
         $cart->id_currency = (int)Currency::getIdByIsoCode('EUR');
-        $cart->id_carrier = (int)Configuration::get('BOL_PLAZA_ORDERS_CARRIER');
+        if ($clientID == 0) {
+            $cart->id_carrier = (int)Configuration::get('BOL_PLAZA_ORDERS_CARRIER');
+        } else {
+            $cart->id_carrier = (int)Configuration::get(
+                BolPlaza::PREFIX_SECONDARY_ACCOUNT . 'BOL_PLAZA_ORDERS_CARRIER'
+            );
+        }
         $cart->recyclable = 0;
         $cart->gift = 0;
         $cart->secure_key = md5(uniqid(rand(), true));
@@ -423,7 +435,12 @@ class AdminBolPlazaOrdersController extends AdminController
                     $productIds['id_product_attribute'],
                     round(self::getTaxExclusive($product, $item->OfferPrice / $item->Quantity), 6)
                 );
+
+                $oldMinimalQuantity = self::updateMinimalQuantity($product->id, $productIds['id_product_attribute']);
                 $cartResult = $cart->updateQty($item->Quantity, $product->id, $productIds['id_product_attribute']);
+                if ($oldMinimalQuantity > 1) {
+                    self::updateMinimalQuantity($product->id, $productIds['id_product_attribute'], $oldMinimalQuantity);
+                }
                 if (!$cartResult) {
                     $context->controller->errors[] = Tools::displayError(
                         'Couldn\'t add product to cart. The product cannot
@@ -449,19 +466,27 @@ class AdminBolPlazaOrdersController extends AdminController
      * Persist the BolItems to the database
      * @param string $orderId
      * @param Wienkit\BolPlazaClient\Entities\BolPlazaOrder $order
+     * @param int $clientID
      */
-    public static function persistBolItems($orderId, Wienkit\BolPlazaClient\Entities\BolPlazaOrder $order)
-    {
+    public static function persistBolItems(
+        $orderId,
+        Wienkit\BolPlazaClient\Entities\BolPlazaOrder $order,
+        $clientID = 0
+    ) {
         $items = $order->OrderItems;
         if (!empty($items)) {
             foreach ($items as $orderItem) {
                 $item = new BolPlazaOrderItem();
+                $item->id_client = $clientID;
                 $item->id_shop = (int)Context::getContext()->shop->id;
                 $item->id_shop_group = (int)Context::getContext()->shop->id_shop_group;
                 $item->id_order = $orderId;
                 $item->id_bol_order_item = $orderItem->OrderItemId;
                 $item->ean = $orderItem->EAN;
                 $item->title = $orderItem->Title;
+                if (empty($item->title)) {
+                    $item->title = Context::getContext()->getTranslator()->trans('No title');
+                }
                 $item->quantity = $orderItem->Quantity;
                 $item->add();
             }
@@ -634,5 +659,33 @@ class AdminBolPlazaOrdersController extends AdminController
             }
         }
         return $total;
+    }
+
+    /**
+     * Set the minimal quantity, return the old value
+     *
+     * @param $id
+     * @param null $id_product_attribute
+     * @param int $minimalQuantity
+     * @return int
+     */
+    private static function updateMinimalQuantity($id, $id_product_attribute = null, $minimalQuantity = 1)
+    {
+        if (isset($id_product_attribute) && $id_product_attribute > 0) {
+            $attribute = new Combination($id_product_attribute);
+            $oldMinimalQuantity = $attribute->minimal_quantity;
+            if ($oldMinimalQuantity != $minimalQuantity) {
+                $attribute->minimal_quantity = $minimalQuantity;
+                $attribute->save();
+            }
+        } else {
+            $product = new Product($id);
+            $oldMinimalQuantity = $product->minimal_quantity;
+            if ($oldMinimalQuantity != $minimalQuantity) {
+                $product->minimal_quantity = $minimalQuantity;
+                $product->save();
+            }
+        }
+        return $oldMinimalQuantity;
     }
 }

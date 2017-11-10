@@ -17,15 +17,9 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-function upgrade_module_1_2_0()
+function upgrade_module_1_4_0()
 {
-    // ALTER TABLE `PREFIX_product` ADD quantity_discount BOOL NULL DEFAULT 0 AFTER out_of_stock;
-    return (
-        Db::getInstance()->execute(
-            'ALTER TABLE `'._DB_PREFIX_.'bolplaza_product` ADD `ean` VARCHAR(13) AFTER `id_shop`;'
-        ) &&
-        Db::getInstance()->execute(
-            'ALTER TABLE `'._DB_PREFIX_.'bolplaza_product` ADD `delivery_time` VARCHAR(10) AFTER `ean`'
-        )
+    return Db::getInstance()->execute(
+        'ALTER TABLE `'._DB_PREFIX_.'bolplaza_item` ADD `id_client` INTEGER DEFAULT \'0\' AFTER `id_bol_order_item`;'
     );
 }

@@ -17,22 +17,25 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-function upgrade_module_1_3_0()
+function upgrade_module_1_4_1()
 {
     return (
         Db::getInstance()->execute(
-            'CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'bolplaza_ownoffers` (
+            'ALTER TABLE `'._DB_PREFIX_.'bolplaza_product` ADD `delivery_time_2` VARCHAR(10) DEFAULT NULL AFTER `delivery_time`;'
+        ) && Db::getInstance()->execute(
+            'CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'bolplaza_ownoffers_2` (
                 `id_bolplaza_product` INT(11) NOT NULL,
-                `reference` VARCHAR(255),
                 `ean` VARCHAR(13),
                 `condition` VARCHAR(10),
                 `stock` INT(10),
                 `price` DECIMAL(20, 6) NOT NULL DEFAULT \'0.000000\',
                 `description` VARCHAR(255),
+                `title` VARCHAR(255),
+                `fulfillment` VARCHAR(10),
                 `delivery_code` VARCHAR(10),
                 `publish` tinyint(1) NOT NULL DEFAULT \'0\',
                 `published` tinyint(1) NOT NULL DEFAULT \'0\',
-                `reasoncode` VARCHAR(20),
+                `reasoncode` VARCHAR(50),
                 `reason` VARCHAR(255),
                 PRIMARY KEY (`id_bolplaza_product`)
             ) ENGINE='._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8;'
