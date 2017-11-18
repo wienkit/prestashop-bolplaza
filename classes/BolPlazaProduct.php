@@ -270,6 +270,8 @@ class BolPlazaProduct extends ObjectModel
                 SELECT *
                 FROM `'._DB_PREFIX_.'bolplaza_product`
                 WHERE `status` > 0
+                AND `ean` IS NOT NULL
+                AND `ean` != \'\'
                 LIMIT 1000')
         );
     }
