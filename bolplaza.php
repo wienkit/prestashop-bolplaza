@@ -1163,6 +1163,7 @@ class BolPlaza extends Module
     {
         $context = Context::getContext();
         AdminBolPlazaOrdersController::synchronize();
+        AdminBolPlazaProductsController::fillEans();
         AdminBolPlazaProductsController::synchronizeFromBol($context);
         AdminBolPlazaProductsController::synchronize($context);
     }
