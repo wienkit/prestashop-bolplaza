@@ -747,7 +747,8 @@ class AdminBolPlazaProductsController extends ModuleAdminController
             INNER JOIN `' . _DB_PREFIX_ . 'product` p ON
                 p.`id_product` = bp.`id_product`
             SET
-                bp.`ean` = p.`ean13`
+                bp.`ean` = p.`ean13`,
+                bp.`status` = 1
             WHERE
                 bp.`id_product_attribute` = 0 
                 AND(bp.`ean` IS NULL OR bp.`ean` = \'\') 
@@ -759,7 +760,8 @@ class AdminBolPlazaProductsController extends ModuleAdminController
             INNER JOIN `' . _DB_PREFIX_ . 'product_attribute` pa ON
                 pa.`id_product` = bp.`id_product` AND pa.`id_product_attribute` = bp.`id_product_attribute`
             SET
-                bp.`ean` = pa.`ean13`
+                bp.`ean` = pa.`ean13`,
+                bp.`status` = 1
             WHERE
                 bp.`id_product_attribute` > 0 
                 AND(bp.`ean` IS NULL OR bp.`ean` = \'\') 
