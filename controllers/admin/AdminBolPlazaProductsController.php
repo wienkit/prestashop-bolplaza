@@ -91,27 +91,31 @@ class AdminBolPlazaProductsController extends ModuleAdminController
                 'filter_key' => 'bo!published',
                 'align' => 'text-center',
                 'class' => 'fixed-width-sm'
-            ),
-            'bol_published_2' => array(
+            )
+        );
+
+        if (Configuration::get('BOL_PLAZA_ORDERS_ENABLE_SPLITTED')) {
+            $this->fields_list['bol_published_2'] = array(
                 'title' => $this->l('Published on Bol 2'),
                 'type' => 'bool',
                 'active' => 'bol_published_2',
                 'filter_key' => 'bo2!published',
                 'align' => 'text-center',
                 'class' => 'fixed-width-sm'
-            ),
-            'status' => array(
-                'title' => $this->l('Synchronized'),
-                'type' => 'select',
-                'callback' => 'getSynchronizedState',
-                'badge_danger' => true,
-                'badge_success' => true,
-                'align' => 'text-center',
-                'class' => 'fixed-width-sm',
-                'list' => $this->statuses_array,
-                'filter_key' => 'status',
-                'filter_type' => 'int'
-            )
+            );
+        }
+
+        $this->fields_list['status'] = array(
+            'title' => $this->l('Synchronized'),
+            'type' => 'select',
+            'callback' => 'getSynchronizedState',
+            'badge_danger' => true,
+            'badge_success' => true,
+            'align' => 'text-center',
+            'class' => 'fixed-width-sm',
+            'list' => $this->statuses_array,
+            'filter_key' => 'status',
+            'filter_type' => 'int'
         );
 
         $this->shopLinkType = 'shop';
