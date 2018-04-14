@@ -190,21 +190,22 @@ class BolPlazaProduct extends ObjectModel
      */
     protected function validateOffer($offer)
     {
-        if (empty($offer->EAN)) {
+        $data = $offer->getData();
+        if (empty($data['EAN'])) {
             throw new Exception('The product "' . $offer->Title . ' has no EAN code, please supply one.');
         }
-        if (empty($offer->Price)) {
+        if (empty($data['Price'])) {
             throw new Exception('The product "' . $offer->Title . ' has no valid price, please supply one.');
         }
-        if (empty($offer->DeliveryCode)) {
+        if (empty($data['DeliveryCode'])) {
             throw new Exception(
                 'The product "' . $offer->Title . ' has no valid delivery code, please supply one.'
             );
         }
-        if (empty($offer->QuantityInStock)) {
+        if (empty($data['QuantityInStock'])) {
             throw new Exception('The product "' . $offer->Title . ' has no valid stock, please supply one.');
         }
-        if (empty($offer->Description)) {
+        if (empty($data['Description'])) {
             throw new Exception('The product "' . $offer->Title . ' has no description, please supply one.');
         }
     }
