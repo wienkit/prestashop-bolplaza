@@ -123,9 +123,14 @@ class BolPlazaProduct extends ObjectModel
 
     /**
      * Parse the Product to a Bol processable entity
+     *
      * @param $context Context
      * @param $prefix string
+     *
      * @return \Wienkit\BolPlazaClient\Entities\BolPlazaRetailerOffer
+     *
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
      */
     public function toRetailerOffer($context, $prefix = '')
     {
@@ -174,7 +179,34 @@ class BolPlazaProduct extends ObjectModel
         $offer->QuantityInStock = $stock;
         $offer->Publish = $this->published == 1 && $product->active ? 'true' : 'false';
         $offer->ReferenceCode = $this->id;
+        $this->validateOffer($offer);
         return $offer;
+    }
+
+    /**
+     * @param \Wienkit\BolPlazaClient\Entities\BolPlazaRetailerOffer $offer
+     *
+     * @throws Exception
+     */
+    protected function validateOffer($offer)
+    {
+        if (empty($offer->EAN)) {
+            throw new Exception('The product "' . $offer->Title . ' has no EAN code, please supply one.');
+        }
+        if (empty($offer->Price)) {
+            throw new Exception('The product "' . $offer->Title . ' has no valid price, please supply one.');
+        }
+        if (empty($offer->DeliveryCode)) {
+            throw new Exception(
+                'The product "' . $offer->Title . ' has no valid delivery code, please supply one.'
+            );
+        }
+        if (empty($offer->QuantityInStock)) {
+            throw new Exception('The product "' . $offer->Title . ' has no valid stock, please supply one.');
+        }
+        if (empty($offer->Description)) {
+            throw new Exception('The product "' . $offer->Title . ' has no description, please supply one.');
+        }
     }
 
     /**

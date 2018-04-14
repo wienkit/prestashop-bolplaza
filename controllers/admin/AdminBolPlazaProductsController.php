@@ -638,8 +638,8 @@ class AdminBolPlazaProductsController extends ModuleAdminController
         $hasErrors = false;
         foreach ($clients as $clientID => $client) {
             $prefix = $clientID == 1 ? BolPlaza::PREFIX_SECONDARY_ACCOUNT : '';
-            $offerUpdate = $bolProduct->toRetailerOffer($context, $prefix);
             try {
+                $offerUpdate = $bolProduct->toRetailerOffer($context, $prefix);
                 $request = new Wienkit\BolPlazaClient\Requests\BolPlazaUpsertRequest();
                 $request->RetailerOffer = $offerUpdate;
                 $client->updateOffer($request);
