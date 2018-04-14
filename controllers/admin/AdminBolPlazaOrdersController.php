@@ -329,7 +329,7 @@ class AdminBolPlazaOrdersController extends AdminController
                 $details->Company
             );
         }
-        $address->lastname = preg_replace(
+        $address->firstname = preg_replace(
             "/[^A-Za-z ]/",
             '',
             $details->Firstname
