@@ -22,11 +22,8 @@ class SetupModule17Test extends AbstractAdmin17TestBase
     public function testEnableModule()
     {
         $this->doAdminLogin();
-        $this->goToMenu(['Modules', 'Modules & Services']);
-        $this->driver->wait()->until(
-            \WebDriverExpectedCondition::visibilityOfElementLocated(\WebDriverBy::className('module-search-result-wording'))
-        );
-        $this->driver->findElement(\WebDriverBy::className('module-tags-input'))->sendKeys('bol.com');
+        $this->goToMenu(['Modules', 'Modules en services']);
+        $this->driver->findElement(\WebDriverBy::className('pstaggerAddTagInput'))->sendKeys('bol.com');
         $this->driver->findElement(\WebDriverBy::className('search-button'))->click();
         $this->driver->wait()->until(
             \WebDriverExpectedCondition::elementToBeClickable(\WebDriverBy::cssSelector('button[data-confirm_modal="module-modal-confirm-bolplaza-install"]'))
@@ -36,7 +33,7 @@ class SetupModule17Test extends AbstractAdmin17TestBase
             \WebDriverExpectedCondition::elementToBeClickable(\WebDriverBy::cssSelector('button[data-confirm_modal="module-modal-confirm-bolplaza-configure"]'))
         );
         $text = $this->driver->findElement(\WebDriverBy::cssSelector('button[data-confirm_modal="module-modal-confirm-bolplaza-configure"]'))->getText();
-        $this->assertContains("CONFIGUREER", $text);
+        $this->assertContains("Configureer", $text);
     }
 
     /**
@@ -45,7 +42,7 @@ class SetupModule17Test extends AbstractAdmin17TestBase
     public function testConfigureModule()
     {
         $this->doAdminLogin();
-        $this->goToMenu(['Modules', 'Modules & Services']);
+        $this->goToMenu(['Modules', 'Modules en services']);
         $this->driver->findElement(\WebDriverBy::linkText("Geïnstalleerde modules"))->click();
         $this->driver->findElement(\WebDriverBy::cssSelector('button[data-confirm_modal="module-modal-confirm-bolplaza-configure"]'))->click();
 
