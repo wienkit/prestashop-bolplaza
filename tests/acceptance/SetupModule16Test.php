@@ -22,7 +22,6 @@ class SetupModule16Test extends ATestBase
     public function testEnableModule()
     {
         $this->doAdminLogin();
-        $this->goToPath('index.php?controller=AdminModules');
         $this->goToPath('index.php?controller=AdminModules&install=bolplaza&tab_module=market_place&module_name=bolplaza');
         $this->assertContains("Installatie module(s) geslaagd", $this->getStatusMessageText());
     }
@@ -46,9 +45,9 @@ class SetupModule16Test extends ATestBase
         $this->assertContains("Instellingen opgeslagen", $this->getStatusMessageText());
     }
 
-//    /**
-//     * @depends testConfigureModule
-//     */
+    /**
+     * @depends testConfigureModule
+     */
     public function testSetProductPrice()
     {
         $this->doAdminLogin();
@@ -99,7 +98,7 @@ class SetupModule16Test extends ATestBase
         $this->doAdminLogin();
         $this->goToPath('index.php?controller=AdminBolPlazaOrders');
         $this->driver->findElement(\WebDriverBy::id('page-header-desc-bolplaza_item-sync_orders'))->click();
-        $this->assertContains('Bol.com order sync completed', $this->getStatusMessageText());
+        $this->assertContains('Bol.com order synchronisatie compleet', $this->getStatusMessageText());
         $tableText = $this->driver->findElement(\WebDriverBy::className('bolplaza_item'))->getText();
         $this->assertContains('Harry Potter', $tableText);
         $this->assertContains('123', $tableText);
