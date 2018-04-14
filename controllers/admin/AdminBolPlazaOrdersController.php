@@ -291,12 +291,12 @@ class AdminBolPlazaOrdersController extends AdminController
         }
         $customer = new Customer();
         $customer->firstname = preg_replace(
-            "/[0-9!<>,;?=+()@#\"°{}_$%:]*/",
+            "/[^A-Za-z ]/",
             '',
             $order->CustomerDetails->BillingDetails->Firstname
         );
         $customer->lastname = preg_replace(
-            "/[0-9!<>,;?=+()@#\"°{}_$%:]*/",
+            "/[^A-Za-z ]/",
             '',
             $order->CustomerDetails->BillingDetails->Surname
         );
