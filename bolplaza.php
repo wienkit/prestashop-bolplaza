@@ -27,7 +27,7 @@ class BolPlaza extends Module
     {
         $this->name = 'bolplaza';
         $this->tab = 'market_place';
-        $this->version = '1.4.1';
+        $this->version = '1.4.2';
         $this->author = 'Wienk IT';
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
@@ -47,6 +47,7 @@ class BolPlaza extends Module
 
     /**
      * Overrides parent::install()
+     * @throws PrestaShopException
      */
     public function install()
     {
@@ -63,7 +64,10 @@ class BolPlaza extends Module
                 && $this->registerHook('actionObjectOrderCarrierUpdateAfter')
                 && $this->registerHook('actionObjectBolPlazaProductAddAfter')
                 && $this->registerHook('actionObjectBolPlazaProductDeleteAfter')
-                && $this->registerHook('actionObjectBolPlazaProductUpdateAfter');
+                && $this->registerHook('actionObjectBolPlazaProductUpdateAfter')
+                && $this->registerHook('actionObjectSpecificPriceDeleteAfter')
+                && $this->registerHook('actionObjectSpecificPriceUpdateAfter')
+                && $this->registerHook('actionObjectSpecificPriceAddAfter');
         }
         return false;
     }
@@ -83,6 +87,9 @@ class BolPlaza extends Module
           && $this->unregisterHook('actionObjectBolPlazaProductAddAfter')
           && $this->unregisterHook('actionObjectBolPlazaProductDeleteAfter')
           && $this->unregisterHook('actionObjectBolPlazaProductUpdateAfter')
+          && $this->unregisterHook('actionObjectSpecificPriceDeleteAfter')
+          && $this->unregisterHook('actionObjectSpecificPriceUpdateAfter')
+          && $this->unregisterHook('actionObjectSpecificPriceAddAfter')
           && parent::uninstall();
     }
 
@@ -118,6 +125,8 @@ class BolPlaza extends Module
     /**
      * Install a new order state for bol.com orders
      * @return bool success
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
      */
     public function installOrderState()
     {
@@ -171,6 +180,8 @@ class BolPlaza extends Module
     /**
      * Remove the Bol.com order state
      * @return bool success
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
      */
     public function uninstallOrderState()
     {
@@ -183,6 +194,8 @@ class BolPlaza extends Module
     /**
      * Install menu items
      * @return bool success
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
      */
     public function installOrdersTab()
     {
@@ -221,6 +234,8 @@ class BolPlaza extends Module
     /**
      * Remove menu items
      * @return bool success
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
      */
     public function uninstallTabs()
     {
@@ -243,7 +258,9 @@ class BolPlaza extends Module
 
     /**
      * Render the module configuration page
-     * @return $output the rendered page
+     * @return string $output the rendered page
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
      */
     public function getContent()
     {
@@ -841,6 +858,8 @@ class BolPlaza extends Module
      * Update a shipment to Bol.com
      * Executes hook: actionObjectOrderCarrierUpdateAfter
      * @param array $params
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
      */
     public function hookActionObjectOrderCarrierUpdateAfter($params)
     {
@@ -879,6 +898,8 @@ class BolPlaza extends Module
      * Executes hook: displayAdminProductsExtra
      * @param $params
      * @return string
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
      */
     public function hookDisplayAdminProductsExtra($params)
     {
@@ -961,6 +982,8 @@ class BolPlaza extends Module
      * Process BolProduct entities added on the product page
      * Executes hook: actionProductUpdate
      * @param array $params
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
      */
     public function hookActionProductUpdate($params)
     {
@@ -973,6 +996,8 @@ class BolPlaza extends Module
     /**
      * Process the Bol.com products for a product
      * @param Product $product
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
      */
     private function processBolProductEntities($product)
     {
@@ -1019,6 +1044,7 @@ class BolPlaza extends Module
                 $bolProduct = new BolPlazaProduct(
                     $indexedBolProducts[$attribute['id_product_attribute']]['id_bolplaza_product']
                 );
+
                 if ($bolProduct->price == $price &&
                     $bolProduct->published == $published &&
                     $bolProduct->condition == $condition &&
@@ -1070,6 +1096,58 @@ class BolPlaza extends Module
     }
 
     /**
+     * Send an update to Bol.com if the product has Bol.com data.
+     * @param $param
+     */
+    public function hookActionObjectSpecificPriceAddAfter($param)
+    {
+        $id_product = $param['object']->id_product;
+        $bolProducts = BolPlazaProduct::getByProductId($id_product);
+        foreach ($bolProducts as $bolProduct) {
+            AdminBolPlazaProductsController::setProductStatusByBolPlazaId(
+                $bolProduct['id_bolplaza_product'],
+                BolPlazaProduct::STATUS_INFO_UPDATE
+            );
+        }
+        AdminBolPlazaOrdersController::synchronize();
+    }
+
+    /**
+     * Send an update to Bol.com if the product has Bol.com data.
+     * @param $param
+     */
+    public function hookActionObjectSpecificPriceUpdateAfter($param)
+    {
+        $id_product = $param['object']->id_product;
+        $bolProducts = BolPlazaProduct::getByProductId($id_product);
+        foreach ($bolProducts as $bolProduct) {
+            AdminBolPlazaProductsController::setProductStatusByBolPlazaId(
+                $bolProduct['id_bolplaza_product'],
+                BolPlazaProduct::STATUS_INFO_UPDATE
+            );
+        }
+        AdminBolPlazaOrdersController::synchronize();
+    }
+
+    /**
+     * Send an update to Bol.com if the product has Bol.com data.
+     * @param $param
+     */
+    public function hookActionObjectSpecificPriceDeleteAfter($param)
+    {
+        $id_product = $param['object']->id_product;
+        $bolProducts = BolPlazaProduct::getByProductId($id_product);
+        var_dump($bolProducts);
+        foreach ($bolProducts as $bolProduct) {
+            AdminBolPlazaProductsController::setProductStatusByBolPlazaId(
+                $bolProduct['id_bolplaza_product'],
+                BolPlazaProduct::STATUS_INFO_UPDATE
+            );
+        }
+        AdminBolPlazaOrdersController::synchronize();
+    }
+
+    /**
      * Send a creation request to Bol.com
      * Executes hook: actionObjectBolPlazaProductAddAfter
      * @param array $param
@@ -1101,6 +1179,8 @@ class BolPlaza extends Module
      * Send stock updates to Bol.com
      * Executes hook: actionUpdateQuantity
      * @param array $param
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
      */
     public function hookActionUpdateQuantity($param)
     {
@@ -1130,6 +1210,7 @@ class BolPlaza extends Module
     /**
      * On delete product, delete Bol.com Product
      * @param $param
+     * @throws PrestaShopException
      */
     public function hookActionProductDelete($param)
     {
@@ -1144,6 +1225,8 @@ class BolPlaza extends Module
     /**
      * On delete attribute, delete Bol.com Product
      * @param $param
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
      */
     public function hookActionProductAttributeDelete($param)
     {

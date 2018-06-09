@@ -608,6 +608,18 @@ class AdminBolPlazaProductsController extends ModuleAdminController
     }
 
     /**
+     * Set the plaza synchronization status of a product
+     * @param int $bolProductId
+     * @param int $status
+     */
+    public static function setProductStatusByBolPlazaId($bolProductId, $status)
+    {
+        Db::getInstance()->update('bolplaza_product', array(
+            'status' => (int)$status
+        ), 'id_bolplaza_product = ' . (int)$bolProductId);
+    }
+
+    /**
      * Delete a product from Bol.combination
      * @param BolPlazaProduct $bolProduct
      * @param Context $context
