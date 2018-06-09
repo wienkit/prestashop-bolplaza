@@ -1024,7 +1024,8 @@ class BolPlaza extends Module
                     $bolProduct->condition == $condition &&
                     $bolProduct->ean == $ean &&
                     $bolProduct->delivery_time == $delivery_time &&
-                    $bolProduct->delivery_time_2 == $delivery_time_2
+                    $bolProduct->delivery_time_2 == $delivery_time_2 &&
+                    (float) $bolProduct->getPrice() === (float) Tools::getValue('bolplaza_baseprice_'.$key)
                 ) {
                     continue;
                 } elseif ($ean != $bolProduct->ean || $condition != $bolProduct->condition) {

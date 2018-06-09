@@ -137,12 +137,7 @@ class BolPlazaProduct extends ObjectModel
         $id_product_attribute = $this->id_product_attribute ? $this->id_product_attribute : null;
         $offer = new \Wienkit\BolPlazaClient\Entities\BolPlazaRetailerOffer();
         $offer->Condition = $this->getCondition();
-        $price = self::getPriceStatic(
-            $this->id_product,
-            $this->id_product_attribute,
-            $context
-        );
-        $offer->Price = $price + $this->price;
+        $offer->Price = $this->getTotalPrice($context);
         if ($prefix == BolPlaza::PREFIX_SECONDARY_ACCOUNT && !empty($this->delivery_time_2)) {
             $offer->DeliveryCode = $this->delivery_time_2;
         } elseif (!empty($this->delivery_time)) {
@@ -181,6 +176,34 @@ class BolPlazaProduct extends ObjectModel
         $offer->ReferenceCode = $this->id;
         $this->validateOffer($offer);
         return $offer;
+    }
+
+    /**
+     * Return the price (incremented)
+     *
+     * @param Context $context
+     * @return float
+     */
+    public function getTotalPrice($context = null)
+    {
+        return $this->getPrice($context) + $this->price;
+    }
+
+    /**
+     * Return the price for the base product (with attribute).
+     *
+     * @param null $context
+     * @return float
+     */
+    public function getPrice($context = null) {
+        if ($context == null) {
+            $context = Context::getContext();
+        }
+        return self::getPriceStatic(
+            $this->id_product,
+            $this->id_product_attribute,
+            $context
+        );
     }
 
     /**
