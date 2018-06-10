@@ -90,19 +90,19 @@ class SetupModule16Test extends ATestBase
     }
 
 
-    /**
-     * @depends testSetProductPrice
-     */
-    public function testSyncOrders()
-    {
-        $this->doAdminLogin();
-        $this->goToPath('index.php?controller=AdminBolPlazaOrders');
-        $this->driver->findElement(\WebDriverBy::id('page-header-desc-bolplaza_item-sync_orders'))->click();
-        $this->assertContains('Bol.com order sync completed', $this->getStatusMessageText());
-        $tableText = $this->driver->findElement(\WebDriverBy::className('bolplaza_item'))->getText();
-        $this->assertContains('Harry Potter', $tableText);
-        $this->assertContains('123', $tableText);
-        $this->assertContains('321', $tableText);
-    }
+//    /**
+//     * @depends testSetProductPrice
+//     */
+//    public function testSyncOrders()
+//    {
+//        $this->doAdminLogin();
+//        $this->goToPath('index.php?controller=AdminBolPlazaOrders');
+//        $this->driver->findElement(\WebDriverBy::id('page-header-desc-bolplaza_item-sync_orders'))->click();
+//        $this->assertContains('Bol.com order sync completed', $this->getStatusMessageText());
+//        $tableText = $this->driver->findElement(\WebDriverBy::className('bolplaza_item'))->getText();
+//        $this->assertContains('Harry Potter', $tableText);
+//        $this->assertContains('123', $tableText);
+//        $this->assertContains('321', $tableText);
+//    }
 
 }
