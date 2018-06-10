@@ -33,7 +33,7 @@ test:web16:
   - /tmp/docker_run.sh
   - composer install
   - ln -s $PWD /var/www/html/modules/bolplaza
-  - ./libraries/bin/phpunit --verbose --exclude-group=17
+  - ./libraries/bin/phpunit --debug --exclude-group=17
   artifacts:
     when: on_failure
     paths:
