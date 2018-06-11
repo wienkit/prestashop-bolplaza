@@ -1109,7 +1109,6 @@ class BolPlaza extends Module
                 BolPlazaProduct::STATUS_INFO_UPDATE
             );
         }
-        AdminBolPlazaOrdersController::synchronize();
     }
 
     /**
@@ -1126,7 +1125,6 @@ class BolPlaza extends Module
                 BolPlazaProduct::STATUS_INFO_UPDATE
             );
         }
-        AdminBolPlazaOrdersController::synchronize();
     }
 
     /**
@@ -1137,14 +1135,12 @@ class BolPlaza extends Module
     {
         $id_product = $param['object']->id_product;
         $bolProducts = BolPlazaProduct::getByProductId($id_product);
-        var_dump($bolProducts);
         foreach ($bolProducts as $bolProduct) {
             AdminBolPlazaProductsController::setProductStatusByBolPlazaId(
                 $bolProduct['id_bolplaza_product'],
                 BolPlazaProduct::STATUS_INFO_UPDATE
             );
         }
-        AdminBolPlazaOrdersController::synchronize();
     }
 
     /**
