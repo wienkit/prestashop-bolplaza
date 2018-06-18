@@ -225,7 +225,7 @@ class BolPlazaProduct extends ObjectModel
                 'The product "' . $offer->Title . ' has no valid delivery code, please supply one.'
             );
         }
-        if (empty($data['QuantityInStock'])) {
+        if (!is_numeric($data['QuantityInStock'])) {
             throw new Exception('The product "' . $offer->Title . ' has no valid stock, please supply one.');
         }
         if (empty($data['Description'])) {
