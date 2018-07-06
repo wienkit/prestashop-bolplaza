@@ -757,7 +757,8 @@ class AdminBolPlazaProductsController extends ModuleAdminController
     /**
      * Updates missing EAN numbers in the Bol.com products table
      */
-    public static function fillEans() {
+    public static function fillEans()
+    {
         Db::getInstance()->execute('
             UPDATE `' . _DB_PREFIX_ . 'bolplaza_product` bp
             INNER JOIN `' . _DB_PREFIX_ . 'product` p ON

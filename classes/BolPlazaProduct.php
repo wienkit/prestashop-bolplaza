@@ -195,7 +195,8 @@ class BolPlazaProduct extends ObjectModel
      * @param null $context
      * @return float
      */
-    public function getPrice($context = null) {
+    public function getPrice($context = null)
+    {
         if ($context == null) {
             $context = Context::getContext();
         }
