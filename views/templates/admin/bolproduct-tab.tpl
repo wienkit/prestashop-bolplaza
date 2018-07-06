@@ -91,6 +91,7 @@
                             </td>
                             <td>
                                 € {$base_price[$attribute['id_product_attribute']]|escape:'htmlall':'UTF-8'|string_format:"%.2f"}
+                                <input type="hidden" name="bolplaza_baseprice_{$key}" value="{$base_price[$attribute['id_product_attribute']]|escape:'htmlall':'UTF-8'}">
                             </td>
                             <td>
                                 <div class="input-group">

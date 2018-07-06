@@ -91,27 +91,31 @@ class AdminBolPlazaProductsController extends ModuleAdminController
                 'filter_key' => 'bo!published',
                 'align' => 'text-center',
                 'class' => 'fixed-width-sm'
-            ),
-            'bol_published_2' => array(
+            )
+        );
+
+        if (Configuration::get('BOL_PLAZA_ORDERS_ENABLE_SPLITTED')) {
+            $this->fields_list['bol_published_2'] = array(
                 'title' => $this->l('Published on Bol 2'),
                 'type' => 'bool',
                 'active' => 'bol_published_2',
                 'filter_key' => 'bo2!published',
                 'align' => 'text-center',
                 'class' => 'fixed-width-sm'
-            ),
-            'status' => array(
-                'title' => $this->l('Synchronized'),
-                'type' => 'select',
-                'callback' => 'getSynchronizedState',
-                'badge_danger' => true,
-                'badge_success' => true,
-                'align' => 'text-center',
-                'class' => 'fixed-width-sm',
-                'list' => $this->statuses_array,
-                'filter_key' => 'status',
-                'filter_type' => 'int'
-            )
+            );
+        }
+
+        $this->fields_list['status'] = array(
+            'title' => $this->l('Synchronized'),
+            'type' => 'select',
+            'callback' => 'getSynchronizedState',
+            'badge_danger' => true,
+            'badge_success' => true,
+            'align' => 'text-center',
+            'class' => 'fixed-width-sm',
+            'list' => $this->statuses_array,
+            'filter_key' => 'status',
+            'filter_type' => 'int'
         );
 
         $this->shopLinkType = 'shop';
@@ -377,6 +381,7 @@ class AdminBolPlazaProductsController extends ModuleAdminController
         } elseif ((bool)Tools::getValue('sync_products')) {
             self::synchronizeFromBol($this->context);
         } elseif ((bool)Tools::getValue('update_products')) {
+            self::fillEans();
             self::synchronize($this->context);
             $this->confirmations[] = $this->l('Bol products fully synchronized.');
         } elseif ((bool)Tools::getValue('reset') && (int)Tools::getValue('id_bolplaza_product')) {
@@ -603,6 +608,18 @@ class AdminBolPlazaProductsController extends ModuleAdminController
     }
 
     /**
+     * Set the plaza synchronization status of a product
+     * @param int $bolProductId
+     * @param int $status
+     */
+    public static function setProductStatusByBolPlazaId($bolProductId, $status)
+    {
+        Db::getInstance()->update('bolplaza_product', array(
+            'status' => (int)$status
+        ), 'id_bolplaza_product = ' . (int)$bolProductId);
+    }
+
+    /**
      * Delete a product from Bol.combination
      * @param BolPlazaProduct $bolProduct
      * @param Context $context
@@ -633,8 +650,8 @@ class AdminBolPlazaProductsController extends ModuleAdminController
         $hasErrors = false;
         foreach ($clients as $clientID => $client) {
             $prefix = $clientID == 1 ? BolPlaza::PREFIX_SECONDARY_ACCOUNT : '';
-            $offerUpdate = $bolProduct->toRetailerOffer($context, $prefix);
             try {
+                $offerUpdate = $bolProduct->toRetailerOffer($context, $prefix);
                 $request = new Wienkit\BolPlazaClient\Requests\BolPlazaUpsertRequest();
                 $request->RetailerOffer = $offerUpdate;
                 $client->updateOffer($request);
@@ -735,5 +752,37 @@ class AdminBolPlazaProductsController extends ModuleAdminController
                     ' button again in a few minutes.';
             }
         }
+    }
+
+    /**
+     * Updates missing EAN numbers in the Bol.com products table
+     */
+    public static function fillEans()
+    {
+        Db::getInstance()->execute('
+            UPDATE `' . _DB_PREFIX_ . 'bolplaza_product` bp
+            INNER JOIN `' . _DB_PREFIX_ . 'product` p ON
+                p.`id_product` = bp.`id_product`
+            SET
+                bp.`ean` = p.`ean13`,
+                bp.`status` = 1
+            WHERE
+                bp.`id_product_attribute` = 0 
+                AND(bp.`ean` IS NULL OR bp.`ean` = \'\') 
+                AND(p.`ean13` IS NOT NULL AND p.`ean13` != \'\')
+        ');
+
+        Db::getInstance()->execute('
+            UPDATE `' . _DB_PREFIX_ . 'bolplaza_product` bp
+            INNER JOIN `' . _DB_PREFIX_ . 'product_attribute` pa ON
+                pa.`id_product` = bp.`id_product` AND pa.`id_product_attribute` = bp.`id_product_attribute`
+            SET
+                bp.`ean` = pa.`ean13`,
+                bp.`status` = 1
+            WHERE
+                bp.`id_product_attribute` > 0 
+                AND(bp.`ean` IS NULL OR bp.`ean` = \'\') 
+                AND(pa.`ean13` IS NOT NULL AND pa.`ean13` != \'\')
+        ');
     }
 }

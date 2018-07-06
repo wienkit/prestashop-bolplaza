@@ -22,7 +22,6 @@ class SetupModule16Test extends ATestBase
     public function testEnableModule()
     {
         $this->doAdminLogin();
-        $this->goToPath('index.php?controller=AdminModules');
         $this->goToPath('index.php?controller=AdminModules&install=bolplaza&tab_module=market_place&module_name=bolplaza');
         $this->assertContains("Installatie module(s) geslaagd", $this->getStatusMessageText());
     }
@@ -46,9 +45,9 @@ class SetupModule16Test extends ATestBase
         $this->assertContains("Instellingen opgeslagen", $this->getStatusMessageText());
     }
 
-//    /**
-//     * @depends testConfigureModule
-//     */
+    /**
+     * @depends testConfigureModule
+     */
     public function testSetProductPrice()
     {
         $this->doAdminLogin();
@@ -89,7 +88,6 @@ class SetupModule16Test extends ATestBase
         $button->click();
         $this->assertContains('Succesvolle wijziging', $this->getStatusMessageText());
     }
-
 
     /**
      * @depends testSetProductPrice

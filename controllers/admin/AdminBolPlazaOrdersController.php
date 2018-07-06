@@ -291,12 +291,12 @@ class AdminBolPlazaOrdersController extends AdminController
         }
         $customer = new Customer();
         $customer->firstname = preg_replace(
-            "/[0-9!<>,;?=+()@#\"°{}_$%:]*/",
+            "/[^A-Za-z ]/",
             '',
             $order->CustomerDetails->BillingDetails->Firstname
         );
         $customer->lastname = preg_replace(
-            "/[0-9!<>,;?=+()@#\"°{}_$%:]*/",
+            "/[^A-Za-z ]/",
             '',
             $order->CustomerDetails->BillingDetails->Surname
         );
@@ -330,26 +330,26 @@ class AdminBolPlazaOrdersController extends AdminController
             );
         }
         $address->firstname = preg_replace(
-            "/[0-9!<>,;?=+()@#\"°{}_$%:]*/",
+            "/[^A-Za-z ]/",
             '',
             $details->Firstname
         );
         $address->lastname = preg_replace(
-            "/[0-9!<>,;?=+()@#\"°{}_$%:]*/",
+            "/[^A-Za-z ]/",
             '',
             $details->Surname
         );
-        $address->address1 = $details->Streetname;
 
+        $address1 = $details->Streetname;
+        $address2 = '';
         $houseNumber = $details->Housenumber;
-        $address2 = "";
         if ($details->HousenumberExtended != '') {
             $houseNumber .= ' ' . $details->HousenumberExtended;
         }
         if (Configuration::get('BOL_PLAZA_ORDERS_USE_ADDRESS2')) {
-            $address2 = $houseNumber;
+            $address2 = trim($houseNumber);
         } else {
-            $address->address1 .= ' ' . $houseNumber;
+            $address1 .= ' ' . trim($houseNumber);
         }
 
         if ($details->AddressSupplement) {
@@ -358,7 +358,19 @@ class AdminBolPlazaOrdersController extends AdminController
         if ($details->ExtraAddressInformation != '') {
             $address2 .= ' (' . $details->ExtraAddressInformation . ')';
         }
-        $address->address2 = trim($address2);
+
+        $address->address1 = preg_replace(
+            '/[!<>?=+@{}_$%]*/',
+            '',
+            trim($address1)
+        );
+
+        $address->address2 = preg_replace(
+            '/[!<>?=+@{}_$%]*/',
+            '',
+            trim($address2)
+        );
+
         $address->postcode = $details->ZipCode;
         $address->city = $details->City;
         $address->id_country = Country::getByIso($details->CountryCode);

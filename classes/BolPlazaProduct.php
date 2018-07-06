@@ -123,21 +123,21 @@ class BolPlazaProduct extends ObjectModel
 
     /**
      * Parse the Product to a Bol processable entity
+     *
      * @param $context Context
      * @param $prefix string
+     *
      * @return \Wienkit\BolPlazaClient\Entities\BolPlazaRetailerOffer
+     *
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
      */
     public function toRetailerOffer($context, $prefix = '')
     {
         $id_product_attribute = $this->id_product_attribute ? $this->id_product_attribute : null;
         $offer = new \Wienkit\BolPlazaClient\Entities\BolPlazaRetailerOffer();
         $offer->Condition = $this->getCondition();
-        $price = self::getPriceStatic(
-            $this->id_product,
-            $this->id_product_attribute,
-            $context
-        );
-        $offer->Price = $price + $this->price;
+        $offer->Price = $this->getTotalPrice($context);
         if ($prefix == BolPlaza::PREFIX_SECONDARY_ACCOUNT && !empty($this->delivery_time_2)) {
             $offer->DeliveryCode = $this->delivery_time_2;
         } elseif (!empty($this->delivery_time)) {
@@ -174,7 +174,64 @@ class BolPlazaProduct extends ObjectModel
         $offer->QuantityInStock = $stock;
         $offer->Publish = $this->published == 1 && $product->active ? 'true' : 'false';
         $offer->ReferenceCode = $this->id;
+        $this->validateOffer($offer);
         return $offer;
+    }
+
+    /**
+     * Return the price (incremented)
+     *
+     * @param Context $context
+     * @return float
+     */
+    public function getTotalPrice($context = null)
+    {
+        return $this->getPrice($context) + $this->price;
+    }
+
+    /**
+     * Return the price for the base product (with attribute).
+     *
+     * @param null $context
+     * @return float
+     */
+    public function getPrice($context = null)
+    {
+        if ($context == null) {
+            $context = Context::getContext();
+        }
+        return self::getPriceStatic(
+            $this->id_product,
+            $this->id_product_attribute,
+            $context
+        );
+    }
+
+    /**
+     * @param \Wienkit\BolPlazaClient\Entities\BolPlazaRetailerOffer $offer
+     *
+     * @throws Exception
+     */
+    protected function validateOffer($offer)
+    {
+        $data = $offer->getData();
+        if (empty($data['EAN'])) {
+            throw new Exception('The product "' . $offer->Title . ' has no EAN code, please supply one.');
+        }
+        if (empty($data['Price'])) {
+            throw new Exception('The product "' . $offer->Title . ' has no valid price, please supply one.');
+        }
+        if (empty($data['DeliveryCode'])) {
+            throw new Exception(
+                'The product "' . $offer->Title . ' has no valid delivery code, please supply one.'
+            );
+        }
+        if (!is_numeric($data['QuantityInStock'])) {
+            throw new Exception('The product "' . $offer->Title . ' has no valid stock, please supply one.');
+        }
+        if (empty($data['Description'])) {
+            throw new Exception('The product "' . $offer->Title . ' has no description, please supply one.');
+        }
     }
 
     /**
@@ -270,6 +327,8 @@ class BolPlazaProduct extends ObjectModel
                 SELECT *
                 FROM `'._DB_PREFIX_.'bolplaza_product`
                 WHERE `status` > 0
+                AND `ean` IS NOT NULL
+                AND `ean` != \'\'
                 LIMIT 1000')
         );
     }
