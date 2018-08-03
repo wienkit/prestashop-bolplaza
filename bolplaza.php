@@ -314,11 +314,13 @@ class BolPlaza extends Module
             $testmode = (bool) Tools::getValue('bolplaza_orders_testmode');
             $useAddress2 = (bool) Tools::getValue('bolplaza_orders_use_address2');
             $useSplitted = (bool) Tools::getValue('bolplaza_orders_enable_splitted');
+            $languageId = (bool) Tools::getValue('bolplaza_orders_language_id');
 
             Configuration::updateValue('BOL_PLAZA_ORDERS_ENABLED', $enabled);
             Configuration::updateValue('BOL_PLAZA_ORDERS_TESTMODE', $testmode);
             Configuration::updateValue('BOL_PLAZA_ORDERS_USE_ADDRESS2', $useAddress2);
             Configuration::updateValue('BOL_PLAZA_ORDERS_ENABLE_SPLITTED', $useSplitted);
+            Configuration::updateValue('BOL_PLAZA_ORDERS_LANGUAGE_ID', $languageId);
 
             // Primary account settings
             $privkey = (string) Tools::getValue('bolplaza_orders_privkey');
@@ -461,6 +463,9 @@ class BolPlaza extends Module
         // Get default language
         $default_lang = (int)Configuration::get('PS_LANG_DEFAULT');
 
+
+        $languages = Language::getLanguages();
+
         // Init Fields form array
         $fields_form = array();
         $fields_form[0]['form'] = array(
@@ -543,6 +548,17 @@ class BolPlaza extends Module
                         )
                     ),
                     'desc' => $this->l('You can enable the splitted account functionality so you can handle Belgium and Netherlands separately.')
+                ),
+                array(
+                    'type' => 'select',
+                    'label' => $this->l('Language'),
+                    'desc' => $this->l('Choose which language should be used for your Bol.com products'),
+                    'name' => 'bolplaza_orders_language_id',
+                    'options' => array(
+                        'query' => $languages,
+                        'id' => 'id_lang',
+                        'name' => 'name'
+                    )
                 ),
             ),
             'submit' => array(
@@ -670,6 +686,7 @@ class BolPlaza extends Module
         $helper->fields_value['bolplaza_orders_use_address2'] = Configuration::get('BOL_PLAZA_ORDERS_USE_ADDRESS2');
         $helper->fields_value['bolplaza_orders_enable_splitted'] =
             Configuration::get('BOL_PLAZA_ORDERS_ENABLE_SPLITTED');
+        $helper->fields_value['bolplaza_orders_language_id'] = Configuration::get('BOL_PLAZA_ORDERS_LANGUAGE_ID', $this->context->language->id);
 
         // Primary account values
         $helper->fields_value['bolplaza_orders_privkey'] = Configuration::get('BOL_PLAZA_ORDERS_PRIVKEY');
@@ -728,6 +745,7 @@ class BolPlaza extends Module
             null,
             Carrier::ALL_CARRIERS
         );
+
         $delivery_codes = BolPlazaProduct::getDeliveryCodes();
         $customer_groups = Group::getGroups(Context::getContext()->language->id);
 
