@@ -278,6 +278,24 @@ class AdminBolPlazaOrdersController extends AdminController
     }
 
     /**
+     * Parse a name (truncate & replace).
+     *
+     * @param $name
+     *   The name to parse.
+     *
+     * @return bool|string
+     */
+    private static function parseName($name)
+    {
+        $name = preg_replace(
+            "/[^A-Za-z ]/",
+            '',
+            $name
+        );
+        return substr($name, 0, 32);
+    }
+
+    /**
      * Parse a customer for the order
      * @param Wienkit\BolPlazaClient\Entities\BolPlazaOrder $order
      * @return Customer
@@ -290,16 +308,8 @@ class AdminBolPlazaOrdersController extends AdminController
             return new Customer($customer['id_customer']);
         }
         $customer = new Customer();
-        $customer->firstname = preg_replace(
-            "/[^A-Za-z ]/",
-            '',
-            $order->CustomerDetails->BillingDetails->Firstname
-        );
-        $customer->lastname = preg_replace(
-            "/[^A-Za-z ]/",
-            '',
-            $order->CustomerDetails->BillingDetails->Surname
-        );
+        $customer->firstname = self::parseName($order->CustomerDetails->BillingDetails->Firstname);
+        $customer->lastname = self::parseName($order->CustomerDetails->BillingDetails->Surname);
         $customer->email = $order->CustomerDetails->BillingDetails->Email;
         $customer->passwd = Tools::passwdGen(8, 'RANDOM');
         $customer->id_default_group = Configuration::get('BOL_PLAZA_ORDERS_CUSTOMER_GROUP');
@@ -329,17 +339,8 @@ class AdminBolPlazaOrdersController extends AdminController
                 $details->Company
             );
         }
-        $address->firstname = preg_replace(
-            "/[^A-Za-z ]/",
-            '',
-            $details->Firstname
-        );
-        $address->lastname = preg_replace(
-            "/[^A-Za-z ]/",
-            '',
-            $details->Surname
-        );
-
+        $address->firstname = self::parseName($details->Firstname);
+        $address->lastname = self::parseName($details->Surname);
         $address1 = $details->Streetname;
         $address2 = '';
         $houseNumber = $details->Housenumber;
