@@ -1066,7 +1066,7 @@ class BolPlaza extends Module
                 if ($bolProduct->price == $price &&
                     $bolProduct->published == $published &&
                     $bolProduct->condition == $condition &&
-                    $bolProduct->ean == $ean &&
+                    $bolProduct->ean === $ean &&
                     $bolProduct->delivery_time == $delivery_time &&
                     $bolProduct->delivery_time_2 == $delivery_time_2 &&
                     (float) $bolProduct->getPrice() === (float) Tools::getValue('bolplaza_baseprice_'.$key)
