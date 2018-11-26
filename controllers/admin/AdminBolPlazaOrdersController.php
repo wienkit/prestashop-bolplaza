@@ -292,7 +292,8 @@ class AdminBolPlazaOrdersController extends AdminController
             '',
             $name
         );
-        return substr($name, 0, 32);
+        $name = substr($name, 0, 32);
+        return !empty($name) ? $name : 'UNKNOWN';
     }
 
     /**
