@@ -77,7 +77,8 @@ class BolPlazaProduct extends ObjectModel
             'ean' => array(
                 'type' => self::TYPE_STRING,
                 'shop' => true,
-                'validate' => 'isEan13'
+                'validate' => 'isEan13',
+                'required' => true,
             ),
             'condition' => array(
                 'type' => self::TYPE_INT,

@@ -37,7 +37,7 @@
     <div class="panel panel-default">
         <div class="panel-heading"><strong>{l s='Bol.com settings' mod='bolplaza'}</strong></div>
         <div class="panel-body" id="bolplaza_combinations">
-            <div>
+            <div id="form_bolplaza_products">
                 <table class="table table-striped table-no-bordered">
                     <thead>
                     <tr class="text-uppercase">
@@ -86,16 +86,17 @@
                             {assign var=prod_condition value=$bol_products[$attribute['id_product_attribute']]['condition']}
                             {assign var=ean value=$bol_products[$attribute['id_product_attribute']]['ean']}
                         {/if}
-                        <tr class="bol-plaza-item" data-key="{$key}">
-                            <td class="fixed-width-xs" align="center"><input type="checkbox"
-                                                                             name="bolplaza_published_{$key}"
-                                                                             {if $selected == true}checked="checked"{/if}
-                                                                             value="1" />
-                            </td>
-                            <td class="clickable collapsed" data-toggle="collapse" data-target=".{$index}collapsed">
-                                {$product_designation[$attribute['id_product_attribute']]}
-                                <i class="icon-caret-up pull-right"></i>
-                            </td>
+                    <tr class="bol-plaza-item" data-key="{$key}">
+                        <td class="fixed-width-xs" align="center">
+                            {if isset($ean) && $ean != ''}
+                                <input type="checkbox" name="bolplaza_published_{$key}" {if $selected == true}checked="checked"{/if} value="1" />
+                            {/if}
+                        </td>
+                        <td class="clickable collapsed" data-toggle="collapse" data-target=".{$index}collapsed">
+                            {$product_designation[$attribute['id_product_attribute']]}
+                            <i class="icon-caret-up pull-right"></i>
+                        </td>
+                        {if isset($ean) && $ean != ''}
                             <td>
                                 € {$base_price[$attribute['id_product_attribute']]|escape:'htmlall':'UTF-8'|string_format:"%.2f"}
                                 <input type="hidden" name="bolplaza_baseprice_{$key}" value="{$base_price[$attribute['id_product_attribute']]|escape:'htmlall':'UTF-8'}">
@@ -159,7 +160,7 @@
                                                     <div class="row form-group">
                                                         <div class="col-sm-4">{l s='EAN' mod='bolplaza'}</div>
                                                         <div class="col-sm-8">
-                                                            <input name="bolplaza_ean_{$key}" id="bolplaza_ean_{$key}" type="text" value="{if isset($ean)}{$ean}{/if}" maxlength="27" class="form-control">
+                                                            <input name="bolplaza_ean_{$key}" id="bolplaza_ean_{$key}" type="text" value="{$ean}" maxlength="27" class="form-control">
                                                         </div>
                                                     </div>
                                                     <div class="row form-group">
@@ -195,6 +196,9 @@
                                     </div>
                                 </div>
                             </td>
+                        {else}
+                            <td colspan="6">{l s='Error: There is no EAN for this product/combination' mod='bolplaza'}</td>
+                        {/if}
                         </tr>
                     {/foreach}
                     </tbody>

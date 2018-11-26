@@ -50,6 +50,9 @@ class AdminBolPlazaOrdersController extends AdminController
                           IF(STRCMP(status,\'shipped\'), 1, 0) as badge_danger,
                           IF (STRCMP(status,\'shipped\'), 0, 1) as badge_success';
 
+        $this->_orderBy = 'a!id_order';
+        $this->_orderWay = 'DESC';
+
         parent::__construct();
 
         $this->fields_list = array(

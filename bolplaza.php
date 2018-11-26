@@ -289,7 +289,7 @@ class BolPlaza extends Module
             $errors[] = $this->l('You don\'t have the mbstring php extension enabled, please enable it first.');
         }
 
-        if (!extension_loaded('mcrypt')) {
+        if (PHP_VERSION_ID < 70200 && !extension_loaded('mcrypt')) {
             $errors[] = $this->l('You don\'t have the mcrypt php extension enabled, please enable it first.');
         }
 
@@ -975,7 +975,6 @@ class BolPlaza extends Module
         foreach ($bolProducts as $bolProduct) {
             $indexedBolProducts[$bolProduct['id_product_attribute']] = $bolProduct;
         }
-
         $this->context->smarty->assign(array(
             'attributes' => $attributes,
             'product_designation' => $product_designation,
@@ -1082,7 +1081,7 @@ class BolPlaza extends Module
             } elseif (!$published &&
                 $price == 0 &&
                 $condition == 0 &&
-                $ean == $attribute['ean13'] &&
+                ($ean == $attribute['ean13'] || empty($ean)) &&
                 $delivery_time == null &&
                 $delivery_time_2 == null
             ) {
@@ -1099,6 +1098,19 @@ class BolPlaza extends Module
             $bolProduct->ean = $ean;
             $bolProduct->delivery_time = $delivery_time;
             $bolProduct->delivery_time_2 = $delivery_time_2;
+
+            if (($existingProducts = BolPlazaProduct::getByEan13($ean)) !== null
+                && $existingProducts[0]['id_bolplaza_product'] !== $bolProduct->id_bolplaza_product) {
+                header("HTTP/1.0 400 Bad Request");
+                $existingProduct = $existingProducts[0];
+                $error = sprintf(
+                    $this->l('The EAN %s is already in use (Bol.com ID: %s, Product ID: %s).'),
+                    $existingProduct['ean'],
+                    $existingProduct['id_bolplaza_product'],
+                    $existingProduct['id_product']
+                );
+                die(json_encode(array('bolplaza_products' => array($error))));
+            }
 
             if (!$published &&
                 $price == 0 &&

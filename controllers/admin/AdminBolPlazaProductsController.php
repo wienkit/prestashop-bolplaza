@@ -65,9 +65,10 @@ class AdminBolPlazaProductsController extends ModuleAdminController
                 'align' => 'text-left',
                 'filter_key' => 'pl!name'
             ),
-            'id_product_attribute' => array(
-                'title' => $this->l('Product combination'),
+            'ean' => array(
+                'title' => $this->l('Bol.com EAN'),
                 'align' => 'text-left',
+                'filter_key' => 'a!ean'
             ),
             'price' => array(
                 'title' => $this->l('Bol.com price addition'),
@@ -128,7 +129,7 @@ class AdminBolPlazaProductsController extends ModuleAdminController
         $this->addRowAction('resetOk');
     }
 
-    public function setMedia()
+    public function setMedia($isNewTheme = false)
     {
         parent::setMedia();
         $this->addJS(__PS_BASE_URI__ . 'modules/bolplaza/views/js/bolplaza.js');
@@ -658,7 +659,8 @@ class AdminBolPlazaProductsController extends ModuleAdminController
             } catch (Exception $e) {
                 $hasErrors = true;
                 $context->controller->errors[] = Tools::displayError(
-                    '[bolplaza] Couldn\'t send update to Bol.com, error: ' . $e->getMessage()
+                    '[bolplaza] Couldn\'t send update to Bol.com, error: ' . $e->getMessage() .
+                    '(EAN: ' . $bolProduct->ean . ').'
                 );
             }
         }
