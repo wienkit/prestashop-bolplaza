@@ -314,7 +314,7 @@ class BolPlaza extends Module
             $testmode = (bool) Tools::getValue('bolplaza_orders_testmode');
             $useAddress2 = (bool) Tools::getValue('bolplaza_orders_use_address2');
             $useSplitted = (bool) Tools::getValue('bolplaza_orders_enable_splitted');
-            $languageId = (bool) Tools::getValue('bolplaza_orders_language_id');
+            $languageId = (int) Tools::getValue('bolplaza_orders_language_id');
 
             Configuration::updateValue('BOL_PLAZA_ORDERS_ENABLED', $enabled);
             Configuration::updateValue('BOL_PLAZA_ORDERS_TESTMODE', $testmode);
