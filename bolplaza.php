@@ -1100,6 +1100,8 @@ class BolPlaza extends Module
             $bolProduct->delivery_time_2 = $delivery_time_2;
 
             if (($existingProducts = BolPlazaProduct::getByEan13($ean)) !== null
+                && !empty($existingProducts)
+                && !empty($existingProducts[0])
                 && $existingProducts[0]['id_bolplaza_product'] !== $bolProduct->id_bolplaza_product) {
                 header("HTTP/1.0 400 Bad Request");
                 $existingProduct = $existingProducts[0];
