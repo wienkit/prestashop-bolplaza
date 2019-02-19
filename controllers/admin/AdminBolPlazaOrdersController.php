@@ -377,7 +377,12 @@ class AdminBolPlazaOrdersController extends AdminController
         );
 
         $address->postcode = $details->ZipCode;
-        $address->city = $details->City;
+        $address->city = preg_replace(
+            '/[!<>?=+@{}_$%]*/',
+            '',
+            $details->City
+        );
+
         $address->id_country = Country::getByIso($details->CountryCode);
         $address->alias = $alias;
         $address->add();
