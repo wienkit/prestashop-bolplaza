@@ -50,6 +50,9 @@ class AdminBolPlazaOrdersController extends AdminController
                           IF(STRCMP(status,\'shipped\'), 1, 0) as badge_danger,
                           IF (STRCMP(status,\'shipped\'), 0, 1) as badge_success';
 
+        $this->_orderBy = 'a!id_order';
+        $this->_orderWay = 'DESC';
+
         parent::__construct();
 
         $this->fields_list = array(
@@ -278,6 +281,25 @@ class AdminBolPlazaOrdersController extends AdminController
     }
 
     /**
+     * Parse a name (truncate & replace).
+     *
+     * @param $name
+     *   The name to parse.
+     *
+     * @return bool|string
+     */
+    private static function parseName($name)
+    {
+        $name = preg_replace(
+            "/[^A-Za-z ]/",
+            '',
+            $name
+        );
+        $name = substr($name, 0, 32);
+        return !empty($name) ? $name : 'UNKNOWN';
+    }
+
+    /**
      * Parse a customer for the order
      * @param Wienkit\BolPlazaClient\Entities\BolPlazaOrder $order
      * @return Customer
@@ -290,16 +312,8 @@ class AdminBolPlazaOrdersController extends AdminController
             return new Customer($customer['id_customer']);
         }
         $customer = new Customer();
-        $customer->firstname = preg_replace(
-            "/[^A-Za-z ]/",
-            '',
-            $order->CustomerDetails->BillingDetails->Firstname
-        );
-        $customer->lastname = preg_replace(
-            "/[^A-Za-z ]/",
-            '',
-            $order->CustomerDetails->BillingDetails->Surname
-        );
+        $customer->firstname = self::parseName($order->CustomerDetails->BillingDetails->Firstname);
+        $customer->lastname = self::parseName($order->CustomerDetails->BillingDetails->Surname);
         $customer->email = $order->CustomerDetails->BillingDetails->Email;
         $customer->passwd = Tools::passwdGen(8, 'RANDOM');
         $customer->id_default_group = Configuration::get('BOL_PLAZA_ORDERS_CUSTOMER_GROUP');
@@ -329,17 +343,8 @@ class AdminBolPlazaOrdersController extends AdminController
                 $details->Company
             );
         }
-        $address->firstname = preg_replace(
-            "/[^A-Za-z ]/",
-            '',
-            $details->Firstname
-        );
-        $address->lastname = preg_replace(
-            "/[^A-Za-z ]/",
-            '',
-            $details->Surname
-        );
-
+        $address->firstname = self::parseName($details->Firstname);
+        $address->lastname = self::parseName($details->Surname);
         $address1 = $details->Streetname;
         $address2 = '';
         $houseNumber = $details->Housenumber;
@@ -372,7 +377,12 @@ class AdminBolPlazaOrdersController extends AdminController
         );
 
         $address->postcode = $details->ZipCode;
-        $address->city = $details->City;
+        $address->city = preg_replace(
+            '/[!<>?=+@{}_$%]*/',
+            '',
+            $details->City
+        );
+
         $address->id_country = Country::getByIso($details->CountryCode);
         $address->alias = $alias;
         $address->add();

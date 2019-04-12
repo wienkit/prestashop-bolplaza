@@ -77,7 +77,8 @@ class BolPlazaProduct extends ObjectModel
             'ean' => array(
                 'type' => self::TYPE_STRING,
                 'shop' => true,
-                'validate' => 'isEan13'
+                'validate' => 'isEan13',
+                'required' => true,
             ),
             'condition' => array(
                 'type' => self::TYPE_INT,
@@ -154,7 +155,11 @@ class BolPlazaProduct extends ObjectModel
         } elseif ($stock > 999) {
             $stock = 999;
         }
-        $product = new Product($this->id_product, false, $context->language->id, $context->shop->id);
+        $id_lang = Configuration::get('BOL_PLAZA_ORDERS_LANGUAGE_ID');
+        if (!$id_lang) {
+            $id_lang = $context->language->id;
+        }
+        $product = new Product($this->id_product, false, $id_lang, $context->shop->id);
         if ($this->ean != null) {
             $offer->EAN = $this->ean;
         } elseif ($id_product_attribute != null) {

@@ -289,7 +289,7 @@ class BolPlaza extends Module
             $errors[] = $this->l('You don\'t have the mbstring php extension enabled, please enable it first.');
         }
 
-        if (!extension_loaded('mcrypt')) {
+        if (PHP_VERSION_ID < 70200 && !extension_loaded('mcrypt')) {
             $errors[] = $this->l('You don\'t have the mcrypt php extension enabled, please enable it first.');
         }
 
@@ -314,11 +314,13 @@ class BolPlaza extends Module
             $testmode = (bool) Tools::getValue('bolplaza_orders_testmode');
             $useAddress2 = (bool) Tools::getValue('bolplaza_orders_use_address2');
             $useSplitted = (bool) Tools::getValue('bolplaza_orders_enable_splitted');
+            $languageId = (int) Tools::getValue('bolplaza_orders_language_id');
 
             Configuration::updateValue('BOL_PLAZA_ORDERS_ENABLED', $enabled);
             Configuration::updateValue('BOL_PLAZA_ORDERS_TESTMODE', $testmode);
             Configuration::updateValue('BOL_PLAZA_ORDERS_USE_ADDRESS2', $useAddress2);
             Configuration::updateValue('BOL_PLAZA_ORDERS_ENABLE_SPLITTED', $useSplitted);
+            Configuration::updateValue('BOL_PLAZA_ORDERS_LANGUAGE_ID', $languageId);
 
             // Primary account settings
             $privkey = (string) Tools::getValue('bolplaza_orders_privkey');
@@ -461,6 +463,9 @@ class BolPlaza extends Module
         // Get default language
         $default_lang = (int)Configuration::get('PS_LANG_DEFAULT');
 
+
+        $languages = Language::getLanguages();
+
         // Init Fields form array
         $fields_form = array();
         $fields_form[0]['form'] = array(
@@ -543,6 +548,17 @@ class BolPlaza extends Module
                         )
                     ),
                     'desc' => $this->l('You can enable the splitted account functionality so you can handle Belgium and Netherlands separately.')
+                ),
+                array(
+                    'type' => 'select',
+                    'label' => $this->l('Language'),
+                    'desc' => $this->l('Choose which language should be used for your Bol.com products'),
+                    'name' => 'bolplaza_orders_language_id',
+                    'options' => array(
+                        'query' => $languages,
+                        'id' => 'id_lang',
+                        'name' => 'name'
+                    )
                 ),
             ),
             'submit' => array(
@@ -670,6 +686,7 @@ class BolPlaza extends Module
         $helper->fields_value['bolplaza_orders_use_address2'] = Configuration::get('BOL_PLAZA_ORDERS_USE_ADDRESS2');
         $helper->fields_value['bolplaza_orders_enable_splitted'] =
             Configuration::get('BOL_PLAZA_ORDERS_ENABLE_SPLITTED');
+        $helper->fields_value['bolplaza_orders_language_id'] = Configuration::get('BOL_PLAZA_ORDERS_LANGUAGE_ID', $this->context->language->id);
 
         // Primary account values
         $helper->fields_value['bolplaza_orders_privkey'] = Configuration::get('BOL_PLAZA_ORDERS_PRIVKEY');
@@ -728,6 +745,7 @@ class BolPlaza extends Module
             null,
             Carrier::ALL_CARRIERS
         );
+
         $delivery_codes = BolPlazaProduct::getDeliveryCodes();
         $customer_groups = Group::getGroups(Context::getContext()->language->id);
 
@@ -957,7 +975,6 @@ class BolPlaza extends Module
         foreach ($bolProducts as $bolProduct) {
             $indexedBolProducts[$bolProduct['id_product_attribute']] = $bolProduct;
         }
-
         $this->context->smarty->assign(array(
             'attributes' => $attributes,
             'product_designation' => $product_designation,
@@ -1048,7 +1065,7 @@ class BolPlaza extends Module
                 if ($bolProduct->price == $price &&
                     $bolProduct->published == $published &&
                     $bolProduct->condition == $condition &&
-                    $bolProduct->ean == $ean &&
+                    $bolProduct->ean === $ean &&
                     $bolProduct->delivery_time == $delivery_time &&
                     $bolProduct->delivery_time_2 == $delivery_time_2 &&
                     (float) $bolProduct->getPrice() === (float) Tools::getValue('bolplaza_baseprice_'.$key)
@@ -1064,7 +1081,7 @@ class BolPlaza extends Module
             } elseif (!$published &&
                 $price == 0 &&
                 $condition == 0 &&
-                $ean == $attribute['ean13'] &&
+                ($ean == $attribute['ean13'] || empty($ean)) &&
                 $delivery_time == null &&
                 $delivery_time_2 == null
             ) {
@@ -1081,6 +1098,21 @@ class BolPlaza extends Module
             $bolProduct->ean = $ean;
             $bolProduct->delivery_time = $delivery_time;
             $bolProduct->delivery_time_2 = $delivery_time_2;
+
+            if (($existingProducts = BolPlazaProduct::getByEan13($ean)) !== null
+                && !empty($existingProducts)
+                && !empty($existingProducts[0])
+                && $existingProducts[0]['id_bolplaza_product'] !== $bolProduct->id_bolplaza_product) {
+                header("HTTP/1.0 400 Bad Request");
+                $existingProduct = $existingProducts[0];
+                $error = sprintf(
+                    $this->l('The EAN %s is already in use (Bol.com ID: %s, Product ID: %s).'),
+                    $existingProduct['ean'],
+                    $existingProduct['id_bolplaza_product'],
+                    $existingProduct['id_product']
+                );
+                die(json_encode(array('bolplaza_products' => array($error))));
+            }
 
             if (!$published &&
                 $price == 0 &&
